@@ -46,7 +46,7 @@ router.post("/", async (req, res) => {
 
     const gaadi_balance = gaadi_freight - gaadi_advance;
     const party_balance = party_freight - party_advance - tds - himmali;
-    const profit = party_balance - gaadi_balance;
+    const profit = party_freight - gaadi_freight;
 
     const result = await pool.query(
       `
@@ -166,7 +166,7 @@ router.put("/:id", async (req, res) => {
 
     const gaadi_balance = gaadi_freight - gaadi_advance;
     const party_balance = party_freight - party_advance - tds - himmali;
-    const profit = party_balance - gaadi_balance;
+    const profit = party_freight - gaadi_freight;
 
     const result = await pool.query(
       `

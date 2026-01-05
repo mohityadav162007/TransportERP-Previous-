@@ -64,7 +64,7 @@ export default function TripDetail() {
 
       <Section title="Vehicle & Driver">
         <Item label="Vehicle Number" value={trip.vehicle_number} />
-        <Item label="Driver Number" value={trip.driver_phone || "-"} />
+        <Item label="Driver Number" value={trip.driver_number || "-"} />
         <Item label="Motor Owner Name" value={trip.motor_owner_name || "-"} />
         <Item label="Motor Owner Number" value={trip.motor_owner_number || "-"} />
       </Section>
@@ -77,7 +77,7 @@ export default function TripDetail() {
 
       <Section title="Party (Income)">
         <Item label="Party Name" value={trip.party_name} />
-        <Item label="Party Number" value={trip.party_phone || "-"} />
+        <Item label="Party Number" value={trip.party_number || "-"} />
         <Money label="Party Freight" value={trip.party_freight} />
         <Money label="Party Advance" value={trip.party_advance} />
         <Money label="Party Balance" value={trip.party_balance} red />
