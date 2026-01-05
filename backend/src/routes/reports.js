@@ -48,7 +48,8 @@ router.get("/trips", async (req, res) => {
         tds                          AS "TDS",
         himmali                      AS "Himmali",
 
-        payment_status               AS "Payment status",
+        payment_status               AS "Party Payment Status",
+        gaadi_balance_status         AS "Gaadi Payment Status",
         pod_status                   AS "POD status",
 
         (party_freight - gaadi_freight) AS "Profit"
