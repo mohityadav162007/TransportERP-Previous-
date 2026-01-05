@@ -86,7 +86,7 @@ export default function Analytics() {
             p.trips,
             `₹${formatCurrency(p.freight)}`,
             `₹${formatCurrency(p.advance)}`,
-            <span className="text-red-600 font-semibold">
+            <span className={p.balance > 0 ? "text-red-600 font-semibold" : "text-green-600 font-semibold"}>
               ₹{formatCurrency(p.balance)}
             </span>,
             `₹${formatCurrency(p.profit)}`
@@ -109,10 +109,12 @@ export default function Analytics() {
           rows={ownerStats.map(o => [
             o.owner,
             o.trips,
-            `₹${o.freight}`,
-            `₹${o.advance}`,
-            `₹${o.balance}`,
-            `₹${o.profit}`
+            `₹${formatCurrency(o.freight)}`,
+            `₹${formatCurrency(o.advance)}`,
+            <span className={o.balance > 0 ? "text-red-600 font-semibold" : "text-green-600 font-semibold"}>
+              ₹{formatCurrency(o.balance)}
+            </span>,
+            `₹${formatCurrency(o.profit)}`
           ])}
         />
       </section>
