@@ -74,6 +74,10 @@ export default function Trips() {
     }
 
     return true;
+  }).sort((a, b) => {
+    const diff = new Date(b.loading_date) - new Date(a.loading_date);
+    if (diff !== 0) return diff;
+    return b.id - a.id;
   });
 
   /* ============================
@@ -115,10 +119,12 @@ export default function Trips() {
         <div className="flex gap-3">
           <button
             onClick={() => {
+              const token = localStorage.getItem("token");
               const qs = new URLSearchParams({
                 startDate: filters.fromDate,
                 endDate: filters.toDate,
-                party: filters.search
+                party: filters.search,
+                token: token
               }).toString();
               window.open(`${import.meta.env.VITE_API_URL}/reports/trips?${qs}`, "_blank");
             }}

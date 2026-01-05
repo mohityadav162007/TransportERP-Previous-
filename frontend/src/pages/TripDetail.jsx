@@ -24,7 +24,8 @@ export default function TripDetail() {
   if (!trip) return <div>Loading trip details...</div>;
 
   const openPOD = () => {
-    const url = `${import.meta.env.VITE_API_URL}/trips/${id}/pod/file`;
+    const token = localStorage.getItem("token");
+    const url = `${import.meta.env.VITE_API_URL}/trips/${id}/pod/file?token=${token}`;
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
