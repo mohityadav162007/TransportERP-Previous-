@@ -1,11 +1,7 @@
 {
     "name": "transport-erp-monorepo",
     "private": true,
-    "workspaces": [
-        "frontend",
-        "backend"
-    ],
     "scripts": {
-        "vercel-build-v2": "cd frontend && npm install --include=dev && npm run build"
+        "build": "cd frontend && npm install && npm run build"
     }
 }
