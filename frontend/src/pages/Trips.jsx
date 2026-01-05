@@ -195,7 +195,7 @@ export default function Trips() {
           <div
             key={trip.id}
             onClick={() => navigate(`/trips/${trip.id}`)}
-            className={`cursor-pointer border rounded p-5 shadow hover:shadow-lg ${trip.is_deleted ? "bg-gray-100 opacity-70" : "bg-white"
+            className={`cursor-pointer border rounded p-5 shadow hover:shadow-lg ${trip.is_deleted ? "bg-gray-100 opacity-70" : trip.payment_status === 'PAID' ? "bg-green-50" : "bg-white"
               }`}
           >
             <div className="flex justify-between mb-2">
