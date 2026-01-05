@@ -1,0 +1,10 @@
+export const formatCurrency = (amount) => {
+    if (amount === null || amount === undefined || amount === "") return "-";
+    const num = Number(amount);
+    if (isNaN(num)) return "-";
+
+    // Round to integer and format with Indian locale (en-IN gives 1,00,000 style)
+    // or en-US for standard 100,000. User asked for "no decimals".
+    // Using 'en-IN' is appropriate for an Indian Transport ERP.
+    return Math.round(num).toLocaleString('en-IN');
+};
