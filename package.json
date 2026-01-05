@@ -2,6 +2,7 @@
     "name": "transport-erp-monorepo",
     "private": true,
     "scripts": {
+        "dev": "cd frontend && npm run dev",
         "build": "cd frontend && npm install && npm run build"
     }
 }
