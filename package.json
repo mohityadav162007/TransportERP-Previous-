@@ -6,7 +6,6 @@
         "backend"
     ],
     "scripts": {
-        "build": "cd frontend && npm install && npm run build"
-    },
-    "comment": "Force redeploy with corrected build script"
+        "vercel-build-v2": "cd frontend && npm install --include=dev && npm run build"
+    }
 }

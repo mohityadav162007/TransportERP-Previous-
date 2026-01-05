@@ -18,7 +18,7 @@ Go to your **Vercel Project Settings > General**.
 
 1.  **Framework Preset:** Select **Other**.
 2.  **Root Directory:** Leave as **`./`** (the root of your project).
-3.  **Build Command:** `cd frontend && npm install && npm run build`
+3.  **Build Command:** `npm run vercel-build-v2`
 4.  **Output Directory:** `frontend/dist`
 5.  **Install Command:** (Leave as default or blank)
 
