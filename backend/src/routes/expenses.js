@@ -32,14 +32,20 @@ router.post("/", async (req, res) => {
     }
 });
 
-// Delete Expense
-router.delete("/:id", async (req, res) => {
+// Update Expense
+router.put("/:id", async (req, res) => {
     try {
-        await pool.query("DELETE FROM daily_expenses WHERE id = $1", [req.params.id]);
-        res.json({ message: "Expense deleted" });
+        const { date, category, amount, vehicle_number, notes } = req.body;
+        const result = await pool.query(
+            `UPDATE daily_expenses 
+             SET date=$1, category=$2, amount=$3, vehicle_number=$4, notes=$5 
+             WHERE id=$6 RETURNING *`,
+            [date, category, amount, vehicle_number, notes, req.params.id]
+        );
+        res.json(result.rows[0]);
     } catch (err) {
-        console.error("DELETE EXPENSE ERROR:", err);
-        res.status(500).json({ error: "Failed to delete expense" });
+        console.error("UPDATE EXPENSE ERROR:", err);
+        res.status(500).json({ error: "Failed to update expense" });
     }
 });
 
