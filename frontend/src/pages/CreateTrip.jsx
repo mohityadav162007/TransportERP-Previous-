@@ -1,5 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  Calendar,
+  MapPin,
+  Truck,
+  User,
+  Wallet,
+  FileText,
+  ChevronRight,
+  Phone,
+  LayoutGrid
+} from "lucide-react";
 import api from "../services/api";
 
 export default function CreateTrip() {
@@ -115,208 +126,300 @@ export default function CreateTrip() {
   };
 
   return (
-    <div className="max-w-5xl">
-      <h1 className="text-2xl font-bold mb-6">Create Trip</h1>
+    <div className="max-w-5xl mx-auto p-6">
+      {/* Breadcrumb */}
+      <div className="flex items-center text-sm text-gray-500 mb-4">
+        <span>Dashboard</span>
+        <ChevronRight size={14} className="mx-1" />
+        <span>Trips</span>
+        <ChevronRight size={14} className="mx-1" />
+        <span className="font-medium text-gray-800">Create Trip</span>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Create New Trip</h1>
+        <p className="text-gray-500 text-sm mt-1">
+          Register a new logistics movement and generate consignment details.
+        </p>
+      </div>
 
-        {/* Dates */}
+      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 space-y-8">
+
+        {/* Dates & Route */}
         <section>
-          <h2 className="font-semibold mb-3">Dates</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <input
-              type="date"
-              name="loading_date"
-              required
-              className="input"
-              onChange={handleChange}
-            />
-            <input
-              type="date"
-              name="unloading_date"
-              className="input"
-              onChange={handleChange}
-            />
+          <div className="flex items-center gap-2 mb-4 text-blue-600">
+            <Calendar size={18} />
+            <h2 className="font-semibold text-gray-900">Dates & Route</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Loading Date</label>
+              <input
+                type="date"
+                name="loading_date"
+                required
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                onChange={handleChange}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Unloading Date (Estimated)</label>
+              <input
+                type="date"
+                name="unloading_date"
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Origin (From)</label>
+              <input
+                name="route_from"
+                placeholder="City, Warehouse, or Port"
+                required
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                onChange={handleChange}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Destination (To)</label>
+              <input
+                name="route_to"
+                placeholder="City or Delivery Point"
+                required
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                onChange={handleChange}
+              />
+            </div>
           </div>
         </section>
 
-        {/* Route */}
+        {/* Vehicle & Driver Details */}
         <section>
-          <h2 className="font-semibold mb-3">Route</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <input
-              name="route_from"
-              placeholder="From"
-              required
-              className="input"
-              onChange={handleChange}
-            />
-            <input
-              name="route_to"
-              placeholder="To"
-              required
-              className="input"
-              onChange={handleChange}
-            />
+          <div className="flex items-center gap-2 mb-4 text-blue-600">
+            <Truck size={18} />
+            <h2 className="font-semibold text-gray-900">Vehicle & Driver Details</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Vehicle Number</label>
+              <input
+                name="vehicle_number"
+                placeholder="e.g. MH-12-AB-1234"
+                required
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                onChange={handleChange}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Driver Phone Number</label>
+              <input
+                name="driver_phone"
+                placeholder="+91 00000 00000"
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Motor Owner Name</label>
+              <input
+                name="motor_owner_name"
+                placeholder="Owner Full Name"
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                onChange={handleChange}
+                onBlur={handleOwnerBlur}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Motor Owner Number</label>
+              <input
+                name="motor_owner_number"
+                placeholder="Owner Contact Number"
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                onChange={handleChange}
+              />
+            </div>
           </div>
         </section>
 
-        {/* Vehicle / Driver */}
-        <section>
-          <h2 className="font-semibold mb-3">Vehicle & Driver</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <input
-              name="vehicle_number"
-              placeholder="Vehicle Number"
-              required
-              className="input"
-              onChange={handleChange}
-            />
-            <input
-              name="driver_phone"
-              placeholder="Driver Number"
-              className="input"
-              onChange={handleChange}
-            />
+        {/* Financials */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Gaadi (Cost) */}
+          <div className="bg-red-50/50 p-6 rounded-xl border border-red-100">
+            <div className="flex items-center gap-2 mb-4 text-red-600">
+              <Wallet size={18} />
+              <h2 className="font-semibold">Gaadi (Cost)</h2>
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">GAADI FREIGHT</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2 text-gray-400">₹</span>
+                  <input
+                    type="number"
+                    name="gaadi_freight"
+                    placeholder="0.00"
+                    className="w-full pl-8 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all"
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">GAADI ADVANCE</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2 text-gray-400">₹</span>
+                  <input
+                    type="number"
+                    name="gaadi_advance"
+                    placeholder="0.00"
+                    className="w-full pl-8 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all"
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-4 mt-3">
-            <input
-              name="motor_owner_name"
-              placeholder="Motor Owner Name"
-              className="input"
-              onChange={handleChange}
-              onBlur={handleOwnerBlur}
-            />
-            <input
-              name="motor_owner_number"
-              placeholder="Motor Owner Number"
-              className="input"
-              onChange={handleChange}
-            />
+
+          {/* Party (Income) */}
+          <div className="bg-blue-50/50 p-6 rounded-xl border border-blue-100">
+            <div className="flex items-center gap-2 mb-4 text-blue-600">
+              <FileText size={18} />
+              <h2 className="font-semibold">Party (Income)</h2>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">PARTY NAME</label>
+                  <input
+                    name="party_name"
+                    placeholder="Client Name"
+                    required
+                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    onChange={handleChange}
+                    onBlur={handlePartyBlur}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">PARTY NUMBER</label>
+                  <input
+                    name="party_phone"
+                    placeholder="Contact No."
+                    className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">PARTY FREIGHT</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2 text-gray-400">₹</span>
+                    <input
+                      type="number"
+                      name="party_freight"
+                      placeholder="0.00"
+                      className="w-full pl-8 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">PARTY ADVANCE</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2 text-gray-400">₹</span>
+                    <input
+                      type="number"
+                      name="party_advance"
+                      placeholder="0.00"
+                      className="w-full pl-8 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Adjustments & Additional Info */}
+        <section>
+          <div className="flex items-center gap-2 mb-4 text-gray-800">
+            <LayoutGrid size={18} className="text-blue-600" />
+            <h2 className="font-semibold">Adjustments & Additional Info</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">TDS (%)</label>
+              <input
+                type="number"
+                name="tds"
+                placeholder="0.0"
+                className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                onChange={handleChange}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Himmali</label>
+              <div className="relative">
+                <span className="absolute left-3 top-2 text-gray-400">₹</span>
+                <input
+                  type="number"
+                  name="himmali"
+                  placeholder="0.00"
+                  className="w-full pl-8 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Weight (MT) <span className="text-gray-300 normal-case">(Optional)</span></label>
+              <input
+                type="number"
+                step="0.1"
+                name="weight"
+                placeholder="0.00"
+                className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                onChange={handleChange}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Remark <span className="text-gray-300 normal-case">(Optional)</span></label>
+              <input
+                name="remark"
+                placeholder="Internal notes"
+                className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                onChange={handleChange}
+              />
+            </div>
           </div>
         </section>
-
-        {/* Gaadi */}
-        <section>
-          <h2 className="font-semibold mb-3">Gaadi (Cost)</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <input
-              type="number"
-              name="gaadi_freight"
-              placeholder="Gaadi Freight"
-              className="input"
-              onChange={handleChange}
-            />
-            <input
-              type="number"
-              name="gaadi_advance"
-              placeholder="Gaadi Advance"
-              className="input"
-              onChange={handleChange}
-            />
-          </div>
-        </section>
-
-        {/* Party */}
-        <section>
-          <h2 className="font-semibold mb-3">Party (Income)</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <input
-              name="party_name"
-              placeholder="Party Name"
-              required
-              className="input"
-              onChange={handleChange}
-              onBlur={handlePartyBlur}
-            />
-            <input
-              name="party_phone"
-              placeholder="Party Number"
-              className="input"
-              onChange={handleChange}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4 mt-3">
-            <input
-              type="number"
-              name="party_freight"
-              placeholder="Party Freight"
-              className="input"
-              onChange={handleChange}
-            />
-            <input
-              type="number"
-              name="party_advance"
-              placeholder="Party Advance"
-              className="input"
-              onChange={handleChange}
-            />
-          </div>
-        </section>
-
-        {/* Additional Info */}
-        <section>
-          <h2 className="font-semibold mb-3">Additional Info</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input
-              type="number"
-              step="0.1"
-              name="weight"
-              placeholder="Weight (optional, e.g. 12.5)"
-              className="input"
-              onChange={handleChange}
-            // Enforce 1 decimal place on blur or change if strictly needed, 
-            // but step="0.1" handles validation.
-            />
-
-            <textarea
-              name="remark"
-              placeholder="Remark (optional)"
-              rows={3}
-              className="input resize-none"
-              onChange={handleChange}
-            />
-          </div>
-        </section>
-
-        {/* Adjustments */}
-        <section>
-          <h2 className="font-semibold mb-3">Adjustments</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <input
-              type="number"
-              name="tds"
-              placeholder="TDS"
-              className="input"
-              onChange={handleChange}
-            />
-            <input
-              type="number"
-              name="himmali"
-              placeholder="Himmali"
-              className="input"
-              onChange={handleChange}
-            />
-          </div>
-        </section>
-
-
 
         {/* Actions */}
-        <div className="flex gap-4">
-          <button
-            type="submit"
-            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Save Trip
-          </button>
+        <div className="flex justify-end gap-4 pt-4">
           <button
             type="button"
             onClick={() => navigate("/trips")}
-            className="px-6 py-2 border rounded"
+            className="px-6 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
           >
             Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 shadow-md shadow-blue-500/20 transition-all flex items-center gap-2"
+          >
+            <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin hidden"></div>
+            {/* Check Circle Icon can be added here if needed, keeping it simple for now */}
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            Create Trip
           </button>
         </div>
 
