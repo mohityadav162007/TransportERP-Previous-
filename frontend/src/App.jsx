@@ -21,7 +21,10 @@ import { AuthProvider } from "./context/AuthContext";
 
 function Layout({ children }) {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-900">
+    <div
+      className="min-h-screen flex flex-col font-sans text-gray-900"
+      style={{ background: "radial-gradient(circle at top, #F8FAFC 0%, #EDF2F7 60%, #E5EAF0 100%)" }}
+    >
       <Header />
       <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         {children}
