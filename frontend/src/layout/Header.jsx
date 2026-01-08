@@ -33,7 +33,7 @@ export default function Header() {
   ];
 
   return (
-    <header className="bg-white shadow-sm border-b sticky top-0 z-50">
+    <header className="bg-white/5 backdrop-blur-md sticky top-0 z-50 border-b border-white/10">
       <div className="px-6 py-3 flex items-center justify-between">
 
         {/* Left: Logo & Navigation */}
@@ -42,13 +42,13 @@ export default function Header() {
             {location.pathname !== "/" && (
               <button
                 onClick={() => navigate(-1)}
-                className="p-1 rounded-full hover:bg-gray-100 text-gray-600 transition-colors"
+                className="p-1 rounded-full hover:bg-white/10 text-gray-300 transition-colors"
                 title="Go Back"
               >
                 <span className="text-xl">←</span>
               </button>
             )}
-            <div className="font-bold text-xl text-gray-800 tracking-tight">
+            <div className="font-bold text-xl text-white tracking-tight">
               Transport ERP
             </div>
           </div>
@@ -60,8 +60,8 @@ export default function Header() {
                 to={link.path}
                 className={({ isActive }) =>
                   `px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${isActive
-                    ? "bg-slate-100 text-blue-700 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    ? "bg-white/10 text-white shadow-sm"
+                    : "text-gray-300 hover:text-white hover:bg-white/5"
                   }`
                 }
               >
@@ -74,7 +74,7 @@ export default function Header() {
         {/* Right: System Status & User Profile */}
         <div className="flex items-center gap-6">
           {/* System Status */}
-          <div className="hidden sm:flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border">
+          <div className="hidden sm:flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
             <span className="relative flex h-2.5 w-2.5">
               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${status === "ONLINE" ? "bg-green-400" : status === "OFFLINE" ? "bg-red-400" : "bg-gray-400"
                 }`}></span>
@@ -82,7 +82,7 @@ export default function Header() {
                 }`}></span>
             </span>
             <span
-              className={`text-xs font-semibold ${status === "OFFLINE" ? "text-red-600" : "text-gray-700"
+              className={`text-xs font-semibold ${status === "OFFLINE" ? "text-red-400" : "text-gray-300"
                 }`}
             >
               {status === "ONLINE"
@@ -95,14 +95,14 @@ export default function Header() {
 
           {/* User Profile */}
           {user && (
-            <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
+            <div className="flex items-center gap-3 pl-4 border-l border-white/10">
               <div className="flex flex-col items-end">
-                <span className="text-sm font-medium text-gray-800 leading-tight">Admin</span>
-                <span className="text-xs text-gray-500">{user.email}</span>
+                <span className="text-sm font-medium text-white leading-tight">Admin</span>
+                <span className="text-xs text-gray-400">{user.email}</span>
               </div>
               <button
                 onClick={logout}
-                className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-full transition-colors"
                 title="Logout"
               >
                 <LogOut size={18} />

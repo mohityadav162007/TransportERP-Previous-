@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
+import GlassBox from "../components/GlassBox";
 
 export default function Reports() {
   const [trips, setTrips] = useState([]);
@@ -48,7 +49,7 @@ export default function Reports() {
           endDate: toDate,
           party: party
         },
-        responseType: "blob" // Important for file download
+        responseType: "blob"
       });
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -65,50 +66,50 @@ export default function Reports() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-white">
       <h1 className="text-2xl font-bold">Reports</h1>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded shadow grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-xl grid grid-cols-1 md:grid-cols-4 gap-4">
         <input
           type="date"
-          className="input"
+          className="bg-white/10 border border-white/10 rounded px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
           value={fromDate}
           onChange={e => setFromDate(e.target.value)}
         />
         <input
           type="date"
-          className="input"
+          className="bg-white/10 border border-white/10 rounded px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
           value={toDate}
           onChange={e => setToDate(e.target.value)}
         />
         <input
           placeholder="Party Name"
-          className="input"
+          className="bg-white/10 border border-white/10 rounded px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
           value={party}
           onChange={e => setParty(e.target.value)}
         />
         <button
           onClick={applyFilter}
-          className="bg-blue-600 text-white rounded px-4"
+          className="bg-blue-600 text-white rounded px-4 hover:bg-blue-700 transition-colors"
         >
           Apply Filter
         </button>
       </div>
 
       {/* Export */}
-      <div>
+      <div className="flex items-center justify-between">
         <button
           onClick={exportExcel}
-          className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 shadow-lg shadow-green-500/20 transition-all flex items-center gap-2 font-medium"
         >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
           Export Excel
         </button>
-      </div>
 
-      {/* Preview Count */}
-      <div className="text-sm text-gray-600">
-        Exporting {filtered.length} trips
+        <div className="text-sm text-gray-400 italic">
+          Total {filtered.length} trips match current filters.
+        </div>
       </div>
     </div>
   );

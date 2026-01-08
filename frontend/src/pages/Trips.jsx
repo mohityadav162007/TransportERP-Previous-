@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
-
+import GlassBox from "../components/GlassBox";
 import { formatCurrency } from "../utils/format";
 
 export default function Trips() {
@@ -20,10 +20,6 @@ export default function Trips() {
     search: ""
   });
 
-  /* ============================
-     FETCH TRIPS (BACKEND FILTER)
-  ============================ */
-
   const fetchTrips = useCallback(async () => {
     setLoading(true);
     const res = await api.get(`/trips?deleted=${showDeleted}`);
@@ -34,10 +30,6 @@ export default function Trips() {
   useEffect(() => {
     fetchTrips();
   }, [fetchTrips]);
-
-  /* ============================
-     FILTERING (FRONTEND ONLY)
-  ============================ */
 
   const filteredTrips = trips.filter(t => {
     if (filters.fromDate &&
@@ -80,10 +72,6 @@ export default function Trips() {
     return b.id - a.id;
   });
 
-  /* ============================
-     ACTIONS
-  ============================ */
-
   const uploadPOD = async (id, file) => {
     if (!file) return;
     const fd = new FormData();
@@ -107,13 +95,13 @@ export default function Trips() {
     fetchTrips();
   };
 
-  if (loading) return <div>Loading trips...</div>;
+  if (loading) return <div className="text-white p-8">Loading trips...</div>;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-white">
 
       {/* HEADER */}
-      <div className="flex justify-between">
+      <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Trips</h1>
 
         <div className="flex gap-3">
@@ -128,13 +116,13 @@ export default function Trips() {
               }).toString();
               window.open(`${import.meta.env.VITE_API_URL}/reports/trips?${qs}`, "_blank");
             }}
-            className="px-4 py-2 border border-green-600 text-green-600 rounded hover:bg-green-50"
+            className="px-4 py-2 border border-green-500 text-green-400 rounded hover:bg-green-500/10 transition-colors"
           >
             Export Excel
           </button>
           <button
             onClick={() => setShowDeleted(!showDeleted)}
-            className="px-4 py-2 border rounded"
+            className="px-4 py-2 border border-white/20 rounded hover:bg-white/5 transition-colors"
           >
             {showDeleted ? "Show Active" : "Show Deleted"}
           </button>
@@ -142,7 +130,7 @@ export default function Trips() {
           {!showDeleted && (
             <button
               onClick={() => navigate("/trips/new")}
-              className="px-4 py-2 bg-blue-600 text-white rounded"
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
             >
               + Add Trip
             </button>
@@ -151,16 +139,16 @@ export default function Trips() {
       </div>
 
       {/* FILTERS */}
-      <div className="bg-white border rounded p-4 grid grid-cols-1 md:grid-cols-6 gap-3">
-        <input type="date" className="input"
+      <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 grid grid-cols-1 md:grid-cols-6 gap-3">
+        <input type="date" className="bg-white/10 border border-white/10 rounded px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
           value={filters.fromDate}
           onChange={e => setFilters({ ...filters, fromDate: e.target.value })}
         />
-        <input type="date" className="input"
+        <input type="date" className="bg-white/10 border border-white/10 rounded px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
           value={filters.toDate}
           onChange={e => setFilters({ ...filters, toDate: e.target.value })}
         />
-        <select className="input"
+        <select className="bg-white/10 border border-white/10 rounded px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-blue-500 [&>option]:text-black"
           value={filters.paymentStatus}
           onChange={e => setFilters({ ...filters, paymentStatus: e.target.value })}
         >
@@ -168,7 +156,7 @@ export default function Trips() {
           <option value="PAID">Paid</option>
           <option value="UNPAID">Unpaid</option>
         </select>
-        <select className="input"
+        <select className="bg-white/10 border border-white/10 rounded px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-blue-500 [&>option]:text-black"
           value={filters.podStatus}
           onChange={e => setFilters({ ...filters, podStatus: e.target.value })}
         >
@@ -176,14 +164,14 @@ export default function Trips() {
           <option value="UPLOADED">Uploaded</option>
           <option value="PENDING">Pending</option>
         </select>
-        <input className="input"
+        <input className="bg-white/10 border border-white/10 rounded px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
           placeholder="Party / Owner / Vehicle"
           value={filters.search}
           onChange={e => setFilters({ ...filters, search: e.target.value })}
         />
         <button
-          onClick={() => setFilters({ ...filters })}
-          className="px-4 py-2 bg-blue-600 text-white rounded"
+          onClick={() => fetchTrips()}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
           Apply
         </button>
@@ -192,81 +180,84 @@ export default function Trips() {
       {/* CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {filteredTrips.map(trip => (
-          <div
-            key={trip.id}
-            onClick={() => navigate(`/trips/${trip.id}`)}
-            className={`cursor-pointer border rounded p-5 shadow hover:shadow-lg ${trip.is_deleted ? "bg-gray-100 opacity-70" : trip.payment_status === 'PAID' ? "bg-green-50" : "bg-white"
-              }`}
-          >
-            <div className="flex justify-between mb-2">
-              <div className="font-semibold">{trip.trip_code}</div>
-              <span className="text-xs">POD: {trip.pod_status}</span>
-            </div>
+          <div key={trip.id} className="h-full">
+            <GlassBox>
+              <div
+                onClick={() => navigate(`/trips/${trip.id}`)}
+                className={`cursor-pointer h-full flex flex-col ${trip.is_deleted ? "opacity-50" : ""}`}
+              >
+                <div className="flex justify-between mb-4">
+                  <div className="font-semibold text-white">{trip.trip_code}</div>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full ${trip.pod_status === 'UPLOADED' ? 'bg-teal-500/20 text-teal-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                    POD: {trip.pod_status}
+                  </span>
+                </div>
 
-            <div className="text-sm text-gray-600 mb-2">
-              {trip.from_location} → {trip.to_location}
-            </div>
+                <div className="text-sm text-gray-300 mb-2 font-medium">
+                  {trip.from_location} → {trip.to_location}
+                </div>
 
-            <div className="text-sm mb-1">
-              Vehicle: {trip.vehicle_number}
-            </div>
+                <div className="text-xs text-gray-400 mb-4">
+                  Vehicle: {trip.vehicle_number}
+                </div>
 
-            <div className="font-bold text-red-600 mb-3">
-              ₹{formatCurrency(trip.party_balance)}
-            </div>
+                <div className="flex justify-between items-end mt-auto">
+                  <div className={`font-bold text-lg ${trip.party_payment_status === 'PAID' ? "text-green-400" : "text-rose-400"}`}>
+                    ₹{formatCurrency(trip.party_balance)}
+                  </div>
 
-            <div className="flex justify-between">
-              {!trip.is_deleted && trip.pod_status !== "UPLOADED" && (
-                <label
-                  className="text-blue-600 text-sm cursor-pointer"
-                  onClick={e => e.stopPropagation()}
-                >
-                  {uploadingId === trip.id ? "Uploading..." : "Upload POD"}
-                  <input type="file" hidden
-                    onChange={e => uploadPOD(trip.id, e.target.files[0])}
-                  />
-                </label>
-              )}
+                  <div className="flex gap-4 text-xs font-medium">
+                    {!trip.is_deleted && trip.pod_status !== "UPLOADED" && (
+                      <label
+                        className="text-blue-400 cursor-pointer hover:underline"
+                        onClick={e => e.stopPropagation()}
+                      >
+                        {uploadingId === trip.id ? "Uploading..." : "Upload POD"}
+                        <input type="file" hidden
+                          onChange={e => uploadPOD(trip.id, e.target.files[0])}
+                        />
+                      </label>
+                    )}
 
-              <div className="flex gap-3 text-sm">
-                {!trip.is_deleted ? (
-                  <>
-                    <button
-                      onClick={e => {
-                        e.stopPropagation();
-                        navigate(`/trips/edit/${trip.id}`);
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="text-red-600"
-                      onClick={e => softDelete(e, trip.id)}
-                    >
-                      Delete
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    className="text-green-600"
-                    onClick={e => restore(e, trip.id)}
-                  >
-                    Restore
-                  </button>
-                )}
+                    {!trip.is_deleted ? (
+                      <>
+                        <button
+                          className="text-gray-300 hover:text-white"
+                          onClick={e => {
+                            e.stopPropagation();
+                            navigate(`/trips/edit/${trip.id}`);
+                          }}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="text-rose-400 hover:text-rose-300"
+                          onClick={e => softDelete(e, trip.id)}
+                        >
+                          Delete
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        className="text-green-400 hover:text-green-300"
+                        onClick={e => restore(e, trip.id)}
+                      >
+                        Restore
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
+            </GlassBox>
           </div>
         ))}
       </div>
 
-      {
-        filteredTrips.length === 0 && (
-          <div className="text-gray-500 text-center mt-10">
-            No trips found
-          </div>
-        )
-      }
-    </div >
+      {filteredTrips.length === 0 && (
+        <div className="text-gray-400 text-center mt-20 italic">
+          No trips found matching your criteria.
+        </div>
+      )}
+    </div>
   );
 }

@@ -2,15 +2,15 @@ import React from "react";
 import styled from "styled-components";
 
 const GlassBox = ({ children }) => {
-    return (
-        <StyledWrapper>
-            <div className="container">
-                <div className="box">
-                    {children}
-                </div>
-            </div>
-        </StyledWrapper>
-    );
+  return (
+    <StyledWrapper>
+      <div className="container">
+        <div className="box">
+          {children}
+        </div>
+      </div>
+    </StyledWrapper>
+  );
 };
 
 const StyledWrapper = styled.div`
@@ -24,6 +24,7 @@ const StyledWrapper = styled.div`
     -webkit-backdrop-filter: blur(20px);
     border-radius: 12px;
     transition: all 0.3s ease;
+    color: white;
   }
 
   .container .box:hover {

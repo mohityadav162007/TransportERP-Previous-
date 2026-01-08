@@ -2,8 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-.input {
-  @apply w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500;
+html,
+body {
+  color: white;
 }
 
 /* Remove arrows/spinners from number inputs */
@@ -11,6 +12,7 @@
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
+  appearance: none;
   margin: 0;
 }
 

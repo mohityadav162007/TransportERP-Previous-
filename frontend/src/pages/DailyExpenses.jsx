@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 import { formatCurrency } from "../utils/format";
+import GlassBox from "../components/GlassBox";
 
 export default function DailyExpenses() {
     const [expenses, setExpenses] = useState([]);
@@ -38,7 +39,6 @@ export default function DailyExpenses() {
                 await api.post("/expenses", form);
             }
 
-            // Reset form
             setForm({
                 date: new Date().toISOString().split('T')[0],
                 category: "",
@@ -56,7 +56,7 @@ export default function DailyExpenses() {
     const handleEdit = (ex) => {
         setEditingId(ex.id);
         setForm({
-            date: ex.date.split('T')[0], // Ensure date format matches input
+            date: ex.date.split('T')[0],
             category: ex.category,
             amount: ex.amount,
             vehicle_number: ex.vehicle_number || "",
@@ -75,81 +75,98 @@ export default function DailyExpenses() {
         });
     };
 
-
+    if (loading) return <div className="text-white p-8 italic">Loading expenses...</div>;
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 text-white">
             <h1 className="text-2xl font-bold">Daily Expenses</h1>
 
             {/* ADD / EDIT FORM */}
-            <div className="bg-white p-6 rounded shadow">
-                <h2 className="font-semibold mb-4">{editingId ? "Edit Expense" : "Add New Expense"}</h2>
-                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-                    <div>
-                        <label className="block text-xs text-gray-500 mb-1">Date</label>
-                        <input type="date" name="date" required value={form.date} onChange={handleChange} className="input w-full" />
-                    </div>
-                    <div>
-                        <label className="block text-xs text-gray-500 mb-1">Category</label>
-                        <input name="category" required placeholder="Fuel, Repair, etc." value={form.category} onChange={handleChange} className="input w-full" />
-                    </div>
-                    <div>
-                        <label className="block text-xs text-gray-500 mb-1">Amount</label>
-                        <input type="number" step="0.01" name="amount" required placeholder="0.00" value={form.amount} onChange={handleChange} className="input w-full" />
-                    </div>
-                    <div>
-                        <label className="block text-xs text-gray-500 mb-1">Vehicle (Opt)</label>
-                        <input name="vehicle_number" placeholder="Vehicle No." value={form.vehicle_number} onChange={handleChange} className="input w-full" />
-                    </div>
-                    <div>
-                        <div className="flex gap-2">
-                            <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded w-full hover:bg-blue-700">
-                                {editingId ? "Update" : "Add"}
-                            </button>
-                            {editingId && (
-                                <button type="button" onClick={handleCancel} className="bg-gray-300 text-gray-800 px-3 py-2 rounded hover:bg-gray-400">
-                                    Cancel
-                                </button>
-                            )}
+            <GlassBox>
+                <div className="p-4">
+                    <h2 className="font-semibold mb-4 text-gray-300">{editingId ? "Edit Expense" : "Add New Expense"}</h2>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Date</label>
+                                <input type="date" name="date" required value={form.date} onChange={handleChange}
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Category</label>
+                                <input name="category" required placeholder="Fuel, Repair, etc." value={form.category} onChange={handleChange}
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Amount</label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-2 text-gray-500">₹</span>
+                                    <input type="number" step="0.01" name="amount" required placeholder="0.00" value={form.amount} onChange={handleChange}
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg pl-8 pr-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                                </div>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Vehicle (Opt)</label>
+                                <input name="vehicle_number" placeholder="Vehicle No." value={form.vehicle_number} onChange={handleChange}
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                            </div>
                         </div>
-                    </div>
-                </form>
-                <div className="mt-3">
-                    <input name="notes" placeholder="Additional Notes..." value={form.notes} onChange={handleChange} className="input w-full" />
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                            <div className="md:col-span-4 space-y-1">
+                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Notes</label>
+                                <input name="notes" placeholder="Additional Notes..." value={form.notes} onChange={handleChange}
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                            </div>
+                            <div>
+                                <div className="flex gap-2">
+                                    <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg w-full hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all font-medium">
+                                        {editingId ? "Update" : "Add Expense"}
+                                    </button>
+                                    {editingId && (
+                                        <button type="button" onClick={handleCancel} className="bg-white/10 text-white px-3 py-2 rounded-lg hover:bg-white/20 transition-all">
+                                            Cancel
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-            </div>
+            </GlassBox>
 
             {/* LIST */}
-            <div className="bg-white rounded shadow overflow-hidden">
-                <table className="min-w-full text-left text-sm">
-                    <thead className="bg-gray-100">
-                        <tr>
-                            <th className="p-3">Date</th>
-                            <th className="p-3">Category</th>
-                            <th className="p-3">Vehicle</th>
-                            <th className="p-3">Notes</th>
-                            <th className="p-3 text-right">Amount</th>
-                            <th className="p-3"></th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                        {expenses.map(ex => (
-                            <tr key={ex.id} className="hover:bg-gray-50">
-                                <td className="p-3">{new Date(ex.date).toLocaleDateString()}</td>
-                                <td className="p-3 font-medium">{ex.category}</td>
-                                <td className="p-3">{ex.vehicle_number || "-"}</td>
-                                <td className="p-3 text-gray-500">{ex.notes}</td>
-                                <td className="p-3 text-right font-bold">₹{formatCurrency(ex.amount)}</td>
-                                <td className="p-3 text-right">
-                                    <button onClick={() => handleEdit(ex)} className="text-blue-600 hover:text-blue-800 font-medium text-xs border border-blue-600 px-2 py-1 rounded">
-                                        Edit
-                                    </button>
-                                </td>
+            <GlassBox>
+                <div className="overflow-x-auto">
+                    <table className="min-w-full text-left text-sm">
+                        <thead className="border-b border-white/10">
+                            <tr className="text-gray-400 uppercase tracking-wider text-[10px] font-bold">
+                                <th className="p-4">Date</th>
+                                <th className="p-4">Category</th>
+                                <th className="p-4">Vehicle</th>
+                                <th className="p-4">Notes</th>
+                                <th className="p-4 text-right">Amount</th>
+                                <th className="p-4"></th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody className="divide-y divide-white/5 text-gray-300">
+                            {expenses.map(ex => (
+                                <tr key={ex.id} className="hover:bg-white/5 transition-colors">
+                                    <td className="p-4">{new Date(ex.date).toLocaleDateString()}</td>
+                                    <td className="p-4 font-medium text-white">{ex.category}</td>
+                                    <td className="p-4">{ex.vehicle_number || "-"}</td>
+                                    <td className="p-4 text-gray-400 italic">{ex.notes}</td>
+                                    <td className="p-4 text-right font-bold text-white">₹{formatCurrency(ex.amount)}</td>
+                                    <td className="p-4 text-right">
+                                        <button onClick={() => handleEdit(ex)} className="text-blue-400 hover:text-blue-300 font-medium text-xs border border-blue-400/30 px-3 py-1 rounded-full transition-all">
+                                            Edit
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </GlassBox>
         </div>
     );
 }

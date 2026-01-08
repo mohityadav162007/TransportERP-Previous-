@@ -109,13 +109,6 @@ export default function App() {
               </Layout>
             </PrivateRoute>
           } />
-          <Route path="/payment-history" element={
-            <PrivateRoute>
-              <Layout>
-                <PaymentHistory />
-              </Layout>
-            </PrivateRoute>
-          } />
 
           <Route path="/expenses" element={
             <PrivateRoute>

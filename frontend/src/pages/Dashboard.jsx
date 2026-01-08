@@ -63,10 +63,10 @@ export default function Dashboard() {
 
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-white">
 
       {/* ===== ROW 1 & 2: KPIs (4 cols) ===== */}
-      <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+      <h1 className="text-2xl font-bold text-white">Dashboard</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         <KPICard title="Total Trips" value={totalTrips} icon={Truck} />
@@ -87,7 +87,7 @@ export default function Dashboard() {
           <GlassBox>
             <div className="h-full flex flex-col">
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-800">Profit Graph</h3>
+                <h3 className="text-lg font-semibold text-white">Profit Graph</h3>
               </div>
               <div className="h-64 w-full flex-grow">
                 <ResponsiveContainer width="100%" height="100%">
@@ -98,20 +98,20 @@ export default function Dashboard() {
                         <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid vertical={false} stroke="#f0f0f0" />
+                    <CartesianGrid horizontal={false} vertical={false} stroke="#ffffff10" />
                     <XAxis
                       dataKey="month"
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fill: '#9ca3af', fontSize: 12 }}
+                      tick={{ fill: '#e5e7eb', fontSize: 12 }}
                       dy={10}
                     />
                     <YAxis
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fill: '#9ca3af', fontSize: 12 }}
+                      tick={{ fill: '#e5e7eb', fontSize: 12 }}
                     />
-                    <Tooltip />
+                    <Tooltip contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff' }} />
                     <Area
                       type="monotone"
                       dataKey="profit"
@@ -131,7 +131,7 @@ export default function Dashboard() {
         <div className="h-full">
           <GlassBox>
             <div className="h-full flex flex-col items-center">
-              <h3 className="text-sm font-semibold text-gray-600 self-start mb-4">POD Status</h3>
+              <h3 className="text-sm font-semibold text-gray-300 self-start mb-4">POD Status</h3>
               <div className="h-48 w-full relative flex-grow">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -152,23 +152,23 @@ export default function Dashboard() {
                 </ResponsiveContainer>
                 {/* Center Label (Optional) */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="h-24 w-24 rounded-full border-4 border-gray-50"></div>
+                  <div className="h-24 w-24 rounded-full border-4 border-white/10"></div>
                 </div>
               </div>
               <div className="w-full mt-4 space-y-2">
                 <div className="flex justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-teal-500"></span>
-                    <span className="text-gray-600">Uploaded</span>
+                    <span className="text-gray-300">Uploaded</span>
                   </div>
-                  <span className="font-bold text-gray-800">{podData[0].value}</span>
+                  <span className="font-bold text-white">{podData[0].value}</span>
                 </div>
                 <div className="flex justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-rose-500"></span>
-                    <span className="text-gray-600">Pending</span>
+                    <span className="text-gray-300">Pending</span>
                   </div>
-                  <span className="font-bold text-gray-800">{podData[1].value}</span>
+                  <span className="font-bold text-white">{podData[1].value}</span>
                 </div>
               </div>
             </div>
@@ -179,7 +179,7 @@ export default function Dashboard() {
         <div className="h-full">
           <GlassBox>
             <div className="h-full flex flex-col items-center">
-              <h3 className="text-sm font-semibold text-gray-600 self-start mb-4">Payment Status</h3>
+              <h3 className="text-sm font-semibold text-gray-300 self-start mb-4">Payment Status</h3>
               <div className="h-48 w-full relative flex-grow">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -199,23 +199,23 @@ export default function Dashboard() {
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="h-24 w-24 rounded-full border-4 border-gray-50"></div>
+                  <div className="h-24 w-24 rounded-full border-4 border-white/10"></div>
                 </div>
               </div>
               <div className="w-full mt-4 space-y-2">
                 <div className="flex justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-teal-500"></span>
-                    <span className="text-gray-600">Received</span>
+                    <span className="text-gray-300">Received</span>
                   </div>
-                  <span className="font-bold text-gray-800">{paymentData[0].value}</span>
+                  <span className="font-bold text-white">{paymentData[0].value}</span>
                 </div>
                 <div className="flex justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-rose-500"></span>
-                    <span className="text-gray-600">Pending</span>
+                    <span className="text-gray-300">Pending</span>
                   </div>
-                  <span className="font-bold text-gray-800">{paymentData[1].value}</span>
+                  <span className="font-bold text-white">{paymentData[1].value}</span>
                 </div>
               </div>
             </div>
@@ -229,7 +229,7 @@ export default function Dashboard() {
         <div className="h-full">
           <GlassBox>
             <div className="h-full flex flex-col">
-              <h3 className="text-sm font-semibold text-gray-800 mb-6">Weekly Trips</h3>
+              <h3 className="text-sm font-semibold text-white mb-6">Weekly Trips</h3>
               <div className="h-64 w-full flex-grow">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={weeklyTrips}>
@@ -237,10 +237,10 @@ export default function Dashboard() {
                       dataKey="day"
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fill: '#9ca3af', fontSize: 12 }}
+                      tick={{ fill: '#e5e7eb', fontSize: 12 }}
                       dy={10}
                     />
-                    <Tooltip cursor={{ fill: 'transparent' }} />
+                    <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff' }} />
                     <Bar dataKey="count" fill="#14b8a6" radius={[4, 4, 0, 0]} barSize={30} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -250,41 +250,45 @@ export default function Dashboard() {
         </div>
 
         {/* POD Pending Table (2 cols) */}
-        {/* Do NOT apply GlassBox to Tables */}
-        <div className="xl:col-span-2 bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-4 border-b">
-            <h3 className="text-sm font-semibold text-gray-800">POD Pending</h3>
-          </div>
-          <div className="overflow-x-auto">
-            <TripTable
-              rows={pendingPODList}
-              onRowClick={(id) => navigate(`/trips/${id}`)}
-            />
-          </div>
+        <div className="xl:col-span-2 min-h-full">
+          <GlassBox>
+            <div className="p-4 border-b border-white/10 flex justify-between items-center mb-4">
+              <h3 className="text-sm font-semibold text-white">POD Pending</h3>
+            </div>
+            <div className="overflow-x-auto">
+              <TripTable
+                rows={pendingPODList}
+                onRowClick={(id) => navigate(`/trips/${id}`)}
+              />
+            </div>
+          </GlassBox>
         </div>
       </div>
 
       {/* ===== ROW 5: PENDING PAYMENTS + RECENT TRIPS ===== */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        {/* Do NOT apply GlassBox to Tables */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden min-h-[300px]">
-          <div className="p-4 border-b">
-            <h3 className="text-sm font-semibold text-gray-800">Pending Payments</h3>
-          </div>
-          <TripTable
-            rows={pendingPaymentList}
-            onRowClick={(id) => navigate(`/trips/${id}`)}
-          />
+        <div className="min-h-[300px]">
+          <GlassBox>
+            <div className="p-4 border-b border-white/10 flex justify-between items-center mb-4">
+              <h3 className="text-sm font-semibold text-white">Pending Payments</h3>
+            </div>
+            <TripTable
+              rows={pendingPaymentList}
+              onRowClick={(id) => navigate(`/trips/${id}`)}
+            />
+          </GlassBox>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden min-h-[300px]">
-          <div className="p-4 border-b">
-            <h3 className="text-sm font-semibold text-gray-800">Recent Trips</h3>
-          </div>
-          <TripTable
-            rows={recentTripsList}
-            onRowClick={(id) => navigate(`/trips/${id}`)}
-          />
+        <div className="min-h-[300px]">
+          <GlassBox>
+            <div className="p-4 border-b border-white/10 flex justify-between items-center mb-4">
+              <h3 className="text-sm font-semibold text-white">Recent Trips</h3>
+            </div>
+            <TripTable
+              rows={recentTripsList}
+              onRowClick={(id) => navigate(`/trips/${id}`)}
+            />
+          </GlassBox>
         </div>
       </div>
 
@@ -302,16 +306,16 @@ function KPICard({ title, value, icon: Icon, disableFormat }) {
       <GlassBox>
         <div className="flex justify-between items-start h-full">
           <div>
-            <p className="text-sm font-medium text-gray-500 mb-1">{title}</p>
-            <h3 className="text-3xl font-bold text-gray-800 tracking-tight">
+            <p className="text-sm font-medium text-gray-300 mb-1">{title}</p>
+            <h3 className="text-3xl font-bold text-white tracking-tight">
               {value}
             </h3>
-            <div className="flex items-center gap-1 mt-2 text-xs font-medium text-green-600">
+            <div className="flex items-center gap-1 mt-2 text-xs font-medium text-green-400">
               <TrendingUp size={14} />
-              <span>5.39%</span> {/* Static trend for now as per design */}
+              <span>5.39%</span>
             </div>
           </div>
-          <div className="p-3 bg-gray-50 rounded-lg text-gray-600">
+          <div className="p-3 bg-white/10 rounded-lg text-gray-200">
             <Icon size={24} strokeWidth={1.5} />
           </div>
         </div>
@@ -327,7 +331,7 @@ function TripTable({ rows, onRowClick }) {
   }
   return (
     <table className="w-full text-xs text-left">
-      <thead className="text-gray-400 font-medium bg-white uppercase tracking-wider border-b">
+      <thead className="text-gray-400 font-medium uppercase tracking-wider border-b border-white/10">
         <tr>
           <th className="px-6 py-3 font-normal">Trip ID</th>
           <th className="px-6 py-3 font-normal">Date</th>
@@ -336,23 +340,22 @@ function TripTable({ rows, onRowClick }) {
           <th className="px-6 py-3 font-normal text-right">Party Balance</th>
         </tr>
       </thead>
-      <tbody className="divide-y divide-gray-50">
+      <tbody className="divide-y divide-white/5">
         {rows.map(t => (
           <tr
             key={t.id}
-            className="hover:bg-gray-50 transition-colors cursor-pointer group"
+            className="hover:bg-white/5 transition-colors cursor-pointer group"
             onClick={() => onRowClick(t.id)}
           >
-            <td className="px-6 py-4 font-medium text-gray-800 group-hover:text-blue-600">
+            <td className="px-6 py-4 font-medium text-gray-200 group-hover:text-blue-400">
               {t.trip_code}
             </td>
-            <td className="px-6 py-4 text-gray-500">{formatDate(t.loading_date)}</td>
-            <td className="px-6 py-4 text-gray-500">
-              {/* Simplified route for table */}
+            <td className="px-6 py-4 text-gray-400">{formatDate(t.loading_date)}</td>
+            <td className="px-6 py-4 text-gray-400">
               <span className="block truncate max-w-[100px]" title={t.route_from}>{t.route_from}</span>
             </td>
-            <td className="px-6 py-4 text-gray-500">{t.vehicle_number}</td>
-            <td className="px-6 py-4 text-right font-medium text-gray-800">
+            <td className="px-6 py-4 text-gray-400">{t.vehicle_number}</td>
+            <td className="px-6 py-4 text-right font-medium text-gray-200">
               ₹{t.party_balance}
             </td>
           </tr>
