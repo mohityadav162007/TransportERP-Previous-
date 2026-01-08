@@ -1,6 +1,6 @@
+import bgImage from "./assets/dashboard-bg.jpg";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import TripDetail from "./pages/TripDetail";
-
 
 import Header from "./layout/Header";
 
@@ -23,7 +23,13 @@ function Layout({ children }) {
   return (
     <div
       className="min-h-screen flex flex-col font-sans text-gray-900"
-      style={{ background: "radial-gradient(circle at top, #F8FAFC 0%, #EDF2F7 60%, #E5EAF0 100%)" }}
+      style={{
+        backgroundImage: `url(${bgImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        backgroundAttachment: "fixed"
+      }}
     >
       <Header />
       <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
