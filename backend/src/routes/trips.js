@@ -4,6 +4,7 @@ import { generateTripCode } from "../utils/tripCode.js";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
+import { supabase } from "../utils/supabaseClient.js";
 
 const router = express.Router();
 
@@ -11,21 +12,9 @@ const router = express.Router();
    POD STORAGE
 ================================ */
 
-const POD_DIR = "uploads/pod";
-
-if (!fs.existsSync(POD_DIR)) {
-  fs.mkdirSync(POD_DIR, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: POD_DIR,
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname) || ".jpg";
-    cb(null, `pod_${req.params.id}${ext}`);
-  }
-});
-
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
+const BUCKET_NAME = process.env.SUPABASE_STORAGE_BUCKET || 'PODs';
 
 /* ================================
    CREATE TRIP  ✅ FIXED
@@ -424,21 +413,41 @@ router.post("/:id/pod", upload.single("pod"), async (req, res) => {
     return res.status(400).json({ message: "No POD uploaded" });
   }
 
-  const podPath = `${POD_DIR}/${req.file.filename}`;
+  try {
+    const ext = path.extname(req.file.originalname) || ".jpg";
+    const fileName = `pod_${req.params.id}_${Date.now()}${ext}`;
 
-  const result = await pool.query(
-    `
-    UPDATE trips SET
-      pod_status='UPLOADED',
-      pod_path=$1,
-      updated_at=now()
-    WHERE id=$2
-    RETURNING *
-    `,
-    [podPath, req.params.id]
-  );
+    const { data, error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(fileName, req.file.buffer, {
+        contentType: req.file.mimetype,
+        upsert: true
+      });
 
-  res.json(result.rows[0]);
+    if (error) {
+      console.error("Supabase Storage Error:", error);
+      return res.status(500).json({ message: "Failed to upload to Supabase Storage", error: error.message });
+    }
+
+    const podPath = fileName;
+
+    const result = await pool.query(
+      `
+      UPDATE trips SET
+        pod_status='UPLOADED',
+        pod_path=$1,
+        updated_at=now()
+      WHERE id=$2
+      RETURNING *
+      `,
+      [podPath, req.params.id]
+    );
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("POD UPLOAD ERROR:", err);
+    res.status(500).json({ message: "Internal server error during POD upload" });
+  }
 });
 
 /* ================================
@@ -456,8 +465,20 @@ router.get("/:id/pod/file", async (req, res) => {
       return res.status(404).send("POD not found");
     }
 
-    res.sendFile(path.resolve(result.rows[0].pod_path));
+    const fileName = result.rows[0].pod_path;
+
+    const { data, error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .createSignedUrl(fileName, 3600); // 1 hour expiry
+
+    if (error) {
+      console.error("Supabase Signed URL Error:", error);
+      return res.status(500).send("Failed to retrieve POD from storage");
+    }
+
+    res.redirect(data.signedUrl);
   } catch (err) {
+    console.error("POD DOWNLOAD ERROR:", err);
     res.status(500).send("Failed to open POD");
   }
 });
