@@ -41,7 +41,7 @@ export default function Dashboard() {
   const totalGaadiFreight = sum(trips, "gaadi_freight");
 
   const pendingPODCount = trips.filter(t => t.pod_status !== "UPLOADED").length;
-  const pendingPaymentsCount = trips.filter(t => t.party_payment_status === "UNPAID").length;
+  const pendingPaymentsCount = trips.filter(t => t.payment_status === "UNPAID").length;
 
   const balanceDue = sum(trips, "party_balance");
   const payable = sum(trips, "gaadi_balance");
@@ -50,14 +50,14 @@ export default function Dashboard() {
   // Charts
   const profitTrend = monthlyProfit(trips);
   const podData = statusSplit(trips, "pod_status", "UPLOADED", ["Uploaded", "Pending"]);
-  const paymentData = statusSplit(trips, "party_payment_status", "PAID", ["Received", "Pending"]);
+  const paymentData = statusSplit(trips, "payment_status", "PAID", ["Received", "Pending"]);
   const weeklyTrips = getWeeklyTrips(trips);
 
   // Tables
   const combinedRecentTrips = [...trips].sort((a, b) => new Date(b.loading_date) - new Date(a.loading_date));
   const recentTripsList = combinedRecentTrips.slice(0, 5);
   const pendingPODList = trips.filter(t => t.pod_status !== "UPLOADED").slice(0, 5);
-  const pendingPaymentList = trips.filter(t => t.party_payment_status === "UNPAID").slice(0, 5);
+  const pendingPaymentList = trips.filter(t => t.payment_status === "UNPAID").slice(0, 5);
 
 
   return (

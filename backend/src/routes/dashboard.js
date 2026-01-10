@@ -14,7 +14,7 @@ router.get("/summary", async (req, res) => {
         COALESCE(SUM(party_balance), 0) AS total_outstanding,
         COALESCE(SUM(profit), 0) AS total_profit,
         COUNT(*) FILTER (WHERE pod_status = 'PENDING') AS pod_pending,
-        COUNT(*) FILTER (WHERE party_payment_status = 'UNPAID') AS payment_pending
+        COUNT(*) FILTER (WHERE payment_status = 'UNPAID') AS payment_pending
       FROM trips
       WHERE is_deleted = false
     `);
