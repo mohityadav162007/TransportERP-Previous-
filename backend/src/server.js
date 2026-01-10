@@ -3,6 +3,8 @@ dotenv.config();
 
 import express from "express";
 import cors from "cors";
+import bcrypt from "bcryptjs";
+import { pool } from "./db.js";
 
 import tripsRouter from "./routes/trips.js";
 import analyticsRouter from "./routes/analytics.js";
@@ -39,8 +41,27 @@ const PORT = process.env.PORT || 5000;
 // Render and local environments need app.listen. 
 // Vercel handles the execution itself.
 if (!process.env.VERCEL) {
-  app.listen(PORT, () => {
+  app.listen(PORT, async () => {
     console.log(`Backend running on port ${PORT}`);
+
+    // Temporary user creation
+    const email = "shrisanwariyaroadlines@gmail.com";
+    const password = "Sanwariya_1228";
+    try {
+      const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+      if (result.rows.length === 0) {
+        const hash = await bcrypt.hash(password, 10);
+        await pool.query(
+          "INSERT INTO users (email, password_hash, role) VALUES ($1, $2, 'admin')",
+          [email, hash]
+        );
+        console.log("Admin user created successfully");
+      } else {
+        console.log("Admin user already exists");
+      }
+    } catch (err) {
+      console.error("Failed to ensure admin user:", err);
+    }
   });
 }
 
