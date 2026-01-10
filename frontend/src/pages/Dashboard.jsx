@@ -68,14 +68,14 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         <KPICard title="Total Trips" value={totalTrips} icon={Truck} />
-        <KPICard title="Total Freight" value={`$${totalPartyFreight}`} icon={DollarSign} disableFormat />
-        <KPICard title="Total Bhada" value={`$${totalGaadiFreight}`} icon={Receipt} disableFormat />
+        <KPICard title="Total Freight" value={`₹${formatCurrency(totalPartyFreight)}`} icon={DollarSign} disableFormat />
+        <KPICard title="Total Bhada" value={`₹${formatCurrency(totalGaadiFreight)}`} icon={Receipt} disableFormat />
         <KPICard title="Pending POD" value={pendingPODCount} icon={FileText} />
 
         <KPICard title="Pending Payments" value={pendingPaymentsCount} icon={Coins} />
-        <KPICard title="Balance Due" value={`$${balanceDue}`} icon={Wallet} disableFormat />
-        <KPICard title="Payable" value={`$${payable}`} icon={HandCoins} disableFormat />
-        <KPICard title="Monthly Profit" value={`$${totalProfit}`} icon={CircleDollarSign} disableFormat />
+        <KPICard title="Balance Due" value={`₹${formatCurrency(balanceDue)}`} icon={Wallet} disableFormat />
+        <KPICard title="Payable" value={`₹${formatCurrency(payable)}`} icon={HandCoins} disableFormat />
+        <KPICard title="Monthly Profit" value={`₹${formatCurrency(totalProfit)}`} icon={CircleDollarSign} disableFormat />
       </div>
 
       {/* ===== ROW 3: PROFIT GRAPH + STATUS CHARTS ===== */}
