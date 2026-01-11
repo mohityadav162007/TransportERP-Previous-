@@ -3,11 +3,16 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import GlassBox from "../components/GlassBox";
 import { formatCurrency } from "../utils/format";
+import { useAuth } from "../context/AuthContext";
+import { Mail, Sparkles } from "lucide-react";
+import EmailDraftModal from "../components/EmailDraftModal";
 
 export default function TripDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [trip, setTrip] = useState(null);
+  const [showEmailModal, setShowEmailModal] = useState(false);
 
   useEffect(() => {
     api.get("/trips").then(res => {
@@ -35,6 +40,16 @@ export default function TripDetail() {
         <h1 className="text-2xl font-bold">{trip.trip_code}</h1>
 
         <div className="flex gap-3">
+          {user?.role === 'admin' && (
+            <button
+              onClick={() => setShowEmailModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 shadow-lg shadow-purple-500/20 transition-all font-medium text-sm"
+            >
+              <Sparkles size={16} />
+              Draft Email
+            </button>
+          )}
+
           <button
             onClick={() => navigate(`/trips/edit/${trip.id}`)}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all font-medium"
@@ -114,6 +129,13 @@ export default function TripDetail() {
             <PodGallery podPath={trip.pod_path} />
           </Section>
         </div>
+
+        {showEmailModal && (
+          <EmailDraftModal
+            tripId={trip.id}
+            onClose={() => setShowEmailModal(false)}
+          />
+        )}
       </div>
     </div>
   );
