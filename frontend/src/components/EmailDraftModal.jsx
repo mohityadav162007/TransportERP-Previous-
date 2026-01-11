@@ -108,7 +108,7 @@ export default function EmailDraftModal({ tripId, onClose }) {
                             </div>
 
                             <p className="text-[10px] text-center text-gray-500 mt-4">
-                                Powered by OpenAI. The draft will open in your Gmail compose window for review.
+                                Powered by Google Gemini. The draft will open in your Gmail compose window for review.
                             </p>
                         </form>
                     </div>
