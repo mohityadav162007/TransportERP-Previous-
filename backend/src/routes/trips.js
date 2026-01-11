@@ -35,18 +35,22 @@ router.post("/:id/pod", async (req, res) => {
     const rawPath = tripResult.rows[0].pod_path;
 
     if (rawPath) {
-      try {
-        const parsed = JSON.parse(rawPath);
-        if (Array.isArray(parsed)) {
-          currentPods = parsed;
-        } else if (typeof parsed === 'string') {
-          currentPods = [parsed];
-        } else {
-          currentPods = [rawPath];
+      if (typeof rawPath === 'string') {
+        try {
+          const parsed = JSON.parse(rawPath);
+          if (Array.isArray(parsed)) {
+            currentPods = parsed;
+          } else if (parsed) {
+            currentPods = [parsed];
+          }
+        } catch (e) {
+          // Robust split for legacy comma-separated strings
+          currentPods = rawPath.split(',')
+            .map(u => u.trim())
+            .filter(Boolean);
         }
-      } catch (e) {
-        // If JSON parse fails, treat as single string
-        currentPods = [rawPath];
+      } else if (Array.isArray(rawPath)) {
+        currentPods = rawPath;
       }
     }
 

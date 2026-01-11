@@ -116,11 +116,23 @@ function PodGallery({ podPath }) {
   let pods = [];
 
   if (podPath) {
-    try {
-      pods = JSON.parse(podPath);
-      if (!Array.isArray(pods)) pods = [podPath];
-    } catch (e) {
-      pods = [podPath];
+    if (typeof podPath === 'string') {
+      try {
+        // Try parsing as JSON first (handles ["url1", "url2"] format)
+        const parsed = JSON.parse(podPath);
+        if (Array.isArray(parsed)) {
+          pods = parsed;
+        } else if (parsed) {
+          pods = [parsed];
+        }
+      } catch (e) {
+        // If not valid JSON, it's likely a comma-separated string
+        pods = podPath.split(',')
+          .map(url => url.trim())
+          .filter(Boolean);
+      }
+    } else if (Array.isArray(podPath)) {
+      pods = podPath;
     }
   }
 
