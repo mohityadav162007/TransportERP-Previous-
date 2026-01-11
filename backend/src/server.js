@@ -14,6 +14,7 @@ import paymentHistoryRouter from "./routes/paymentHistory.js";
 import mastersRouter from "./routes/masters.js";
 import expensesRouter from "./routes/expenses.js";
 import authenticateToken from "./middleware/authMiddleware.js";
+import adminRouter from "./routes/admin.js";
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use("/api/reports", authenticateToken, reportsRouter);
 app.use("/api/payment-history", authenticateToken, paymentHistoryRouter);
 app.use("/api/masters", authenticateToken, mastersRouter);
 app.use("/api/expenses", authenticateToken, expensesRouter);
+app.use("/api/admin", authenticateToken, adminRouter);
 
 app.get("/api/health", async (req, res) => {
   try {

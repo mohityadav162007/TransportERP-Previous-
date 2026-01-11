@@ -32,6 +32,10 @@ export default function Header() {
     { name: "Daily Expenses", path: "/expenses" },
   ];
 
+  if (user?.role === 'admin') {
+    navLinks.push({ name: "Admin Panel", path: "/admin-panel" });
+  }
+
   return (
     <header className="bg-white/5 backdrop-blur-md sticky top-0 z-50 border-b border-white/10">
       <div className="px-6 py-3 flex items-center justify-between">

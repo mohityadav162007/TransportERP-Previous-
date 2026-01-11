@@ -14,6 +14,7 @@ import PaymentHistory from "./pages/PaymentHistory";
 import DailyExpenses from "./pages/DailyExpenses";
 import PartyDetail from "./pages/PartyDetail";
 import MotorOwnerDetail from "./pages/MotorOwnerDetail";
+import AdminPanel from "./pages/AdminPanel";
 
 import Login from "./pages/Login";
 import PrivateRoute from "./components/PrivateRoute";
@@ -130,6 +131,14 @@ export default function App() {
             <PrivateRoute>
               <Layout>
                 <MotorOwnerDetail />
+              </Layout>
+            </PrivateRoute>
+          } />
+
+          <Route path="/admin-panel" element={
+            <PrivateRoute>
+              <Layout>
+                <AdminPanel />
               </Layout>
             </PrivateRoute>
           } />
