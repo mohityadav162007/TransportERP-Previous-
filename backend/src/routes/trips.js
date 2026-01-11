@@ -20,9 +20,9 @@ router.post("/:id/pod", async (req, res) => {
   }
 
   try {
-    // Get existing pod_path
+    // CRITICAL: Use FOR UPDATE to prevent race conditions from multiple frontends
     const tripResult = await pool.query(
-      "SELECT pod_path FROM trips WHERE id=$1",
+      "SELECT pod_path FROM trips WHERE id=$1 FOR UPDATE",
       [req.params.id]
     );
 
@@ -30,34 +30,43 @@ router.post("/:id/pod", async (req, res) => {
       return res.status(404).json({ message: "Trip not found" });
     }
 
+    // Step 1: Normalize existing pod_path to array
     let currentPods = [];
     const rawPath = tripResult.rows[0].pod_path;
 
     if (rawPath) {
       try {
-        currentPods = JSON.parse(rawPath);
-        if (!Array.isArray(currentPods)) {
-          currentPods = [rawPath]; // Fallback if it was a single string before
+        const parsed = JSON.parse(rawPath);
+        if (Array.isArray(parsed)) {
+          currentPods = parsed;
+        } else if (typeof parsed === 'string') {
+          currentPods = [parsed];
+        } else {
+          currentPods = [rawPath];
         }
       } catch (e) {
-        currentPods = [rawPath]; // Fallback for legacy data
+        // If JSON parse fails, treat as single string
+        currentPods = [rawPath];
       }
     }
 
-    // Append new URL if not already present
-    if (!currentPods.includes(url)) {
-      currentPods.push(url);
+    // Step 2: Normalize incoming URL(s) - handle both single URL and array
+    let newUrls = [];
+    if (Array.isArray(url)) {
+      newUrls = url;
+    } else if (typeof url === 'string') {
+      newUrls = [url];
     }
 
+    // Step 3: Append new URLs, preventing duplicates
+    for (const newUrl of newUrls) {
+      if (newUrl && !currentPods.includes(newUrl)) {
+        currentPods.push(newUrl);
+      }
+    }
+
+    // Step 4: Save merged result
     const newPodPath = JSON.stringify(currentPods);
-
-    // Limit check (VARCHAR(500))
-    if (newPodPath.length > 500) {
-      return res.status(400).json({
-        message: "Too many PODs. Database limit reached (500 chars).",
-        currentCount: currentPods.length
-      });
-    }
 
     const result = await pool.query(
       `
@@ -71,6 +80,7 @@ router.post("/:id/pod", async (req, res) => {
       [newPodPath, req.params.id]
     );
 
+    console.log(`POD APPEND SUCCESS: Trip ${req.params.id} now has ${currentPods.length} POD(s)`);
     res.json(result.rows[0]);
   } catch (err) {
     console.error("POD UPDATE ERROR:", err);

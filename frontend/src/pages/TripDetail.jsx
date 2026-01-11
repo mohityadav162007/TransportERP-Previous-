@@ -113,7 +113,6 @@ export default function TripDetail() {
 }
 
 function PodGallery({ podPath }) {
-  const [selectedIndex, setSelectedIndex] = useState(null);
   let pods = [];
 
   if (podPath) {
@@ -124,29 +123,6 @@ function PodGallery({ podPath }) {
       pods = [podPath];
     }
   }
-
-  // Filter images for gallery navigation
-  const images = pods.filter(url => !url.toLowerCase().endsWith(".pdf"));
-
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (selectedIndex === null) return;
-      if (e.key === "ArrowRight") navigateGallery(1);
-      if (e.key === "ArrowLeft") navigateGallery(-1);
-      if (e.key === "Escape") setSelectedIndex(null);
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedIndex, images]);
-
-  const navigateGallery = (direction) => {
-    setSelectedIndex((prev) => {
-      const nextIndex = prev + direction;
-      if (nextIndex < 0) return images.length - 1;
-      if (nextIndex >= images.length) return 0;
-      return nextIndex;
-    });
-  };
 
   const getThumbnail = (url) => {
     if (url.toLowerCase().endsWith(".pdf")) {
@@ -173,92 +149,22 @@ function PodGallery({ podPath }) {
             <div
               key={index}
               className="group relative aspect-square bg-white/5 border border-white/10 rounded-xl overflow-hidden cursor-pointer hover:border-blue-500/50 transition-all"
-              onClick={() => {
-                if (isPdf) {
-                  window.open(url, "_blank");
-                } else {
-                  const imgIndex = images.indexOf(url);
-                  setSelectedIndex(imgIndex);
-                }
-              }}
+              onClick={() => window.open(url, "_blank")}
             >
               <img
                 src={getThumbnail(url)}
                 alt={`POD ${index + 1}`}
                 className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ${isPdf ? "p-4 object-contain" : ""}`}
               />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-center p-2">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-white bg-blue-600 px-2 py-1 rounded">
-                  {isPdf ? "Open PDF" : "View"}
+                  {isPdf ? "Open PDF" : "Open Image"}
                 </span>
               </div>
             </div>
           );
         })}
       </div>
-
-      {selectedIndex !== null && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md"
-          onClick={() => setSelectedIndex(null)}
-        >
-          {/* Controls Overlay */}
-          <div className="absolute inset-0 flex flex-col pointer-events-none">
-            {/* Header */}
-            <div className="flex justify-between items-center p-6 bg-gradient-to-b from-black/50 to-transparent pointer-events-auto">
-              <span className="text-white/70 font-bold uppercase tracking-widest text-sm">
-                Image {selectedIndex + 1} of {images.length}
-              </span>
-              <button
-                className="p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedIndex(null);
-                }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-              </button>
-            </div>
-
-            {/* Navigation Buttons */}
-            <div className="flex-1 flex items-center justify-between px-6">
-              <button
-                className="p-4 bg-white/5 hover:bg-white/15 rounded-full text-white transition-all backdrop-blur-sm pointer-events-auto disabled:opacity-20"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigateGallery(-1);
-                }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-              </button>
-              <button
-                className="p-4 bg-white/5 hover:bg-white/15 rounded-full text-white transition-all backdrop-blur-sm pointer-events-auto disabled:opacity-20"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigateGallery(1);
-                }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-              </button>
-            </div>
-
-            {/* Bottom Info (Optional) */}
-            <div className="p-6 text-center text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">
-              Use arrow keys to navigate • Esc to close
-            </div>
-          </div>
-
-          {/* Actual Image */}
-          <div className="relative max-w-[90vw] max-h-[85vh] flex items-center justify-center pointer-events-none">
-            <img
-              src={images[selectedIndex]}
-              className="max-w-full max-h-[85vh] object-contain rounded shadow-2xl transition-all duration-300"
-              alt={`Full view ${selectedIndex + 1}`}
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -26,7 +26,7 @@ CREATE TABLE trips (
   weight VARCHAR(50),
   remark TEXT,
   pod_status VARCHAR(50) DEFAULT 'PENDING',
-  pod_path VARCHAR(500),
+  pod_path TEXT,
   is_deleted BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
