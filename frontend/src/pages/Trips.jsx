@@ -43,13 +43,13 @@ export default function Trips() {
     }
 
     if (filters.paymentStatus !== "ALL" &&
-      t.party_payment_status !== filters.paymentStatus) {
+      t.payment_status !== filters.paymentStatus) {
       return false;
     }
 
     if (filters.podStatus !== "ALL") {
       const isReceived = t.pod_status === "UPLOADED" || t.pod_status === "RECEIVED";
-      if (filters.podStatus === "UPLOADED" && !isReceived) {
+      if (filters.podStatus === "RECEIVED" && !isReceived) {
         return false;
       }
       if (filters.podStatus === "PENDING" && isReceived) {
@@ -192,7 +192,7 @@ export default function Trips() {
           onChange={e => setFilters({ ...filters, podStatus: e.target.value })}
         >
           <option value="ALL">All PODs</option>
-          <option value="UPLOADED">Received/Uploaded</option>
+          <option value="RECEIVED">Received</option>
           <option value="PENDING">Pending</option>
         </select>
         <input className="bg-white/10 border border-white/10 rounded px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -219,8 +219,8 @@ export default function Trips() {
               >
                 <div className="flex justify-between mb-4">
                   <div className="font-semibold text-white">{trip.trip_code}</div>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full ${(trip.pod_status === 'UPLOADED' || trip.pod_status === 'RECEIVED') ? 'bg-teal-500/20 text-teal-400' : 'bg-rose-500/20 text-rose-400'}`}>
-                    POD: {trip.pod_status}
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${(trip.pod_status === 'UPLOADED' || trip.pod_status === 'RECEIVED') ? 'bg-green-500/20 text-green-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                    POD: {(trip.pod_status === 'UPLOADED' || trip.pod_status === 'RECEIVED') ? 'RECEIVED' : 'PENDING'}
                   </span>
                 </div>
 
@@ -233,7 +233,7 @@ export default function Trips() {
                 </div>
 
                 <div className="flex justify-between items-end mt-auto">
-                  <div className={`font-bold text-lg ${trip.party_payment_status === 'PAID' ? "text-green-400" : "text-rose-400"}`}>
+                  <div className={`font-bold text-lg ${(trip.payment_status || trip.party_payment_status) === 'PAID' ? "text-green-400" : "text-rose-400"}`}>
                     ₹{formatCurrency(trip.party_balance)}
                   </div>
 

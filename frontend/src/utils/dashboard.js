@@ -36,8 +36,9 @@ export function getWeeklyTrips(trips) {
   }));
 }
 
-export function statusSplit(trips, key, successValue, labels = ["Completed", "Pending"]) {
-  const success = trips.filter(t => t[key] === successValue).length;
+export function statusSplit(trips, key, successValues, labels = ["Completed", "Pending"]) {
+  const values = Array.isArray(successValues) ? successValues : [successValues];
+  const success = trips.filter(t => values.includes(t[key])).length;
   const pending = trips.length - success;
 
   return [

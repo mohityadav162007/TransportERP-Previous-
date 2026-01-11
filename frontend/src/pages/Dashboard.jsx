@@ -42,7 +42,7 @@ export default function Dashboard() {
   const totalPartyFreight = sum(trips, "party_freight");
   const totalGaadiFreight = sum(trips, "gaadi_freight");
 
-  const pendingPODCount = trips.filter(t => t.pod_status !== "UPLOADED").length;
+  const pendingPODCount = trips.filter(t => t.pod_status !== "UPLOADED" && t.pod_status !== "RECEIVED").length;
   const pendingPaymentsCount = trips.filter(t => t.payment_status === "UNPAID").length;
 
   const balanceDue = sum(trips, "party_balance");
@@ -51,14 +51,14 @@ export default function Dashboard() {
 
   // Charts
   const profitTrend = monthlyProfit(trips);
-  const podData = statusSplit(trips, "pod_status", "UPLOADED", ["Uploaded", "Pending"]);
+  const podData = statusSplit(trips, "pod_status", ["UPLOADED", "RECEIVED"], ["Received", "Pending"]);
   const paymentData = statusSplit(trips, "payment_status", "PAID", ["Received", "Pending"]);
   const weeklyTrips = getWeeklyTrips(trips);
 
   // Tables
   const combinedRecentTrips = [...trips].sort((a, b) => new Date(b.loading_date) - new Date(a.loading_date));
   const recentTripsList = combinedRecentTrips.slice(0, 5);
-  const pendingPODList = trips.filter(t => t.pod_status !== "UPLOADED").slice(0, 5);
+  const pendingPODList = trips.filter(t => t.pod_status !== "UPLOADED" && t.pod_status !== "RECEIVED").slice(0, 5);
   const pendingPaymentList = trips.filter(t => t.payment_status === "UNPAID").slice(0, 5);
 
 
@@ -144,7 +144,7 @@ export default function Dashboard() {
                       startAngle={90}
                       endAngle={-270}
                     >
-                      <Cell fill="#14b8a6" /> {/* Teal for Uploaded */}
+                      <Cell fill="#14b8a6" /> {/* Teal for Received/Uploaded */}
                       <Cell fill="#f43f5e" /> {/* Red for Pending */}
                     </Pie>
                     <Tooltip />
@@ -159,7 +159,7 @@ export default function Dashboard() {
                 <div className="flex justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-teal-500"></span>
-                    <span className="text-gray-300">Uploaded</span>
+                    <span className="text-gray-300">Received</span>
                   </div>
                   <span className="font-bold text-white">{podData[0].value}</span>
                 </div>

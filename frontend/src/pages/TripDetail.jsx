@@ -103,7 +103,14 @@ export default function TripDetail() {
         </Section>
 
         <div className="md:col-span-2">
-          <Section title="POD Documents">
+          <Section title={
+            <div className="flex justify-between items-center w-full">
+              <span>POD Documents</span>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${(trip.pod_status === 'UPLOADED' || trip.pod_status === 'RECEIVED') ? 'bg-green-500/20 text-green-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                {(trip.pod_status === 'UPLOADED' || trip.pod_status === 'RECEIVED') ? 'RECEIVED' : 'PENDING'}
+              </span>
+            </div>
+          }>
             <PodGallery podPath={trip.pod_path} />
           </Section>
         </div>
