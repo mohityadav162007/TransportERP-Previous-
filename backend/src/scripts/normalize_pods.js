@@ -35,10 +35,15 @@ const normalizePods = async () => {
             // Convert back to JSON string for storage
             const jsonValue = JSON.stringify(normalized);
 
-            // Update only if changed or if it wasn't valid JSON before
-            // We force update to ensure everything is a valid JSON array string
+            // Update pod_path AND pod_status to maintain consistency
             await pool.query(
-                "UPDATE trips SET pod_path = $1 WHERE id = $2",
+                `UPDATE trips SET 
+                    pod_path = $1,
+                    pod_status = CASE 
+                        WHEN $1 IS NOT NULL AND $1 != '[]' THEN 'RECEIVED'
+                        ELSE 'PENDING'
+                    END
+                WHERE id = $2`,
                 [jsonValue, id]
             );
             updatedCount++;

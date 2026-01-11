@@ -320,8 +320,9 @@ router.put("/:id", async (req, res) => {
         profit=$21,
         weight=$22,
         remark=$23,
+        pod_status=$24,
         updated_at=now()
-      WHERE id=$24 AND is_deleted=false
+      WHERE id=$25 AND is_deleted=false
       RETURNING *
       `,
       [
@@ -348,6 +349,7 @@ router.put("/:id", async (req, res) => {
         profit,
         t.weight || null,
         t.remark || null,
+        oldTrip.pod_status, // Preserve existing pod_status
         req.params.id
       ]
     );
