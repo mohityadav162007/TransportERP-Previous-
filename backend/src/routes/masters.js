@@ -69,4 +69,16 @@ router.get("/motor-owners/:id", async (req, res) => {
     }
 });
 
+// Get All Own Vehicles (for frontend validation)
+router.get("/own-vehicles", async (req, res) => {
+    try {
+        const result = await pool.query("SELECT vehicle_number FROM own_vehicles");
+        const vehicles = result.rows.map(row => row.vehicle_number);
+        res.json(vehicles);
+    } catch (err) {
+        console.error("FETCH OWN VEHICLES ERROR:", err);
+        res.status(500).json({ error: "Failed to fetch own vehicles" });
+    }
+});
+
 export default router;

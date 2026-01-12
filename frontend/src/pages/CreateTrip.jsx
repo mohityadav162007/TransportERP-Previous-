@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import api from "../services/api";
 import GlassBox from "../components/GlassBox";
+import { useEffect } from "react";
 
 export default function CreateTrip() {
   const navigate = useNavigate();
@@ -46,6 +47,25 @@ export default function CreateTrip() {
 
     party_payment_status: "UNPAID"
   });
+
+  const [ownVehicles, setOwnVehicles] = useState([]);
+  const [isOwnVehicle, setIsOwnVehicle] = useState(false);
+
+  useEffect(() => {
+    api.get("/masters/own-vehicles")
+      .then(res => setOwnVehicles(res.data))
+      .catch(err => console.error("Failed to load own vehicles", err));
+  }, []);
+
+  useEffect(() => {
+    if (!form.vehicle_number) {
+      setIsOwnVehicle(false);
+      return;
+    }
+    const cleanNumber = form.vehicle_number.replace(/\s+/g, '').toLowerCase();
+    const match = ownVehicles.some(v => v.replace(/\s+/g, '').toLowerCase() === cleanNumber);
+    setIsOwnVehicle(match);
+  }, [form.vehicle_number, ownVehicles]);
 
   /* AUTO-FILL LOGIC */
   const handlePartyBlur = async () => {
@@ -200,6 +220,11 @@ export default function CreateTrip() {
                   className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white placeholder-gray-500 transition-all"
                   onChange={handleChange}
                 />
+                {isOwnVehicle && (
+                  <span className="text-xs text-green-400 font-medium px-1 block mt-1">
+                    ✓ Recognized as Own Vehicle
+                  </span>
+                )}
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Driver Phone</label>
@@ -211,67 +236,73 @@ export default function CreateTrip() {
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Motor Owner Name</label>
-                <input
-                  name="motor_owner_name"
-                  placeholder="Owner Full Name"
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white placeholder-gray-500 transition-all"
-                  onChange={handleChange}
-                  onBlur={handleOwnerBlur}
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Motor Owner Number</label>
-                <input
-                  name="motor_owner_number"
-                  placeholder="Owner Contact Number"
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white placeholder-gray-500 transition-all"
-                  onChange={handleChange}
-                />
-              </div>
+              {!isOwnVehicle && (
+                <>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Motor Owner Name</label>
+                    <input
+                      name="motor_owner_name"
+                      placeholder="Owner Full Name"
+                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white placeholder-gray-500 transition-all"
+                      onChange={handleChange}
+                      onBlur={handleOwnerBlur}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Motor Owner Number</label>
+                    <input
+                      name="motor_owner_number"
+                      placeholder="Owner Contact Number"
+                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white placeholder-gray-500 transition-all"
+                      onChange={handleChange}
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </section>
 
           {/* Financials */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Gaadi (Cost) */}
-            <div className="bg-rose-500/5 p-6 rounded-xl border border-rose-500/10">
-              <div className="flex items-center gap-2 mb-4 text-rose-400">
-                <Wallet size={18} />
-                <h2 className="font-semibold uppercase tracking-wider text-xs">Gaadi (Cost)</h2>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">GAADI FREIGHT</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-2 text-gray-500">₹</span>
-                    <input
-                      type="number"
-                      name="gaadi_freight"
-                      placeholder="0.00"
-                      className="w-full pl-8 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500/50 text-white placeholder-gray-600 transition-all"
-                      onChange={handleChange}
-                    />
-                  </div>
+            {/* Gaadi (Cost) - Hidden for Own Vehicles */}
+            {!isOwnVehicle && (
+              <div className="bg-rose-500/5 p-6 rounded-xl border border-rose-500/10">
+                <div className="flex items-center gap-2 mb-4 text-rose-400">
+                  <Wallet size={18} />
+                  <h2 className="font-semibold uppercase tracking-wider text-xs">Gaadi (Cost)</h2>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">GAADI ADVANCE</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-2 text-gray-500">₹</span>
-                    <input
-                      type="number"
-                      name="gaadi_advance"
-                      placeholder="0.00"
-                      className="w-full pl-8 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500/50 text-white placeholder-gray-600 transition-all"
-                      onChange={handleChange}
-                    />
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">GAADI FREIGHT</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-2 text-gray-500">₹</span>
+                      <input
+                        type="number"
+                        name="gaadi_freight"
+                        placeholder="0.00"
+                        className="w-full pl-8 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500/50 text-white placeholder-gray-600 transition-all"
+                        onChange={handleChange}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">GAADI ADVANCE</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-2 text-gray-500">₹</span>
+                      <input
+                        type="number"
+                        name="gaadi_advance"
+                        placeholder="0.00"
+                        className="w-full pl-8 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500/50 text-white placeholder-gray-600 transition-all"
+                        onChange={handleChange}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
             {/* Party (Income) */}
             <div className="bg-blue-500/5 p-6 rounded-xl border border-blue-500/10">

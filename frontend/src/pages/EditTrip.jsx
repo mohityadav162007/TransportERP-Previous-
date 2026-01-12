@@ -9,7 +9,15 @@ export default function EditTrip() {
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
 
+  const [ownVehicles, setOwnVehicles] = useState([]);
+  const [isOwnVehicle, setIsOwnVehicle] = useState(false);
+
   useEffect(() => {
+    // Fetch own vehicles list
+    api.get("/masters/own-vehicles")
+      .then(res => setOwnVehicles(res.data))
+      .catch(err => console.error("Failed to load own vehicles", err));
+
     api.get("/trips").then(res => {
       const trip = res.data.find(t => t.id == id);
       if (!trip) return navigate("/trips");
@@ -19,6 +27,16 @@ export default function EditTrip() {
       setForm(trip);
     });
   }, [id, navigate]);
+
+  useEffect(() => {
+    if (!form || !form.vehicle_number) {
+      setIsOwnVehicle(false);
+      return;
+    }
+    const cleanNumber = form.vehicle_number.replace(/\s+/g, '').toLowerCase();
+    const match = ownVehicles.some(v => v.replace(/\s+/g, '').toLowerCase() === cleanNumber);
+    setIsOwnVehicle(match);
+  }, [form?.vehicle_number, ownVehicles]);
 
   if (!form) return <div className="text-white p-8 italic">Loading trip...</div>;
 
@@ -68,24 +86,44 @@ export default function EditTrip() {
         </Section>
 
         <Section title="Vehicle & Driver Management">
-          <Input label="Vehicle Number" name="vehicle_number" value={form.vehicle_number} onChange={change} required />
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Vehicle Number</label>
+            <input
+              name="vehicle_number"
+              value={form.vehicle_number}
+              onChange={change}
+              required
+              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+            />
+            {isOwnVehicle && (
+              <span className="text-xs text-green-400 font-medium px-1 block mt-1">
+                ✓ Recognized as Own Vehicle
+              </span>
+            )}
+          </div>
           <Input label="Driver Mobile" name="driver_number" value={form.driver_number || ""} onChange={change} />
-          <Input label="Motor Owner" name="motor_owner_name" value={form.motor_owner_name || ""} onChange={change} />
-          <Input label="Owner Mobile" name="motor_owner_number" value={form.motor_owner_number || ""} onChange={change} />
+          {!isOwnVehicle && (
+            <>
+              <Input label="Motor Owner" name="motor_owner_name" value={form.motor_owner_name || ""} onChange={change} />
+              <Input label="Owner Mobile" name="motor_owner_number" value={form.motor_owner_number || ""} onChange={change} />
+            </>
+          )}
         </Section>
 
-        <Section title="Financials: Motor Owner Cost">
-          <Input label="Agreed Freight (₹)" type="number" name="gaadi_freight" value={form.gaadi_freight} onChange={change} />
-          <Input label="Advance Paid (₹)" type="number" name="gaadi_advance" value={form.gaadi_advance} onChange={change} />
-          <div className="md:col-span-2">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">Payout Status</label>
-            <select name="gaadi_balance_status" value={form.gaadi_balance_status || "UNPAID"} onChange={change}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50">
-              <option value="UNPAID">Balance: UNPAID</option>
-              <option value="PAID">Balance: PAID</option>
-            </select>
-          </div>
-        </Section>
+        {!isOwnVehicle && (
+          <Section title="Financials: Motor Owner Cost">
+            <Input label="Agreed Freight (₹)" type="number" name="gaadi_freight" value={form.gaadi_freight} onChange={change} />
+            <Input label="Advance Paid (₹)" type="number" name="gaadi_advance" value={form.gaadi_advance} onChange={change} />
+            <div className="md:col-span-2">
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">Payout Status</label>
+              <select name="gaadi_balance_status" value={form.gaadi_balance_status || "UNPAID"} onChange={change}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50">
+                <option value="UNPAID">Balance: UNPAID</option>
+                <option value="PAID">Balance: PAID</option>
+              </select>
+            </div>
+          </Section>
+        )}
 
         <Section title="Financials: Party Billing">
           <Input label="Party Name" name="party_name" value={form.party_name} onChange={change} required />
