@@ -263,17 +263,26 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
-    const { deleted } = req.query;
+    const { deleted, own } = req.query;
 
-    const result = await pool.query(
-      `
-      SELECT *
-      FROM trips
-      WHERE is_deleted = $1
-      ORDER BY loading_date DESC
-      `,
-      [deleted === "true"]
-    );
+    let query = `
+      SELECT t.*, 
+        CASE WHEN ov.vehicle_number IS NOT NULL THEN true ELSE false END as is_admin_own
+      FROM trips t
+      LEFT JOIN own_vehicles ov ON LOWER(t.vehicle_number) = LOWER(ov.vehicle_number)
+      WHERE t.is_deleted = $1
+    `;
+
+    const params = [deleted === "true"];
+    let paramIndex = 2;
+
+    if (own === "true") {
+      query += ` AND ov.vehicle_number IS NOT NULL`;
+    }
+
+    query += ` ORDER BY t.loading_date DESC`;
+
+    const result = await pool.query(query, params);
 
     res.json(result.rows);
   } catch (err) {

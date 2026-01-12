@@ -26,6 +26,7 @@ export default function Header() {
   const navLinks = [
     { name: "Dashboard", path: "/" },
     { name: "Trips", path: "/trips" },
+    { name: "Own Trips", path: "/own-trips" },
     { name: "Analytics", path: "/analytics" },
     { name: "Reports", path: "/reports" },
     { name: "Payment History", path: "/payment-history" },

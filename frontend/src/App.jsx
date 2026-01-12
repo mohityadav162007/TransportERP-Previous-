@@ -12,6 +12,7 @@ import Analytics from "./pages/Analytics";
 import Reports from "./pages/Reports";
 import PaymentHistory from "./pages/PaymentHistory";
 import DailyExpenses from "./pages/DailyExpenses";
+import OwnTrips from "./pages/OwnTrips";
 import PartyDetail from "./pages/PartyDetail";
 import MotorOwnerDetail from "./pages/MotorOwnerDetail";
 import AdminPanel from "./pages/AdminPanel";
@@ -115,6 +116,14 @@ export default function App() {
             <PrivateRoute>
               <Layout>
                 <DailyExpenses />
+              </Layout>
+            </PrivateRoute>
+          } />
+
+          <Route path="/own-trips" element={
+            <PrivateRoute>
+              <Layout>
+                <OwnTrips />
               </Layout>
             </PrivateRoute>
           } />
