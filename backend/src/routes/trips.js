@@ -106,16 +106,46 @@ router.post("/", async (req, res) => {
       t.motor_owner_number
     );
 
-    const gaadi_freight = Number(t.gaadi_freight || 0);
-    const gaadi_advance = Number(t.gaadi_advance || 0);
+    const isOwn = await isOwnVehicle(t.vehicle_number);
+
+    let gaadi_freight = Number(t.gaadi_freight || 0);
+    let gaadi_advance = Number(t.gaadi_advance || 0);
     const party_freight = Number(t.party_freight || 0);
     const party_advance = Number(t.party_advance || 0);
     const tds = Number(t.tds || 0);
-    const himmali = Number(t.himmali || 0);
+    let himmali = Number(t.himmali || 0);
+
+    // ADMIN OWN VEHICLE LOGIC
+    if (isOwn) {
+      gaadi_freight = 0;
+      gaadi_advance = 0;
+      himmali = 0; // As per rules, ignore fields logically
+    }
 
     const gaadi_balance = gaadi_freight - gaadi_advance;
+    // For own vehicle: gaadi_freight=0, so profit = party_freight - tds
+    // For market vehicle: profit = party_freight - gaadi_freight
+    // But since gaadi_freight is 0 for own, the formula holds: profit = party_freight - (0) => too high?
+    // Wait, requirement: "Profit = Party Freight - TDS". Normal profit = Party Freight - Gaadi Freight. 
+    // If we set Gaadi Freight to 0, Profit becomes Party Freight.
+    // If TDS is involved, usually Profit = (Party - TDS) - Gaadi. 
+    // Let's stick to standard formula if variables are adjusted.
+    // Standard: profit = party_freight - gaadi_freight.
+    // If own vehicle, gaadi_freight is 0. So profit = party_freight. 
+    // Requirement says: "Profit = Party Freight - TDS".
+    // So we need to subtract TDS manually or adjust the formula?
+    // Let's look at existing calc: const profit = party_freight - gaadi_freight;
+    // Does it account for TDS? Usually Profit is Net Income vs Cost.
+    // If I just set gaadi_freight=0, profit = party_freight. 
+    // The requirement says "Profit = Party Freight - TDS".
+    // So for OWN vehicle, I should set profit explicitly.
+
+    let profit = party_freight - gaadi_freight;
+    if (isOwn) {
+      profit = party_freight - tds;
+    }
+
     const party_balance = party_freight - party_advance - tds - himmali;
-    const profit = party_freight - gaadi_freight;
 
     const result = await pool.query(
       `
@@ -283,16 +313,29 @@ router.put("/:id", async (req, res) => {
 
     const oldTrip = oldTripResult.rows[0];
 
-    const gaadi_freight = Number(t.gaadi_freight || 0);
-    const gaadi_advance = Number(t.gaadi_advance || 0);
+    const isOwn = await isOwnVehicle(t.vehicle_number);
+
+    let gaadi_freight = Number(t.gaadi_freight || 0);
+    let gaadi_advance = Number(t.gaadi_advance || 0);
     const party_freight = Number(t.party_freight || 0);
     const party_advance = Number(t.party_advance || 0);
     const tds = Number(t.tds || 0);
-    const himmali = Number(t.himmali || 0);
+    let himmali = Number(t.himmali || 0);
+
+    // ADMIN OWN VEHICLE LOGIC
+    if (isOwn) {
+      gaadi_freight = 0;
+      gaadi_advance = 0;
+      himmali = 0;
+    }
 
     const gaadi_balance = gaadi_freight - gaadi_advance;
     const party_balance = party_freight - party_advance - tds - himmali;
-    const profit = party_freight - gaadi_freight;
+
+    let profit = party_freight - gaadi_freight;
+    if (isOwn) {
+      profit = party_freight - tds;
+    }
 
     const result = await pool.query(
       `
@@ -534,5 +577,22 @@ async function ensureMasters(pName, pMobile, mName, mMobile) {
   } catch (err) {
     console.error("Error auto-managing masters:", err.message);
     // Do not fail the trip creation/update if master creation fails
+  }
+}
+
+/* ================================
+   HELPER: CHECK OWN VEHICLE
+================================ */
+async function isOwnVehicle(vehicleNumber) {
+  if (!vehicleNumber) return false;
+  try {
+    const result = await pool.query(
+      "SELECT 1 FROM own_vehicles WHERE LOWER(vehicle_number) = LOWER($1)",
+      [vehicleNumber.trim()]
+    );
+    return result.rows.length > 0;
+  } catch (err) {
+    console.error("Error checking own vehicle:", err);
+    return false; // Fail safe to normal behavior
   }
 }
