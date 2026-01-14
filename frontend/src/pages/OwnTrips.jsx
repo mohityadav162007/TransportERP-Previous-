@@ -1,8 +1,6 @@
-import { useEffect, useState, useCallback } from "react";
-import api from "../services/api";
-import { useNavigate } from "react-router-dom";
 import GlassBox from "../components/GlassBox";
 import { formatCurrency, formatDate } from "../utils/format";
+import { Plus, Edit2, Trash2, RotateCcw } from "lucide-react";
 
 export default function OwnTrips() {
     const navigate = useNavigate();
@@ -280,10 +278,17 @@ export default function OwnTrips() {
                                     <div className="flex gap-4">
                                         {!trip.is_deleted && (
                                             <label
-                                                className="text-blue-400 cursor-pointer hover:text-blue-300 text-xs font-bold uppercase tracking-wider"
+                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 rounded-lg cursor-pointer transition-all text-[11px] font-bold uppercase tracking-wider border border-blue-500/20"
                                                 onClick={e => e.stopPropagation()}
                                             >
-                                                {uploadingId === trip.id ? "Uploading..." : "+ Add POD"}
+                                                {uploadingId === trip.id ? (
+                                                    <span className="animate-pulse">Uploading...</span>
+                                                ) : (
+                                                    <>
+                                                        <Plus size={14} />
+                                                        Add POD
+                                                    </>
+                                                )}
                                                 <input type="file" hidden
                                                     onChange={e => uploadPOD(trip, e.target.files[0])}
                                                 />
@@ -291,30 +296,33 @@ export default function OwnTrips() {
                                         )}
                                     </div>
 
-                                    <div className="flex gap-4 text-xs font-bold uppercase tracking-wider">
+                                    <div className="flex gap-3 text-[11px] font-bold uppercase tracking-wider">
                                         {!trip.is_deleted ? (
                                             <>
                                                 <button
-                                                    className="text-gray-400 hover:text-white transition-colors"
+                                                    className="flex items-center gap-1 px-2 py-1.5 text-gray-400 hover:text-white transition-colors"
                                                     onClick={e => {
                                                         e.stopPropagation();
                                                         navigate(`/trips/edit/${trip.id}`);
                                                     }}
                                                 >
+                                                    <Edit2 size={13} />
                                                     Edit
                                                 </button>
                                                 <button
-                                                    className="text-rose-500/80 hover:text-rose-400 transition-colors"
+                                                    className="flex items-center gap-1 px-2 py-1.5 text-rose-500/70 hover:text-rose-400 transition-colors"
                                                     onClick={e => softDelete(e, trip.id)}
                                                 >
+                                                    <Trash2 size={13} />
                                                     Delete
                                                 </button>
                                             </>
                                         ) : (
                                             <button
-                                                className="text-green-400 hover:text-green-300 transition-colors"
+                                                className="flex items-center gap-1 px-3 py-1.5 bg-green-500/10 text-green-400 hover:bg-green-500/20 rounded-lg transition-colors border border-green-500/20"
                                                 onClick={e => restore(e, trip.id)}
                                             >
+                                                <RotateCcw size={13} />
                                                 Restore
                                             </button>
                                         )}
