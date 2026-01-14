@@ -219,12 +219,12 @@ export default function Trips() {
                 className={`cursor-pointer h-full flex flex-col ${trip.is_deleted ? "opacity-50" : ""}`}
               >
                 {/* TOP SECTION */}
-                <div className="flex justify-between items-start mb-4">
+                <div className="flex justify-between items-start mb-2">
                   <div className="flex flex-col">
-                    <div className="font-bold text-white text-lg tracking-tight group-hover:text-blue-400 transition-colors">
+                    <div className="font-bold text-white text-lg tracking-tight">
                       {trip.trip_code}
                     </div>
-                    <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                    <div className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">
                       {trip.party_name}
                     </div>
                   </div>
@@ -233,99 +233,70 @@ export default function Trips() {
                   </span>
                 </div>
 
-                {/* ROUTE & DATE SECTION */}
-                <div className="grid grid-cols-2 gap-4 mb-4 border-y border-white/5 py-3">
-                  <div className="border-r border-white/5 pr-2">
-                    <div className="text-[10px] text-gray-500 font-bold uppercase mb-1">From</div>
-                    <div className="text-sm text-white font-medium truncate" title={trip.from_location}>
+                {/* ROUTE & DATE SECTION - Aligned Split */}
+                <div className="flex justify-between mb-2">
+                  <div className="flex flex-col">
+                    <div className="text-sm text-white font-bold uppercase truncate">
                       {trip.from_location}
                     </div>
-                    <div className="text-[10px] text-gray-400 mt-1">
+                    <div className="text-[10px] text-gray-500 font-medium lowercase">
                       {formatDate(trip.loading_date)}
                     </div>
                   </div>
-                  <div className="pl-2">
-                    <div className="text-[10px] text-gray-500 font-bold uppercase mb-1">To</div>
-                    <div className="text-sm text-white font-medium truncate" title={trip.to_location}>
+                  <div className="flex flex-col items-end text-right">
+                    <div className="text-sm text-white font-bold uppercase truncate">
                       {trip.to_location}
                     </div>
-                    <div className="text-[10px] text-gray-400 mt-1">
+                    <div className="text-[10px] text-gray-500 font-medium lowercase">
                       {formatDate(trip.unloading_date)}
                     </div>
                   </div>
                 </div>
 
                 {/* VEHICLE SECTION */}
-                <div className="mb-4">
-                  <div className="text-[10px] text-gray-500 font-bold uppercase mb-1">Vehicle</div>
-                  <div className="text-sm text-gray-300 font-medium">
-                    {trip.vehicle_number}
-                  </div>
+                <div className="mb-4 text-[11px] text-gray-500 font-medium italic">
+                  Vehicle: {trip.vehicle_number}
                 </div>
 
-                {/* FINANCIAL SECTION */}
-                <div className="mb-6">
-                  <div className="text-[10px] text-gray-500 font-bold uppercase mb-1">Party Balance</div>
-                  <div className="flex items-center gap-2">
-                    <div className={`font-bold text-2xl transition-all ${(trip.payment_status || trip.party_payment_status) === 'PAID' ? "text-green-400" : "text-rose-400"}`}>
-                      ₹{formatCurrency(trip.party_balance)}
-                    </div>
-                    <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ${trip.party_payment_status === 'PAID' ? 'bg-green-500/10 text-green-500' : 'bg-rose-500/10 text-rose-500'}`}>
-                      {trip.party_payment_status}
-                    </span>
-                  </div>
-                </div>
-
-                {/* ACTIONS */}
-                <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-auto">
-                  <div className="flex gap-4">
-                    {!trip.is_deleted && (
-                      <label
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 rounded-lg cursor-pointer transition-all text-[11px] font-bold uppercase tracking-wider border border-blue-500/20"
-                        onClick={e => e.stopPropagation()}
-                      >
-                        {uploadingId === trip.id ? (
-                          <span className="animate-pulse">Uploading...</span>
-                        ) : (
-                          <>
-                            <Plus size={14} />
-                            Add POD
-                          </>
-                        )}
-                        <input type="file" hidden
-                          onChange={e => uploadPOD(trip, e.target.files[0])}
-                        />
-                      </label>
-                    )}
+                {/* FINANCIAL & ACTIONS SECTION */}
+                <div className="flex items-end justify-between mt-auto">
+                  <div className={`font-bold text-2xl ${(trip.payment_status || trip.party_payment_status) === 'PAID' ? "text-green-400" : "text-rose-400"}`}>
+                    ₹{formatCurrency(trip.party_balance)}
                   </div>
 
-                  <div className="flex gap-3 text-[11px] font-bold uppercase tracking-wider">
+                  <div className="flex gap-4 text-[11px] font-bold uppercase tracking-wider">
                     {!trip.is_deleted ? (
                       <>
+                        <label
+                          className="text-blue-400 cursor-pointer hover:text-blue-300"
+                          onClick={e => e.stopPropagation()}
+                        >
+                          {uploadingId === trip.id ? "Uploading..." : "Add POD"}
+                          <input type="file" hidden
+                            onChange={e => uploadPOD(trip, e.target.files[0])}
+                          />
+                        </label>
                         <button
-                          className="flex items-center gap-1 px-2 py-1.5 text-gray-400 hover:text-white transition-colors"
+                          className="text-gray-400 hover:text-white"
                           onClick={e => {
                             e.stopPropagation();
                             navigate(`/trips/edit/${trip.id}`);
                           }}
                         >
-                          <Edit2 size={13} />
                           Edit
                         </button>
                         <button
-                          className="flex items-center gap-1 px-2 py-1.5 text-rose-500/70 hover:text-rose-400 transition-colors"
+                          className="text-rose-500/80 hover:text-rose-400"
                           onClick={e => softDelete(e, trip.id)}
                         >
-                          <Trash2 size={13} />
                           Delete
                         </button>
                       </>
                     ) : (
                       <button
-                        className="flex items-center gap-1 px-3 py-1.5 bg-green-500/10 text-green-400 hover:bg-green-500/20 rounded-lg transition-colors border border-green-500/20"
+                        className="text-green-400 hover:text-green-300"
                         onClick={e => restore(e, trip.id)}
                       >
-                        <RotateCcw size={13} />
                         Restore
                       </button>
                     )}
