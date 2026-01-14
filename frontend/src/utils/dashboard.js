@@ -18,14 +18,28 @@ export function groupByDate(trips) {
 
 export function getWeeklyTrips(trips) {
   const dayMap = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  // Initialize with 0
   const counts = { "Mon": 0, "Tue": 0, "Wed": 0, "Thu": 0, "Fri": 0, "Sat": 0, "Sun": 0 };
+
+  // Calculate start (Monday) and end (Sunday) of current week
+  const now = new Date();
+  const monday = new Date(now);
+  const currentDay = now.getDay();
+  // Adjust to Monday: if Sunday (0), go back 6 days; if others, go to day 1.
+  const diffToMonday = now.getDate() - currentDay + (currentDay === 0 ? -6 : 1);
+  monday.setDate(diffToMonday);
+  monday.setHours(0, 0, 0, 0);
+
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  sunday.setHours(23, 59, 59, 999);
 
   trips.forEach(t => {
     const d = new Date(t.loading_date);
-    const day = dayMap[d.getDay()];
-    if (counts[day] !== undefined) {
-      counts[day]++;
+    if (d >= monday && d <= sunday) {
+      const day = dayMap[d.getDay()];
+      if (counts[day] !== undefined) {
+        counts[day]++;
+      }
     }
   });
 
