@@ -239,7 +239,7 @@ export default function OwnTrips() {
                                         <div className="text-sm text-white font-bold uppercase truncate">
                                             {trip.from_location}
                                         </div>
-                                        <div className="text-[10px] text-gray-500 font-medium lowercase">
+                                        <div className="text-xs text-gray-500 font-medium lowercase">
                                             {formatDate(trip.loading_date)}
                                         </div>
                                     </div>
@@ -247,14 +247,14 @@ export default function OwnTrips() {
                                         <div className="text-sm text-white font-bold uppercase truncate">
                                             {trip.to_location}
                                         </div>
-                                        <div className="text-[10px] text-gray-500 font-medium lowercase">
+                                        <div className="text-xs text-gray-500 font-medium lowercase">
                                             {formatDate(trip.unloading_date)}
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* VEHICLE SECTION */}
-                                <div className="mb-4 text-[11px] text-gray-500 font-medium italic">
+                                <div className="mb-4 text-sm text-gray-500 font-medium italic">
                                     Vehicle: {trip.vehicle_number}
                                 </div>
 
