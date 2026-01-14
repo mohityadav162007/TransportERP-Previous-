@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
 import GlassBox from "../components/GlassBox";
-import { formatCurrency } from "../utils/format";
+import { formatCurrency, formatDate } from "../utils/format";
 
 export default function OwnTrips() {
     const navigate = useNavigate();
@@ -217,44 +217,85 @@ export default function OwnTrips() {
                                 onClick={() => navigate(`/trips/${trip.id}`)}
                                 className={`cursor-pointer h-full flex flex-col ${trip.is_deleted ? "opacity-50" : ""}`}
                             >
-                                <div className="flex justify-between mb-4">
-                                    <div className="font-semibold text-white">{trip.trip_code}</div>
-                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${(trip.pod_status === 'UPLOADED' || trip.pod_status === 'RECEIVED') ? 'bg-green-500/20 text-green-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                                {/* TOP SECTION */}
+                                <div className="flex justify-between items-start mb-4">
+                                    <div className="flex flex-col">
+                                        <div className="font-bold text-white text-lg tracking-tight group-hover:text-blue-400 transition-colors">
+                                            {trip.trip_code}
+                                        </div>
+                                        <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                                            {trip.party_name}
+                                        </div>
+                                    </div>
+                                    <span className={`text-[10px] px-2 py-1 rounded-full font-bold ${(trip.pod_status === 'UPLOADED' || trip.pod_status === 'RECEIVED') ? 'bg-green-500/20 text-green-400' : 'bg-rose-500/20 text-rose-400'}`}>
                                         POD: {(trip.pod_status === 'UPLOADED' || trip.pod_status === 'RECEIVED') ? 'RECEIVED' : 'PENDING'}
                                     </span>
                                 </div>
 
-                                <div className="text-sm text-gray-300 mb-2 font-medium">
-                                    {trip.from_location} → {trip.to_location}
-                                </div>
-
-                                <div className="text-xs text-gray-400 mb-4">
-                                    Vehicle: {trip.vehicle_number}
-                                </div>
-
-                                <div className="flex justify-between items-end mt-auto">
-                                    {/* For Own Vehicles, we show Party Balance/Payment only since Gaadi is 0/Irrelevant */}
-                                    <div className={`font-bold text-lg ${(trip.payment_status || trip.party_payment_status) === 'PAID' ? "text-green-400" : "text-rose-400"}`}>
-                                        ₹{formatCurrency(trip.party_balance)}
+                                {/* ROUTE & DATE SECTION */}
+                                <div className="grid grid-cols-2 gap-4 mb-4 border-y border-white/5 py-3">
+                                    <div className="border-r border-white/5 pr-2">
+                                        <div className="text-[10px] text-gray-500 font-bold uppercase mb-1">From</div>
+                                        <div className="text-sm text-white font-medium truncate" title={trip.from_location}>
+                                            {trip.from_location}
+                                        </div>
+                                        <div className="text-[10px] text-gray-400 mt-1">
+                                            {formatDate(trip.loading_date)}
+                                        </div>
                                     </div>
+                                    <div className="pl-2">
+                                        <div className="text-[10px] text-gray-500 font-bold uppercase mb-1">To</div>
+                                        <div className="text-sm text-white font-medium truncate" title={trip.to_location}>
+                                            {trip.to_location}
+                                        </div>
+                                        <div className="text-[10px] text-gray-400 mt-1">
+                                            {formatDate(trip.unloading_date)}
+                                        </div>
+                                    </div>
+                                </div>
 
-                                    <div className="flex gap-4 text-xs font-medium">
+                                {/* VEHICLE SECTION */}
+                                <div className="mb-4">
+                                    <div className="text-[10px] text-gray-500 font-bold uppercase mb-1">Vehicle</div>
+                                    <div className="text-sm text-gray-300 font-medium">
+                                        {trip.vehicle_number}
+                                    </div>
+                                </div>
+
+                                {/* FINANCIAL SECTION */}
+                                <div className="mb-6">
+                                    <div className="text-[10px] text-gray-500 font-bold uppercase mb-1">Party Balance</div>
+                                    <div className="flex items-center gap-2">
+                                        <div className={`font-bold text-2xl transition-all ${(trip.payment_status || trip.party_payment_status) === 'PAID' ? "text-green-400" : "text-rose-400"}`}>
+                                            ₹{formatCurrency(trip.party_balance)}
+                                        </div>
+                                        <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ${trip.party_payment_status === 'PAID' ? 'bg-green-500/10 text-green-500' : 'bg-rose-500/10 text-rose-500'}`}>
+                                            {trip.party_payment_status}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* ACTIONS */}
+                                <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-auto">
+                                    <div className="flex gap-4">
                                         {!trip.is_deleted && (
                                             <label
-                                                className="text-blue-400 cursor-pointer hover:underline"
+                                                className="text-blue-400 cursor-pointer hover:text-blue-300 text-xs font-bold uppercase tracking-wider"
                                                 onClick={e => e.stopPropagation()}
                                             >
-                                                {uploadingId === trip.id ? "Uploading..." : "Add POD"}
+                                                {uploadingId === trip.id ? "Uploading..." : "+ Add POD"}
                                                 <input type="file" hidden
                                                     onChange={e => uploadPOD(trip, e.target.files[0])}
                                                 />
                                             </label>
                                         )}
+                                    </div>
 
+                                    <div className="flex gap-4 text-xs font-bold uppercase tracking-wider">
                                         {!trip.is_deleted ? (
                                             <>
                                                 <button
-                                                    className="text-gray-300 hover:text-white"
+                                                    className="text-gray-400 hover:text-white transition-colors"
                                                     onClick={e => {
                                                         e.stopPropagation();
                                                         navigate(`/trips/edit/${trip.id}`);
@@ -263,7 +304,7 @@ export default function OwnTrips() {
                                                     Edit
                                                 </button>
                                                 <button
-                                                    className="text-rose-400 hover:text-rose-300"
+                                                    className="text-rose-500/80 hover:text-rose-400 transition-colors"
                                                     onClick={e => softDelete(e, trip.id)}
                                                 >
                                                     Delete
@@ -271,7 +312,7 @@ export default function OwnTrips() {
                                             </>
                                         ) : (
                                             <button
-                                                className="text-green-400 hover:text-green-300"
+                                                className="text-green-400 hover:text-green-300 transition-colors"
                                                 onClick={e => restore(e, trip.id)}
                                             >
                                                 Restore
