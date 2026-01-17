@@ -227,6 +227,11 @@ export default function Trips() {
                     <div className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">
                       {trip.party_name}
                     </div>
+                    {trip.apartment && (
+                      <div className="text-[10px] text-blue-300 font-medium uppercase tracking-wider mt-0.5">
+                        {trip.apartment}
+                      </div>
+                    )}
                   </div>
                   <span className={`text-[10px] px-2 py-1 rounded-full font-bold ${(trip.pod_status === 'UPLOADED' || trip.pod_status === 'RECEIVED') ? 'bg-green-500/20 text-green-400' : 'bg-rose-500/20 text-rose-400'}`}>
                     POD: {(trip.pod_status === 'UPLOADED' || trip.pod_status === 'RECEIVED') ? 'RECEIVED' : 'PENDING'}

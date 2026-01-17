@@ -59,6 +59,7 @@ export default function TripDetail() {
         </Section>
 
         <Section title="Route">
+          <Item label="Apartment" value={trip.apartment || "-"} />
           <Item label="From" value={trip.from_location} />
           <Item label="To" value={trip.to_location} />
         </Section>

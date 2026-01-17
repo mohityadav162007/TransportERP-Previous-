@@ -173,12 +173,14 @@ router.post("/", async (req, res) => {
         profit,
         weight,
         remark,
-        pod_status
+        pod_status,
+        apartment
       )
       VALUES (
         $1,$2,$3,$4,$5,$6,$7,$8,$9,
         $10,$11,$12,$13,$14,$15,$16,
-        $17,$18,$19,$20,$21,$22,$23,$24
+        $17,$18,$19,$20,$21,$22,$23,$24,
+        $25
       )
       RETURNING *
       `,
@@ -206,7 +208,8 @@ router.post("/", async (req, res) => {
         profit,
         t.weight || null,
         t.remark || null,
-        "PENDING"
+        "PENDING",
+        t.apartment || null
       ]
     );
 
@@ -373,8 +376,9 @@ router.put("/:id", async (req, res) => {
         weight=$22,
         remark=$23,
         pod_status=$24,
+        apartment=$25,
         updated_at=now()
-      WHERE id=$25 AND is_deleted=false
+      WHERE id=$26 AND is_deleted=false
       RETURNING *
       `,
       [
@@ -402,6 +406,7 @@ router.put("/:id", async (req, res) => {
         t.weight || null,
         t.remark || null,
         oldTrip.pod_status, // Preserve existing pod_status
+        t.apartment || null,
         req.params.id
       ]
     );
@@ -508,9 +513,11 @@ router.put("/:id", async (req, res) => {
 ================================ */
 
 router.delete("/:id", async (req, res) => {
-  await pool.query(`UPDATE trips SET is_deleted=true WHERE id=$1`, [
-    req.params.id
-  ]);
+  // Append _DEL to trip_code to free up the original code for sequence continuity
+  await pool.query(
+    `UPDATE trips SET is_deleted=true, trip_code=trip_code || '_DEL' WHERE id=$1`,
+    [req.params.id]
+  );
   // Sync soft delete with payment history
   await pool.query(`UPDATE payment_history SET is_deleted=true WHERE trip_id=$1`, [
     req.params.id
@@ -519,8 +526,9 @@ router.delete("/:id", async (req, res) => {
 });
 
 router.post("/:id/restore", async (req, res) => {
+  // Remove _DEL suffix to restore valid trip_code
   await pool.query(
-    `UPDATE trips SET is_deleted=false, updated_at=now() WHERE id=$1`,
+    `UPDATE trips SET is_deleted=false, trip_code=REPLACE(trip_code, '_DEL', ''), updated_at=now() WHERE id=$1`,
     [req.params.id]
   );
   // Sync restore with payment history
