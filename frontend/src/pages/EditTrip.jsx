@@ -81,7 +81,6 @@ export default function EditTrip() {
         </Section>
 
         <Section title="Logistics & Route">
-          <Input label="Apartment" name="apartment" value={form.apartment || ""} onChange={change} />
           <Input label="From Location" name="from_location" value={form.from_location} onChange={change} required />
           <Input label="To Location" name="to_location" value={form.to_location} onChange={change} required />
         </Section>

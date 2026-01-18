@@ -227,11 +227,6 @@ export default function Trips() {
                     <div className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">
                       {trip.party_name}
                     </div>
-                    {trip.apartment && (
-                      <div className="text-[10px] text-blue-300 font-medium uppercase tracking-wider mt-0.5">
-                        {trip.apartment}
-                      </div>
-                    )}
                   </div>
                   <span className={`text-[10px] px-2 py-1 rounded-full font-bold ${(trip.pod_status === 'UPLOADED' || trip.pod_status === 'RECEIVED') ? 'bg-green-500/20 text-green-400' : 'bg-rose-500/20 text-rose-400'}`}>
                     POD: {(trip.pod_status === 'UPLOADED' || trip.pod_status === 'RECEIVED') ? 'RECEIVED' : 'PENDING'}
@@ -298,12 +293,25 @@ export default function Trips() {
                         </button>
                       </>
                     ) : (
-                      <button
-                        className="text-green-400 hover:text-green-300"
-                        onClick={e => restore(e, trip.id)}
-                      >
-                        Restore
-                      </button>
+                      <>
+                        <button
+                          className="text-rose-500/80 hover:text-rose-400 mr-auto"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            if (!confirm("PERMANENTLY DELETE? This cannot be undone.")) return;
+                            await api.delete(`/trips/${trip.id}/permanent`);
+                            fetchTrips();
+                          }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                        <button
+                          className="text-green-400 hover:text-green-300"
+                          onClick={e => restore(e, trip.id)}
+                        >
+                          Restore
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>

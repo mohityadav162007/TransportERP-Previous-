@@ -21,7 +21,6 @@ export default function CreateTrip() {
   const [form, setForm] = useState({
     loading_date: "",
     unloading_date: "",
-    apartment: "",
 
     route_from: "",
     route_to: "",
@@ -106,7 +105,6 @@ export default function CreateTrip() {
       await api.post("/trips", {
         loading_date: form.loading_date,
         unloading_date: form.unloading_date || null,
-        apartment: form.apartment || null,
         from_location: form.route_from,
         to_location: form.route_to,
         vehicle_number: form.vehicle_number,
@@ -177,14 +175,6 @@ export default function CreateTrip() {
                 <input
                   type="date"
                   name="unloading_date"
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white transition-all"
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Apartment</label>
-                <input
-                  name="apartment"
                   className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white transition-all"
                   onChange={handleChange}
                 />

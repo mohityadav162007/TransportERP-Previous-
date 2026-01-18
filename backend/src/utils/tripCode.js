@@ -20,7 +20,7 @@ export async function generateTripCode(loading_date) {
     `
     SELECT trip_code
     FROM trips
-    WHERE trip_code LIKE $1
+    WHERE trip_code LIKE $1 AND is_deleted=false
     ORDER BY trip_code DESC
     LIMIT 1
     `,

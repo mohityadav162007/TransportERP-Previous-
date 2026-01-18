@@ -173,14 +173,12 @@ router.post("/", async (req, res) => {
         profit,
         weight,
         remark,
-        pod_status,
-        apartment
+        pod_status
       )
       VALUES (
         $1,$2,$3,$4,$5,$6,$7,$8,$9,
         $10,$11,$12,$13,$14,$15,$16,
-        $17,$18,$19,$20,$21,$22,$23,$24,
-        $25
+        $17,$18,$19,$20,$21,$22,$23,$24
       )
       RETURNING *
       `,
@@ -208,8 +206,7 @@ router.post("/", async (req, res) => {
         profit,
         t.weight || null,
         t.remark || null,
-        "PENDING",
-        t.apartment || null
+        "PENDING"
       ]
     );
 
@@ -376,9 +373,8 @@ router.put("/:id", async (req, res) => {
         weight=$22,
         remark=$23,
         pod_status=$24,
-        apartment=$25,
         updated_at=now()
-      WHERE id=$26 AND is_deleted=false
+      WHERE id=$25 AND is_deleted=false
       RETURNING *
       `,
       [
@@ -406,7 +402,6 @@ router.put("/:id", async (req, res) => {
         t.weight || null,
         t.remark || null,
         oldTrip.pod_status, // Preserve existing pod_status
-        t.apartment || null,
         req.params.id
       ]
     );
@@ -513,29 +508,206 @@ router.put("/:id", async (req, res) => {
 ================================ */
 
 router.delete("/:id", async (req, res) => {
-  // Append _DEL to trip_code to free up the original code for sequence continuity
-  await pool.query(
-    `UPDATE trips SET is_deleted=true, trip_code=trip_code || '_DEL' WHERE id=$1`,
-    [req.params.id]
-  );
-  // Sync soft delete with payment history
-  await pool.query(`UPDATE payment_history SET is_deleted=true WHERE trip_id=$1`, [
-    req.params.id
-  ]);
-  res.json({ message: "Trip deleted" });
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    // 1. Get the trip to be deleted
+    const targetRes = await client.query(
+      "SELECT id, trip_code, loading_date FROM trips WHERE id=$1 AND is_deleted=false FOR UPDATE",
+      [req.params.id]
+    );
+
+    if (targetRes.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ message: "Trip not found or already deleted" });
+    }
+
+    const trip = targetRes.rows[0];
+    const parts = trip.trip_code.split("_");
+    const prefix = `${parts[0]}_${parts[1]}`; // e.g., 2025_01
+    const targetNum = parseInt(parts[2]);
+
+    if (isNaN(targetNum)) {
+      throw new Error("Invalid trip code format for sliding logic");
+    }
+
+    // 2. Rename the deleted trip to get it out of the way
+    // trip_code becomes: 2025_01_012_DEL_<timestamp> to ensure uniqueness and history
+    const delParams = [req.params.id];
+    await client.query(
+      `UPDATE trips 
+       SET is_deleted=true, 
+           trip_code=trip_code || '_DEL_' || $2::text 
+       WHERE id=$1`,
+      [req.params.id, Date.now()]
+    );
+    // Also mark payment history as deleted for this trip
+    await client.query(`UPDATE payment_history SET is_deleted=true WHERE trip_id=$1`, [req.params.id]);
+
+
+    // 3. Shift subsequent active trips DOWN (e.g. 13 -> 12, 14 -> 13)
+    // Find all active trips with same prefix and number > targetNum
+    const subsequentRes = await client.query(
+      `SELECT id, trip_code 
+       FROM trips 
+       WHERE is_deleted=false 
+         AND trip_code LIKE $1 
+         AND length(trip_code) = 11
+       ORDER BY trip_code ASC
+       FOR UPDATE`,
+      [`${prefix}_%`]
+    );
+
+    for (const row of subsequentRes.rows) {
+      const p = row.trip_code.split("_");
+      const num = parseInt(p[2]);
+      if (num > targetNum) {
+        const newNum = num - 1;
+        const newCode = `${prefix}_${String(newNum).padStart(3, "0")}`;
+
+        // Update trip code
+        await client.query(
+          "UPDATE trips SET trip_code=$1 WHERE id=$2",
+          [newCode, row.id]
+        );
+
+        // Update related payment history trip_code
+        await client.query(
+          "UPDATE payment_history SET trip_code=$1 WHERE trip_id=$2",
+          [newCode, row.id]
+        );
+      }
+    }
+
+    await client.query("COMMIT");
+    res.json({ message: "Trip deleted and sequence updated" });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error("SOFT DELETE ERROR:", err);
+    res.status(500).json({ message: "Failed to delete trip", error: err.message });
+  } finally {
+    client.release();
+  }
 });
 
 router.post("/:id/restore", async (req, res) => {
-  // Remove _DEL suffix to restore valid trip_code
-  await pool.query(
-    `UPDATE trips SET is_deleted=false, trip_code=REPLACE(trip_code, '_DEL', ''), updated_at=now() WHERE id=$1`,
-    [req.params.id]
-  );
-  // Sync restore with payment history
-  await pool.query(`UPDATE payment_history SET is_deleted=false WHERE trip_id=$1`, [
-    req.params.id
-  ]);
-  res.json({ message: "Trip restored" });
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+
+    // 1. Get the deleted trip
+    const targetRes = await client.query(
+      "SELECT id, trip_code FROM trips WHERE id=$1 AND is_deleted=true FOR UPDATE",
+      [req.params.id]
+    );
+
+    if (targetRes.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ message: "Trip not found or not deleted" });
+    }
+
+    const trip = targetRes.rows[0];
+    // Expected format: YYYY_MM_XXX_DEL_<timestamp>
+    const parts = trip.trip_code.split("_");
+    if (parts.length < 5 || parts[3] !== "DEL") {
+      await client.query("ROLLBACK");
+      return res.status(400).json({ message: "Invalid deleted trip format, cannot restore sequence" });
+    }
+
+    const prefix = `${parts[0]}_${parts[1]}`;
+    const originalNum = parseInt(parts[2]);
+
+    if (isNaN(originalNum)) {
+      throw new Error("Invalid original trip number");
+    }
+
+    // 2. Shift conflicting active trips UP (e.g. 12 -> 13, 13 -> 14) to make room for 12
+    // We filter by trips >= originalNum
+    const subsequentRes = await client.query(
+      `SELECT id, trip_code 
+       FROM trips 
+       WHERE is_deleted=false 
+         AND trip_code LIKE $1 
+         AND length(trip_code) = 11
+       ORDER BY trip_code DESC
+       FOR UPDATE`,
+      [`${prefix}_%`]
+    );
+
+    // Process in descending order to avoid collision (move 15->16, then 14->15...)
+    for (const row of subsequentRes.rows) {
+      const p = row.trip_code.split("_");
+      const num = parseInt(p[2]);
+      if (num >= originalNum) {
+        const newNum = num + 1;
+        const newCode = `${prefix}_${String(newNum).padStart(3, "0")}`;
+
+        await client.query(
+          "UPDATE trips SET trip_code=$1 WHERE id=$2",
+          [newCode, row.id]
+        );
+
+        await client.query(
+          "UPDATE payment_history SET trip_code=$1 WHERE trip_id=$2",
+          [newCode, row.id]
+        );
+      }
+    }
+
+    // 3. Restore the deleted trip to its original code
+    const originalCode = `${prefix}_${String(originalNum).padStart(3, "0")}`;
+    await client.query(
+      `UPDATE trips 
+       SET is_deleted=false, 
+           trip_code=$1, 
+           updated_at=now() 
+       WHERE id=$2`,
+      [originalCode, req.params.id]
+    );
+
+    // Restore payment history
+    await client.query(
+      `UPDATE payment_history 
+       SET is_deleted=false,
+           trip_code=$1 
+       WHERE trip_id=$2`,
+      [originalCode, req.params.id]
+    );
+
+    await client.query("COMMIT");
+    res.json({ message: "Trip restored and sequence updated" });
+  } catch (err) {
+    await client.query("ROLLBACK");
+    console.error("RESTORE ERROR:", err);
+    res.status(500).json({ message: "Failed to restore trip", error: err.message });
+  } finally {
+    client.release();
+  }
+});
+
+router.delete("/:id/permanent", async (req, res) => {
+  try {
+    // Only allow if already soft deleted? Or just delete.
+    // Assuming deleting a 'Soft Deleted' trip, so its code is already out of the active sequence (renamed with _DEL).
+    // So no shifting needed.
+
+    // Safety check: Ensure it IS soft deleted first to avoid accidental active deletions without shifting?
+    const check = await pool.query("SELECT is_deleted FROM trips WHERE id=$1", [req.params.id]);
+    if (check.rows.length === 0) return res.status(404).json({ message: "Trip not found" });
+
+    if (!check.rows[0].is_deleted) {
+      return res.status(400).json({ message: "Cannot permanently delete an active trip. Soft delete it first." });
+    }
+
+    await pool.query("DELETE FROM payment_history WHERE trip_id=$1", [req.params.id]);
+    await pool.query("DELETE FROM trips WHERE id=$1", [req.params.id]);
+
+    res.json({ message: "Trip permanently deleted" });
+  } catch (err) {
+    console.error("PERMANENT DELETE ERROR:", err);
+    res.status(500).json({ message: "Failed to delete permanently" });
+  }
 });
 
 /* ================================
