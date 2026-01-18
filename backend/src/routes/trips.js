@@ -123,28 +123,7 @@ router.post("/", async (req, res) => {
     }
 
     const gaadi_balance = gaadi_freight - gaadi_advance;
-    // For own vehicle: gaadi_freight=0, so profit = party_freight - tds
-    // For market vehicle: profit = party_freight - gaadi_freight
-    // But since gaadi_freight is 0 for own, the formula holds: profit = party_freight - (0) => too high?
-    // Wait, requirement: "Profit = Party Freight - TDS". Normal profit = Party Freight - Gaadi Freight. 
-    // If we set Gaadi Freight to 0, Profit becomes Party Freight.
-    // If TDS is involved, usually Profit = (Party - TDS) - Gaadi. 
-    // Let's stick to standard formula if variables are adjusted.
-    // Standard: profit = party_freight - gaadi_freight.
-    // If own vehicle, gaadi_freight is 0. So profit = party_freight. 
-    // Requirement says: "Profit = Party Freight - TDS".
-    // So we need to subtract TDS manually or adjust the formula?
-    // Let's look at existing calc: const profit = party_freight - gaadi_freight;
-    // Does it account for TDS? Usually Profit is Net Income vs Cost.
-    // If I just set gaadi_freight=0, profit = party_freight. 
-    // The requirement says "Profit = Party Freight - TDS".
-    // So for OWN vehicle, I should set profit explicitly.
-
-    let profit = party_freight - gaadi_freight;
-    if (isOwn) {
-      profit = party_freight - tds;
-    }
-
+    const profit = isOwn ? party_freight - tds : party_freight - gaadi_freight;
     const party_balance = party_freight - party_advance - tds - himmali;
 
     const result = await pool.query(
@@ -340,11 +319,7 @@ router.put("/:id", async (req, res) => {
 
     const gaadi_balance = gaadi_freight - gaadi_advance;
     const party_balance = party_freight - party_advance - tds - himmali;
-
-    let profit = party_freight - gaadi_freight;
-    if (isOwn) {
-      profit = party_freight - tds;
-    }
+    const profit = isOwn ? party_freight - tds : party_freight - gaadi_freight;
 
     const result = await pool.query(
       `
@@ -514,7 +489,7 @@ router.delete("/:id", async (req, res) => {
 
     // 1. Get the trip to be deleted
     const targetRes = await client.query(
-      "SELECT id, trip_code, loading_date FROM trips WHERE id=$1 AND is_deleted=false FOR UPDATE",
+      "SELECT id, trip_code FROM trips WHERE id=$1 AND is_deleted=false FOR UPDATE",
       [req.params.id]
     );
 
@@ -523,18 +498,8 @@ router.delete("/:id", async (req, res) => {
       return res.status(404).json({ message: "Trip not found or already deleted" });
     }
 
-    const trip = targetRes.rows[0];
-    const parts = trip.trip_code.split("_");
-    const prefix = `${parts[0]}_${parts[1]}`; // e.g., 2025_01
-    const targetNum = parseInt(parts[2]);
-
-    if (isNaN(targetNum)) {
-      throw new Error("Invalid trip code format for sliding logic");
-    }
-
     // 2. Rename the deleted trip to get it out of the way
-    // trip_code becomes: 2025_01_012_DEL_<timestamp> to ensure uniqueness and history
-    const delParams = [req.params.id];
+    // trip_code becomes: 2025_01_012_DEL_<timestamp>
     await client.query(
       `UPDATE trips 
        SET is_deleted=true, 
@@ -542,46 +507,14 @@ router.delete("/:id", async (req, res) => {
        WHERE id=$1`,
       [req.params.id, Date.now()]
     );
+
     // Also mark payment history as deleted for this trip
     await client.query(`UPDATE payment_history SET is_deleted=true WHERE trip_id=$1`, [req.params.id]);
 
-
-    // 3. Shift subsequent active trips DOWN (e.g. 13 -> 12, 14 -> 13)
-    // Find all active trips with same prefix and number > targetNum
-    const subsequentRes = await client.query(
-      `SELECT id, trip_code 
-       FROM trips 
-       WHERE is_deleted=false 
-         AND trip_code LIKE $1 
-         AND length(trip_code) = 11
-       ORDER BY trip_code ASC
-       FOR UPDATE`,
-      [`${prefix}_%`]
-    );
-
-    for (const row of subsequentRes.rows) {
-      const p = row.trip_code.split("_");
-      const num = parseInt(p[2]);
-      if (num > targetNum) {
-        const newNum = num - 1;
-        const newCode = `${prefix}_${String(newNum).padStart(3, "0")}`;
-
-        // Update trip code
-        await client.query(
-          "UPDATE trips SET trip_code=$1 WHERE id=$2",
-          [newCode, row.id]
-        );
-
-        // Update related payment history trip_code
-        await client.query(
-          "UPDATE payment_history SET trip_code=$1 WHERE trip_id=$2",
-          [newCode, row.id]
-        );
-      }
-    }
+    // NOTE: Simplified logic - NO shifting of subsequent trips.
 
     await client.query("COMMIT");
-    res.json({ message: "Trip deleted and sequence updated" });
+    res.json({ message: "Trip deleted" });
   } catch (err) {
     await client.query("ROLLBACK");
     console.error("SOFT DELETE ERROR:", err);
@@ -608,13 +541,12 @@ router.post("/:id/restore", async (req, res) => {
     }
 
     const trip = targetRes.rows[0];
-    // Expected format: YYYY_MM_XXX_DEL_<timestamp> or YYYY_MM_XXX_DEL
     const parts = trip.trip_code.split("_");
-    // Parts is [2025, 01, 001, DEL, TIMESTAMP?]
-    // Check if parts[3] is DEL. Length must be at least 4.
+
+    // Support both new buffer style (parts=5) and old style (parts=4)
     if (parts.length < 4 || parts[3] !== "DEL") {
       await client.query("ROLLBACK");
-      return res.status(400).json({ message: "Invalid deleted trip format, cannot restore sequence" });
+      return res.status(400).json({ message: "Invalid deleted trip format, cannot restore" });
     }
 
     const prefix = `${parts[0]}_${parts[1]}`;
@@ -624,61 +556,44 @@ router.post("/:id/restore", async (req, res) => {
       throw new Error("Invalid original trip number");
     }
 
-    // 2. Shift conflicting active trips UP (e.g. 12 -> 13, 13 -> 14) to make room for 12
-    // We filter by trips >= originalNum
-    const subsequentRes = await client.query(
-      `SELECT id, trip_code 
-       FROM trips 
-       WHERE is_deleted=false 
-         AND trip_code LIKE $1 
-         AND length(trip_code) = 11
-       ORDER BY trip_code DESC
-       FOR UPDATE`,
-      [`${prefix}_%`]
+    const originalCode = `${prefix}_${String(originalNum).padStart(3, "0")}`;
+
+    // 2. CHECK IF SLOT IS OCCUPIED
+    const collisionRes = await client.query(
+      "SELECT 1 FROM trips WHERE trip_code=$1 AND is_deleted=false",
+      [originalCode]
     );
 
-    // Process in descending order to avoid collision (move 15->16, then 14->15...)
-    for (const row of subsequentRes.rows) {
-      const p = row.trip_code.split("_");
-      const num = parseInt(p[2]);
-      if (num >= originalNum) {
-        const newNum = num + 1;
-        const newCode = `${prefix}_${String(newNum).padStart(3, "0")}`;
+    if (collisionRes.rows.length > 0) {
+      // Collision detected! Use original_code with suffix OR fail.
+      const newCode = `${originalCode}_RES`;
 
-        await client.query(
-          "UPDATE trips SET trip_code=$1 WHERE id=$2",
-          [newCode, row.id]
-        );
+      await client.query(
+        `UPDATE trips SET is_deleted=false, trip_code=$1, updated_at=now() WHERE id=$2`,
+        [newCode, req.params.id]
+      );
+      await client.query(
+        `UPDATE payment_history SET is_deleted=false, trip_code=$1 WHERE trip_id=$2`,
+        [newCode, req.params.id]
+      );
 
-        await client.query(
-          "UPDATE payment_history SET trip_code=$1 WHERE trip_id=$2",
-          [newCode, row.id]
-        );
-      }
+      await client.query("COMMIT");
+      return res.json({ message: "Trip restored with suffix (slot occupied)" });
     }
 
-    // 3. Restore the deleted trip to its original code
-    const originalCode = `${prefix}_${String(originalNum).padStart(3, "0")}`;
+    // 3. Restore to original code (Slot is free)
     await client.query(
-      `UPDATE trips 
-       SET is_deleted=false, 
-           trip_code=$1, 
-           updated_at=now() 
-       WHERE id=$2`,
+      `UPDATE trips SET is_deleted=false, trip_code=$1, updated_at=now() WHERE id=$2`,
       [originalCode, req.params.id]
     );
 
-    // Restore payment history
     await client.query(
-      `UPDATE payment_history 
-       SET is_deleted=false,
-           trip_code=$1 
-       WHERE trip_id=$2`,
+      `UPDATE payment_history SET is_deleted=false, trip_code=$1 WHERE trip_id=$2`,
       [originalCode, req.params.id]
     );
 
     await client.query("COMMIT");
-    res.json({ message: "Trip restored and sequence updated" });
+    res.json({ message: "Trip restored" });
   } catch (err) {
     await client.query("ROLLBACK");
     console.error("RESTORE ERROR:", err);
@@ -690,11 +605,6 @@ router.post("/:id/restore", async (req, res) => {
 
 router.delete("/:id/permanent", async (req, res) => {
   try {
-    // Only allow if already soft deleted? Or just delete.
-    // Assuming deleting a 'Soft Deleted' trip, so its code is already out of the active sequence (renamed with _DEL).
-    // So no shifting needed.
-
-    // Safety check: Ensure it IS soft deleted first to avoid accidental active deletions without shifting?
     const check = await pool.query("SELECT is_deleted FROM trips WHERE id=$1", [req.params.id]);
     if (check.rows.length === 0) return res.status(404).json({ message: "Trip not found" });
 
