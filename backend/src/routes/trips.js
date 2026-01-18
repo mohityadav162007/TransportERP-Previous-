@@ -608,9 +608,11 @@ router.post("/:id/restore", async (req, res) => {
     }
 
     const trip = targetRes.rows[0];
-    // Expected format: YYYY_MM_XXX_DEL_<timestamp>
+    // Expected format: YYYY_MM_XXX_DEL_<timestamp> or YYYY_MM_XXX_DEL
     const parts = trip.trip_code.split("_");
-    if (parts.length < 5 || parts[3] !== "DEL") {
+    // Parts is [2025, 01, 001, DEL, TIMESTAMP?]
+    // Check if parts[3] is DEL. Length must be at least 4.
+    if (parts.length < 4 || parts[3] !== "DEL") {
       await client.query("ROLLBACK");
       return res.status(400).json({ message: "Invalid deleted trip format, cannot restore sequence" });
     }
