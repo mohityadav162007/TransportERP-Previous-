@@ -54,62 +54,68 @@ const LoadingSlip = ({ data = {}, slipNumber }) => {
                 </div>
             </div>
 
-            {/* Fields */}
-            <div className="flex flex-col gap-0 flex-grow px-2">
+            {/* Fields Table */}
+            <div className="flex-grow">
+                <table className="w-full border-collapse">
+                    <tbody>
+                        {/* To */}
+                        <tr className="border-b border-black">
+                            <td className="font-bold w-12 py-2 whitespace-nowrap align-bottom">To</td>
+                            <td className="font-bold text-blue-800 text-lg px-2 align-bottom font-mono" colSpan="3">
+                                {data.party_name || ''}
+                            </td>
+                        </tr>
 
-                {/* To */}
-                <div className="flex items-end border-b border-black py-2">
-                    <div className="w-10 flex-shrink-0 font-bold">To</div>
-                    <div className="flex-grow font-bold text-blue-800 text-lg px-2">
-                        {data.party_name || ''}
-                    </div>
-                </div>
+                        {/* From / To */}
+                        <tr className="border-b border-black">
+                            <td className="font-bold w-12 py-2 whitespace-nowrap align-bottom">From</td>
+                            <td className="font-bold text-blue-800 text-lg px-2 align-bottom border-r border-black font-mono w-[40%]">
+                                {data.from_location || ''}
+                            </td>
+                            <td className="font-bold w-8 px-2 py-2 whitespace-nowrap align-bottom">To</td>
+                            <td className="font-bold text-blue-800 text-lg px-2 align-bottom font-mono">
+                                {data.to_location || ''}
+                            </td>
+                        </tr>
 
-                {/* From / To (Dest) */}
-                <div className="flex items-end border-b border-black py-2">
-                    <div className="w-12 flex-shrink-0 font-bold">From</div>
-                    <div className="flex-grow font-bold text-blue-800 text-lg px-2 border-r border-black mr-2">
-                        {data.from_location || ''}
-                    </div>
-                    <div className="w-8 flex-shrink-0 font-bold pl-2">To</div>
-                    <div className="flex-grow font-bold text-blue-800 text-lg px-2">
-                        {data.to_location || ''}
-                    </div>
-                </div>
+                        {/* Vehicle No */}
+                        <tr className="border-b border-black">
+                            <td className="font-bold py-2 whitespace-nowrap align-bottom" colSpan="1">Vehicle No.</td>
+                            <td className="font-bold text-blue-800 text-lg px-2 align-bottom font-mono" colSpan="3">
+                                {data.vehicle_number || ''}
+                            </td>
+                        </tr>
 
-                {/* Vehicle No */}
-                <div className="flex items-end border-b border-black py-2">
-                    <div className="w-24 flex-shrink-0 font-bold">Vehicle No.</div>
-                    <div className="flex-grow font-bold text-blue-800 text-lg px-2">
-                        {data.vehicle_number || ''}
-                    </div>
-                </div>
+                        {/* Rate */}
+                        <tr className="border-b border-black">
+                            <td className="font-bold py-2 whitespace-nowrap align-bottom">Rate</td>
+                            <td className="font-bold text-blue-800 text-lg px-2 align-bottom font-mono" colSpan="3">
+                                {data.party_freight || ''}
+                            </td>
+                        </tr>
 
-                {/* Other Fields from prompt mapping */}
-                <div className="flex items-end border-b border-black py-2">
-                    <div className="w-24 flex-shrink-0 font-bold">Rate</div>
-                    <div className="flex-grow font-bold text-blue-800 text-lg px-2">
-                        {data.party_freight || ''}
-                    </div>
-                </div>
+                        {/* Weight */}
+                        <tr className="border-b border-black">
+                            <td className="font-bold py-2 whitespace-nowrap align-bottom">Weight</td>
+                            <td className="font-bold text-blue-800 text-lg px-2 align-bottom font-mono" colSpan="3">
+                                {data.weight ? data.weight + ' MT' : ''}
+                            </td>
+                        </tr>
 
-                <div className="flex items-end border-b border-black py-2">
-                    <div className="w-24 flex-shrink-0 font-bold">Weight</div>
-                    <div className="flex-grow font-bold text-blue-800 text-lg px-2">
-                        {data.weight ? data.weight + ' MT' : ''}
-                    </div>
-                </div>
+                        {/* Advance */}
+                        <tr className="border-b border-black">
+                            <td className="font-bold py-2 whitespace-nowrap align-bottom">Advance</td>
+                            <td className="align-bottom" colSpan="3"></td>
+                        </tr>
 
-                {/* Explicitly Mapped fields end. Rest are blank as per instruction "If a field is not explicitly mapped, it must remain blank" */}
-                <div className="flex items-end border-b border-black py-2">
-                    <div className="w-24 flex-shrink-0 font-bold">Advance</div>
-                    <div className="flex-grow"></div>
-                </div>
 
-                <div className="flex items-end border-b border-black py-2">
-                    <div className="w-24 flex-shrink-0 font-bold">Balance</div>
-                    <div className="flex-grow"></div>
-                </div>
+                        {/* Balance */}
+                        <tr className="border-b border-black">
+                            <td className="font-bold py-2 whitespace-nowrap align-bottom">Balance</td>
+                            <td className="align-bottom" colSpan="3"></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
             {/* Footer */}

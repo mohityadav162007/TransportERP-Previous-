@@ -65,77 +65,81 @@ const PaySlip = ({ data = {}, slipNumber }) => {
                 </div>
             </div>
 
-            {/* Fields */}
-            <div className="flex flex-col gap-0 flex-grow px-2">
+            {/* Fields Table */}
+            <div className="flex-grow">
+                <table className="w-full border-collapse">
+                    <tbody>
+                        {/* To */}
+                        <tr className="border-b border-black">
+                            <td className="font-bold w-12 py-2 whitespace-nowrap align-bottom">To</td>
+                            <td className="font-bold text-blue-800 text-lg px-2 align-bottom font-mono" colSpan="3">
+                                {data.party_name || ''}
+                            </td>
+                        </tr>
 
-                {/* To */}
-                <div className="flex items-end border-b border-black py-2">
-                    <div className="w-10 flex-shrink-0 font-bold">To</div>
-                    <div className="flex-grow font-bold text-blue-800 text-lg px-2">
-                        {data.motor_owner_name || ''}
-                    </div>
-                </div>
+                        {/* From / To */}
+                        <tr className="border-b border-black">
+                            <td className="font-bold w-12 py-2 whitespace-nowrap align-bottom">From</td>
+                            <td className="font-bold text-blue-800 text-lg px-2 align-bottom border-r border-black font-mono w-[40%]">
+                                {data.from_location || ''}
+                            </td>
+                            <td className="font-bold w-8 px-2 py-2 whitespace-nowrap align-bottom">To</td>
+                            <td className="font-bold text-blue-800 text-lg px-2 align-bottom font-mono">
+                                {data.to_location || ''}
+                            </td>
+                        </tr>
 
-                {/* From / To (Dest) */}
-                <div className="flex items-end border-b border-black py-2">
-                    <div className="w-12 flex-shrink-0 font-bold">From</div>
-                    <div className="flex-grow font-bold text-blue-800 text-lg px-2 border-r border-black mr-2">
-                        {data.from_location || ''}
-                    </div>
-                    <div className="w-8 flex-shrink-0 font-bold pl-2">To</div>
-                    <div className="flex-grow font-bold text-blue-800 text-lg px-2">
-                        {data.to_location || ''}
-                    </div>
-                </div>
+                        {/* Vehicle No */}
+                        <tr className="border-b border-black">
+                            <td className="font-bold py-2 whitespace-nowrap align-bottom" colSpan="1">Vehicle No.</td>
+                            <td className="font-bold text-blue-800 text-lg px-2 align-bottom font-mono" colSpan="3">
+                                {data.vehicle_number || ''}
+                            </td>
+                        </tr>
 
-                {/* Vehicle No */}
-                <div className="flex items-end border-b border-black py-2">
-                    <div className="w-24 flex-shrink-0 font-bold">Vehicle No.</div>
-                    <div className="flex-grow font-bold text-blue-800 text-lg px-2">
-                        {data.vehicle_number || ''}
-                    </div>
-                </div>
+                        {/* Driver Info */}
+                        <tr className="border-b border-black">
+                            <td className="font-bold py-2 whitespace-nowrap align-bottom">Driver Name</td>
+                            <td className="px-2 align-bottom border-r border-black font-mono">
+                                {/* Blank */}
+                            </td>
+                            <td className="font-bold px-2 py-2 whitespace-nowrap align-bottom">Driver No.</td>
+                            <td className="font-bold text-blue-800 text-lg px-2 align-bottom font-mono">
+                                {data.driver_number || ''}
+                            </td>
+                        </tr>
 
-                {/* Driver Info - Specific to Pay Slip */}
-                <div className="flex items-end border-b border-black py-2">
-                    <div className="w-24 flex-shrink-0 font-bold">Driver Name</div>
-                    <div className="flex-grow px-2 border-r border-black mr-2">
-                        {/* Blank as per mapping instructions */}
-                    </div>
-                    <div className="w-20 flex-shrink-0 font-bold pl-2">Driver No.</div>
-                    <div className="w-32 font-bold text-blue-800 text-lg px-2">
-                        {data.driver_number || ''}
-                    </div>
-                </div>
+                        {/* Rate / Advance */}
+                        <tr className="border-b border-black">
+                            <td className="font-bold py-2 whitespace-nowrap align-bottom">Rate</td>
+                            <td className="font-bold text-blue-800 text-lg px-2 align-bottom border-r border-black font-mono">
+                                {data.gaadi_freight || ''}
+                            </td>
+                            <td className="font-bold px-2 py-2 whitespace-nowrap align-bottom">Advance Rs.</td>
+                            <td className="align-bottom"></td>
+                        </tr>
 
-                {/* Other Fields from prompt mapping */}
-                <div className="flex items-end border-b border-black py-2">
-                    <div className="w-24 flex-shrink-0 font-bold">Rate</div>
-                    <div className="flex-grow font-bold text-blue-800 text-lg px-2">
-                        {data.gaadi_freight || ''}
-                    </div>
-                    {/* Per image, extra fields might be here but we leave blank if not mapped */}
-                    <div className="w-24 flex-shrink-0 font-bold border-l border-black pl-2">Advance Rs.</div>
-                    <div className="w-32"></div>
-                </div>
+                        {/* Weight */}
+                        <tr className="border-b border-black">
+                            <td className="font-bold py-2 whitespace-nowrap align-bottom">Weight</td>
+                            <td className="font-bold text-blue-800 text-lg px-2 align-bottom font-mono" colSpan="3">
+                                {data.weight ? data.weight + ' MT' : ''}
+                            </td>
+                        </tr>
 
-                <div className="flex items-end border-b border-black py-2">
-                    <div className="w-24 flex-shrink-0 font-bold">Weight</div>
-                    <div className="flex-grow font-bold text-blue-800 text-lg px-2">
-                        {data.weight ? data.weight + ' MT' : ''}
-                    </div>
-                </div>
+                        {/* Balance */}
+                        <tr className="border-b border-black">
+                            <td className="font-bold py-2 whitespace-nowrap align-bottom">Balance</td>
+                            <td className="align-bottom" colSpan="3"></td>
+                        </tr>
 
-                {/* Filler rows to match look */}
-                <div className="flex items-end border-b border-black py-2">
-                    <div className="w-24 flex-shrink-0 font-bold">Balance</div>
-                    <div className="flex-grow"></div>
-                </div>
-
-                <div className="flex items-end border-b border-black py-2">
-                    <div className="w-24 flex-shrink-0 font-bold">Remark</div>
-                    <div className="flex-grow"></div>
-                </div>
+                        {/* Remark */}
+                        <tr className="border-b border-black">
+                            <td className="font-bold py-2 whitespace-nowrap align-bottom">Remark</td>
+                            <td className="align-bottom" colSpan="3"></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
             {/* Footer */}
