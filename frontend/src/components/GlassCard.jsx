@@ -6,16 +6,19 @@ const GlassCard = ({
     className,
     interactive = false,
     onClick,
-    ...messageProps // Pass through other props like variants, initial, animate
+    initial = "hidden",
+    animate = "visible",
+    variants = FADE_IN_VARIANTS,
+    ...messageProps
 }) => {
     return (
         <motion.div
             className={`glass-panel ${interactive ? 'glass-panel-interactive' : ''} ${className || ''}`}
             onClick={onClick}
             style={{ padding: '24px' }}
-            initial="hidden"
-            animate="visible"
-            variants={FADE_IN_VARIANTS}
+            initial={initial}
+            animate={animate}
+            variants={variants}
             {...messageProps}
         >
             {children}

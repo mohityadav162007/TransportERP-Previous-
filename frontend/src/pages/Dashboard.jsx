@@ -94,15 +94,15 @@ export default function Dashboard() {
         initial="hidden"
         animate="visible"
       >
-        <KPICard title="Total Trips" value={totalTrips} icon={Truck} color="blue" variants={FADE_IN_VARIANTS} />
-        <KPICard title="Total Freight" value={`₹${formatCurrency(totalPartyFreight)}`} icon={DollarSign} color="emerald" variants={FADE_IN_VARIANTS} />
-        <KPICard title="Total Bhada" value={`₹${formatCurrency(totalGaadiFreight)}`} icon={Receipt} color="orange" variants={FADE_IN_VARIANTS} />
-        <KPICard title="Pending POD" value={pendingPODCount} icon={FileText} color="amber" alert={pendingPODCount > 0} variants={FADE_IN_VARIANTS} />
+        <KPICard title="Total Trips" value={totalTrips} icon={Truck} color="blue" />
+        <KPICard title="Total Freight" value={`₹${formatCurrency(totalPartyFreight)}`} icon={DollarSign} color="emerald" />
+        <KPICard title="Total Bhada" value={`₹${formatCurrency(totalGaadiFreight)}`} icon={Receipt} color="orange" />
+        <KPICard title="Pending POD" value={pendingPODCount} icon={FileText} color="amber" alert={pendingPODCount > 0} />
 
-        <KPICard title="Pending Payments" value={pendingPaymentsCount} icon={Coins} color="rose" alert={pendingPaymentsCount > 0} variants={FADE_IN_VARIANTS} />
-        <KPICard title="Balance Due" value={`₹${formatCurrency(balanceDue)}`} icon={Wallet} color="indigo" variants={FADE_IN_VARIANTS} />
-        <KPICard title="Payable" value={`₹${formatCurrency(payable)}`} icon={HandCoins} color="cyan" variants={FADE_IN_VARIANTS} />
-        <KPICard title="Monthly Profit" value={`₹${formatCurrency(totalProfit)}`} icon={CircleDollarSign} color="green" variants={FADE_IN_VARIANTS} />
+        <KPICard title="Pending Payments" value={pendingPaymentsCount} icon={Coins} color="rose" alert={pendingPaymentsCount > 0} />
+        <KPICard title="Balance Due" value={`₹${formatCurrency(balanceDue)}`} icon={Wallet} color="indigo" />
+        <KPICard title="Payable" value={`₹${formatCurrency(payable)}`} icon={HandCoins} color="cyan" />
+        <KPICard title="Monthly Profit" value={`₹${formatCurrency(totalProfit)}`} icon={CircleDollarSign} color="green" />
       </motion.div>
 
       {/* ===== ROW 3: PROFIT GRAPH + STATUS CHARTS ===== */}
