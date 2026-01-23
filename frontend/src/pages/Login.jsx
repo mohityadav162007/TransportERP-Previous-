@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import GlassBox from "../components/GlassBox";
+import GlassCard from "../components/GlassCard";
+import GlassInput from "../components/GlassInput";
+import GlassButton from "../components/GlassButton";
+import { ArrowRight, AlertCircle, Truck } from "lucide-react";
 
 export default function Login() {
     const [email, setEmail] = useState("");
@@ -23,58 +26,58 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] p-6">
-            <div className="max-w-md w-full">
-                <GlassBox>
-                    <div className="p-4">
-                        <div className="text-center mb-8">
-                            <h1 className="text-3xl font-bold text-white tracking-tight">Transport ERP</h1>
-                            <p className="text-gray-400 mt-2 text-sm uppercase tracking-widest font-medium">Enterprise Management</p>
-                        </div>
+        <div className="min-h-screen flex flex-col items-center justify-center p-6 relative">
+            {/* Decorative Elements */}
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl pointer-events-none -z-10 animate-pulse" />
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-600/10 rounded-full blur-3xl pointer-events-none -z-10" />
 
+            <div className="max-w-md w-full">
+                <div className="text-center mb-8">
+                    <div className="inline-flex p-4 rounded-2xl bg-gradient-to-br from-blue-500/20 to-indigo-600/20 mb-4 border border-white/10 shadow-xl backdrop-blur-sm">
+                        <Truck size={40} className="text-white drop-shadow-lg" />
+                    </div>
+                    <h1 className="text-4xl font-bold text-white tracking-tight mb-2 text-gradient">Transport ERP</h1>
+                    <p className="text-white/50 text-sm uppercase tracking-widest font-medium">Enterprise Management System</p>
+                </div>
+
+                <GlassCard className="p-8 backdrop-blur-xl">
+                    <form onSubmit={handleSubmit} className="space-y-6">
                         {error && (
-                            <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-lg text-sm flex items-center gap-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                            <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-300 rounded-xl text-sm flex items-center gap-3 animate-spring">
+                                <AlertCircle size={18} />
                                 {error}
                             </div>
                         )}
 
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Email Address</label>
-                                <input
-                                    type="email"
-                                    required
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white transition-all placeholder-gray-600"
-                                    placeholder="admin@transport.com"
-                                />
-                            </div>
+                        <GlassInput
+                            label="Email Address"
+                            type="email"
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="admin@transport.com"
+                        />
 
-                            <div className="space-y-1">
-                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Password</label>
-                                <input
-                                    type="password"
-                                    required
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white transition-all placeholder-gray-600"
-                                    placeholder="••••••••"
-                                />
-                            </div>
+                        <GlassInput
+                            label="Password"
+                            type="password"
+                            required
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="••••••••"
+                        />
 
-                            <button
-                                type="submit"
-                                className="w-full flex justify-center py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg shadow-lg shadow-blue-500/20 transition-all uppercase tracking-widest"
-                            >
-                                Sign In
-                            </button>
-                        </form>
-                    </div>
-                </GlassBox>
+                        <GlassButton
+                            type="submit"
+                            variant="primary"
+                            className="w-full justify-center py-3 text-sm uppercase tracking-widest shadow-lg shadow-blue-500/20"
+                        >
+                            Sign In <ArrowRight size={16} />
+                        </GlassButton>
+                    </form>
+                </GlassCard>
 
-                <div className="text-center mt-8 text-gray-500 text-xs">
+                <div className="text-center mt-8 text-white/30 text-xs">
                     &copy; 2026 Transport ERP System. All rights reserved.
                 </div>
             </div>

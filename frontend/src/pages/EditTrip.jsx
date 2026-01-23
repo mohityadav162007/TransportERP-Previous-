@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../services/api";
-import GlassBox from "../components/GlassBox";
+import GlassCard from "../components/GlassCard";
+import GlassInput from "../components/GlassInput";
+import GlassButton from "../components/GlassButton";
+import { CheckCircle, Calendar, MapPin, Truck, Wallet, User, FileText, ChevronRight, LayoutGrid } from "lucide-react";
+import Skeleton from "../components/Skeleton";
 
 export default function EditTrip() {
   const { id } = useParams();
@@ -38,7 +42,12 @@ export default function EditTrip() {
     setIsOwnVehicle(match);
   }, [form?.vehicle_number, ownVehicles]);
 
-  if (!form) return <div className="text-white p-8 italic">Loading trip...</div>;
+  if (!form) return (
+    <div className="max-w-5xl mx-auto space-y-6">
+      <Skeleton width="300px" height="40px" />
+      <GlassCard className="h-96" />
+    </div>
+  );
 
   const change = e => {
     const { name, value } = e.target;
@@ -71,118 +80,163 @@ export default function EditTrip() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto text-white">
-      <h1 className="text-2xl font-bold mb-8">Edit Trip: {form.trip_code}</h1>
-
-      <form onSubmit={submit} className="space-y-8">
-        <Section title="Trip Dates">
-          <Input label="Loading Date" type="date" name="loading_date" value={form.loading_date?.slice(0, 10)} onChange={change} required />
-          <Input label="Unloading Date" type="date" name="unloading_date" value={form.unloading_date?.slice(0, 10) || ""} onChange={change} />
-        </Section>
-
-        <Section title="Logistics & Route">
-          <Input label="From Location" name="from_location" value={form.from_location} onChange={change} required />
-          <Input label="To Location" name="to_location" value={form.to_location} onChange={change} required />
-        </Section>
-
-        <Section title="Vehicle & Driver Management">
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Vehicle Number</label>
-            <input
-              name="vehicle_number"
-              value={form.vehicle_number}
-              onChange={change}
-              required
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
-            />
-            {isOwnVehicle && (
-              <span className="text-xs text-green-400 font-medium px-1 block mt-1">
-                ✓ Recognized as Own Vehicle
-              </span>
-            )}
-          </div>
-          <Input label="Driver Mobile" name="driver_number" value={form.driver_number || ""} onChange={change} />
-          {!isOwnVehicle && (
-            <>
-              <Input label="Motor Owner" name="motor_owner_name" value={form.motor_owner_name || ""} onChange={change} />
-              <Input label="Owner Mobile" name="motor_owner_number" value={form.motor_owner_number || ""} onChange={change} />
-            </>
-          )}
-        </Section>
-
-        {!isOwnVehicle && (
-          <Section title="Financials: Motor Owner Cost">
-            <Input label="Agreed Freight (₹)" type="number" name="gaadi_freight" value={form.gaadi_freight} onChange={change} />
-            <Input label="Advance Paid (₹)" type="number" name="gaadi_advance" value={form.gaadi_advance} onChange={change} />
-            <div className="md:col-span-2">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">Payout Status</label>
-              <select name="gaadi_balance_status" value={form.gaadi_balance_status || "UNPAID"} onChange={change}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50">
-                <option value="UNPAID">Balance: UNPAID</option>
-                <option value="PAID">Balance: PAID</option>
-              </select>
-            </div>
-          </Section>
-        )}
-
-        <Section title="Financials: Party Billing">
-          <Input label="Party Name" name="party_name" value={form.party_name} onChange={change} required />
-          <Input label="Party Mobile" name="party_number" value={form.party_number || ""} onChange={change} />
-          <Input label="Total Freight (₹)" type="number" name="party_freight" value={form.party_freight} onChange={change} />
-          <Input label="Advance Received (₹)" type="number" name="party_advance" value={form.party_advance} onChange={change} />
-        </Section>
-
-        <Section title="Deductions & Adjustments">
-          <Input label="TDS (₹)" type="number" name="tds" value={form.tds} onChange={change} />
-          <Input label="Himmali (₹)" type="number" name="himmali" value={form.himmali} onChange={change} />
-          <div className="md:col-span-2">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">Collection Status</label>
-            <select name="payment_status" value={form.payment_status} onChange={change}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50">
-              <option value="UNPAID">Collection: UNPAID</option>
-              <option value="PAID">Collection: PAID</option>
-            </select>
-          </div>
-        </Section>
-
-        <Section title="Operational Metadata">
-          <Input label="Load Weight (MT)" type="number" name="weight" value={form.weight || ""} onChange={change} />
-          <div className="md:col-span-2">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">Internal Remarks</label>
-            <textarea name="remark" rows="3" value={form.remark || ""} onChange={change}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50" />
-          </div>
-        </Section>
-
-        <div className="flex gap-4 sticky bottom-4">
-          <button disabled={saving} className="flex-1 py-3 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-500/20 hover:bg-blue-700 disabled:opacity-50 transition-all font-bold uppercase tracking-widest text-sm">
-            {saving ? "Processing..." : "Commit Changes"}
-          </button>
-          <button type="button" onClick={() => navigate(-1)} className="px-8 py-3 bg-white/10 border border-white/10 rounded-xl hover:bg-white/20 transition-all font-bold uppercase tracking-widest text-sm text-gray-300">
-            Cancel
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-}
-
-function Section({ title, children }) {
-  return (
-    <GlassBox>
-      <div className="p-4">
-        <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6 py-2 border-b border-white/5">{title}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">{children}</div>
+    <div className="max-w-5xl mx-auto text-white pb-20 space-y-6">
+      {/* Breadcrumb */}
+      <div className="flex items-center text-sm text-gray-400">
+        <span>Dashboard</span>
+        <ChevronRight size={14} className="mx-1" />
+        <span onClick={() => navigate('/trips')} className="cursor-pointer hover:text-white">Trips</span>
+        <ChevronRight size={14} className="mx-1" />
+        <span className="font-medium text-white">Edit Trip</span>
       </div>
-    </GlassBox>
-  );
-}
 
-function Input({ label, ...props }) {
-  return (
-    <div className="space-y-1">
-      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{label}</label>
-      <input {...props} className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all" />
+      <h1 className="text-2xl font-bold mb-8">Edit Trip: <span className="text-blue-400">{form.trip_code}</span></h1>
+
+      <GlassCard className="p-6 md:p-8">
+        <form onSubmit={submit} className="space-y-8">
+
+          {/* Dates */}
+          <section>
+            <div className="flex items-center gap-2 mb-6 pb-2 border-b border-white/5">
+              <Calendar size={18} className="text-blue-400" />
+              <h2 className="font-semibold text-white uppercase tracking-wider text-sm">Trip Dates</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <GlassInput label="Loading Date" type="date" name="loading_date" value={form.loading_date?.slice(0, 10)} onChange={change} required />
+              <GlassInput label="Unloading Date" type="date" name="unloading_date" value={form.unloading_date?.slice(0, 10) || ""} onChange={change} />
+            </div>
+          </section>
+
+          {/* Logistics */}
+          <section>
+            <div className="flex items-center gap-2 mb-6 pb-2 border-b border-white/5">
+              <MapPin size={18} className="text-blue-400" />
+              <h2 className="font-semibold text-white uppercase tracking-wider text-sm">Logistics & Route</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <GlassInput label="From Location" name="from_location" value={form.from_location} onChange={change} required />
+              <GlassInput label="To Location" name="to_location" value={form.to_location} onChange={change} required />
+            </div>
+          </section>
+
+          {/* Vehicle */}
+          <section>
+            <div className="flex items-center gap-2 mb-6 pb-2 border-b border-white/5">
+              <Truck size={18} className="text-blue-400" />
+              <h2 className="font-semibold text-white uppercase tracking-wider text-sm">Vehicle & Driver Management</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="relative">
+                <GlassInput
+                  label="Vehicle Number"
+                  name="vehicle_number"
+                  value={form.vehicle_number}
+                  onChange={change}
+                  required
+                />
+                {isOwnVehicle && (
+                  <span className="absolute top-0 right-0 text-xs text-green-400 font-bold flex items-center gap-1 bg-green-500/10 px-2 py-0.5 rounded-full">
+                    <CheckCircle size={10} /> Own Vehicle
+                  </span>
+                )}
+              </div>
+              <GlassInput label="Driver Mobile" name="driver_number" value={form.driver_number || ""} onChange={change} />
+              {!isOwnVehicle && (
+                <>
+                  <GlassInput label="Motor Owner" name="motor_owner_name" value={form.motor_owner_name || ""} onChange={change} />
+                  <GlassInput label="Owner Mobile" name="motor_owner_number" value={form.motor_owner_number || ""} onChange={change} />
+                </>
+              )}
+            </div>
+          </section>
+
+          {/* Financials Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Motor Owner Cost */}
+            {!isOwnVehicle && (
+              <div className="bg-rose-500/5 p-6 rounded-xl border border-rose-500/10">
+                <div className="flex items-center gap-2 mb-4 text-rose-400">
+                  <Wallet size={18} />
+                  <h2 className="font-semibold uppercase tracking-wider text-xs">Financials: Motor Owner Cost</h2>
+                </div>
+                <div className="space-y-4">
+                  <GlassInput label="Agreed Freight (₹)" type="number" name="gaadi_freight" value={form.gaadi_freight} onChange={change} />
+                  <GlassInput label="Advance Paid (₹)" type="number" name="gaadi_advance" value={form.gaadi_advance} onChange={change} />
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Payout Status</label>
+                    <select
+                      name="gaadi_balance_status"
+                      value={form.gaadi_balance_status || "UNPAID"}
+                      onChange={change}
+                      className="glass-input [&>option]:text-black"
+                    >
+                      <option value="UNPAID">Balance: UNPAID</option>
+                      <option value="PAID">Balance: PAID</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Party Billing */}
+            <div className="bg-blue-500/5 p-6 rounded-xl border border-blue-500/10">
+              <div className="flex items-center gap-2 mb-4 text-blue-400">
+                <User size={18} />
+                <h2 className="font-semibold uppercase tracking-wider text-xs">Financials: Party Billing</h2>
+              </div>
+              <div className="space-y-4">
+                <GlassInput label="Party Name" name="party_name" value={form.party_name} onChange={change} required />
+                <GlassInput label="Party Mobile" name="party_number" value={form.party_number || ""} onChange={change} />
+                <GlassInput label="Total Freight (₹)" type="number" name="party_freight" value={form.party_freight} onChange={change} />
+                <GlassInput label="Advance Received (₹)" type="number" name="party_advance" value={form.party_advance} onChange={change} />
+              </div>
+            </div>
+          </div>
+
+          <section>
+            <div className="flex items-center gap-2 mb-6 pb-2 border-b border-white/5">
+              <LayoutGrid size={18} className="text-blue-400" />
+              <h2 className="font-semibold text-white uppercase tracking-wider text-sm">Deductions & Adjustments</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <GlassInput label="TDS (₹)" type="number" name="tds" value={form.tds} onChange={change} />
+              <GlassInput label="Himmali (₹)" type="number" name="himmali" value={form.himmali} onChange={change} />
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">Collection Status</label>
+                <select
+                  name="payment_status"
+                  value={form.payment_status}
+                  onChange={change}
+                  className="glass-input [&>option]:text-black"
+                >
+                  <option value="UNPAID">Collection: UNPAID</option>
+                  <option value="PAID">Collection: PAID</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <div className="flex items-center gap-2 mb-6 pb-2 border-b border-white/5">
+              <FileText size={18} className="text-blue-400" />
+              <h2 className="font-semibold text-white uppercase tracking-wider text-sm">Operational Metadata</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <GlassInput label="Load Weight (MT)" type="number" name="weight" value={form.weight || ""} onChange={change} />
+              <GlassInput label="Internal Remarks" name="remark" value={form.remark || ""} onChange={change} placeholder="Add notes here..." />
+            </div>
+          </section>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
+            <GlassButton type="button" variant="secondary" onClick={() => navigate(-1)}>
+              Cancel
+            </GlassButton>
+            <GlassButton type="submit" variant="primary" disabled={saving} className="px-8 shadow-lg shadow-blue-500/20">
+              {saving ? "Processing..." : "Commit Changes"}
+            </GlassButton>
+          </div>
+        </form>
+      </GlassCard>
     </div>
   );
 }

@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
-import GlassBox from "../components/GlassBox";
+import GlassCard from "../components/GlassCard";
+import GlassInput from "../components/GlassInput";
+import GlassButton from "../components/GlassButton";
+import Skeleton from "../components/Skeleton";
 import { formatCurrency } from "../utils/format";
+import { Filter, Download, RotateCcw, ArrowRight, Wallet } from "lucide-react";
 
 export default function PaymentHistory() {
     const navigate = useNavigate();
@@ -74,86 +78,87 @@ export default function PaymentHistory() {
         return date.toLocaleDateString("en-GB", { day: '2-digit', month: 'short', year: 'numeric' });
     };
 
-    const formatDateWithParentheses = (dateString) => {
-        const date = new Date(dateString);
-        const day = String(date.getDate()).padStart(2, '0');
-        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        const month = monthNames[date.getMonth()];
-        const year = date.getFullYear();
-        return `(${day} ${month} ${year})`;
-    };
-
     if (loading) {
-        return <div className="text-white p-8 italic">Loading payment history...</div>;
+        return (
+            <div className="space-y-6 max-w-7xl mx-auto">
+                <Skeleton height="32px" width="200px" />
+                <Skeleton height="200px" className="glass-panel" />
+                <div className="space-y-4">
+                    {[...Array(5)].map((_, i) => (
+                        <Skeleton key={i} height="80px" className="glass-panel" />
+                    ))}
+                </div>
+            </div>
+        );
     }
 
     return (
-        <div className="max-w-7xl mx-auto space-y-6 text-white">
-            <h1 className="text-2xl font-bold">Payment Ledger</h1>
+        <div className="max-w-7xl mx-auto space-y-6 text-white pb-20">
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+                <Wallet className="text-blue-400" /> Payment Ledger
+            </h1>
 
             {/* Filters */}
-            <div className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-2xl shadow-xl">
-                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Search & Filters</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Type</label>
-                        <select name="type" value={filters.type} onChange={handleFilterChange}
-                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+            <GlassCard className="p-5">
+                <div className="flex items-center gap-2 mb-4 text-gray-400 border-b border-white/5 pb-2">
+                    <Filter size={16} />
+                    <h2 className="text-xs font-bold uppercase tracking-widest">Search & Filters</h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider ml-1">Type</label>
+                        <select
+                            name="type"
+                            value={filters.type}
+                            onChange={handleFilterChange}
+                            className="glass-input [&>option]:text-black"
+                        >
                             <option value="ALL">All Transactions</option>
                             <option value="CREDIT">Collections (Credit)</option>
                             <option value="DEBIT">Payouts (Debit)</option>
                         </select>
                     </div>
 
-                    <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">From Date</label>
-                        <input type="date" name="fromDate" value={filters.fromDate} onChange={handleFilterChange}
-                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-blue-500" />
-                    </div>
-
-                    <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">To Date</label>
-                        <input type="date" name="toDate" value={filters.toDate} onChange={handleFilterChange}
-                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-blue-500" />
-                    </div>
-
-                    <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Vehicle Number</label>
-                        <input type="text" name="vehicle" value={filters.vehicle} onChange={handleFilterChange} placeholder="Search MH12..."
-                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-                    </div>
+                    <GlassInput label="From Date" type="date" name="fromDate" value={filters.fromDate} onChange={handleFilterChange} />
+                    <GlassInput label="To Date" type="date" name="toDate" value={filters.toDate} onChange={handleFilterChange} />
+                    <GlassInput label="Vehicle Number" name="vehicle" value={filters.vehicle} onChange={handleFilterChange} placeholder="Search MH12..." />
                 </div>
 
-                <div className="flex flex-wrap gap-3 mt-6">
-                    <button onClick={applyFilters} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all font-bold text-xs uppercase tracking-widest">
+                <div className="flex flex-wrap gap-3">
+                    <GlassButton onClick={applyFilters} variant="primary">
                         Apply Filters
-                    </button>
-                    <button onClick={clearFilters} className="px-6 py-2 bg-white/5 border border-white/10 text-gray-300 rounded-lg hover:bg-white/10 transition-all font-bold text-xs uppercase tracking-widest">
-                        Reset
-                    </button>
-                    <button onClick={exportToExcel} className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition-all font-bold text-xs uppercase tracking-widest flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        Export Excel
-                    </button>
+                    </GlassButton>
+                    <GlassButton onClick={clearFilters} variant="secondary">
+                        <RotateCcw size={16} /> Reset
+                    </GlassButton>
+                    <div className="ml-auto">
+                        <GlassButton onClick={exportToExcel} variant="secondary" className="text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10">
+                            <Download size={16} /> Export Excel
+                        </GlassButton>
+                    </div>
                 </div>
-            </div>
+            </GlassCard>
 
             {/* Payment History List */}
             <div className="space-y-3">
                 {history.length === 0 ? (
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-12 text-center text-gray-500 italic">
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-12 text-center text-gray-500 italic flex flex-col items-center">
+                        <Filter size={32} className="mb-2 opacity-50" />
                         No transactions found matching your criteria.
                     </div>
                 ) : (
                     history.map((item) => (
-                        <div
+                        <GlassCard
                             key={item.id}
+                            interactive
                             onClick={() => navigate(`/trips/${item.trip_id}`)}
-                            className="group bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl p-4 cursor-pointer transition-all duration-300 shadow-lg hover:shadow-blue-500/5 flex justify-between items-center"
+                            className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4"
                         >
-                            <div className="flex-1">
+                            <div className="flex-1 w-full sm:w-auto">
                                 <div className="flex items-center gap-3 mb-1">
-                                    <span className="font-bold text-white tracking-tight">
+                                    <span className="font-bold text-white tracking-tight flex items-center gap-2">
+                                        <span className={`w-2 h-2 rounded-full ${item.transaction_type === 'CREDIT' ? 'bg-green-500' : 'bg-rose-500'}`}></span>
                                         {item.payment_type} - {item.vehicle_number}
                                     </span>
                                     <span className="text-blue-400 text-[10px] font-bold px-2 py-0.5 bg-blue-500/10 rounded-full border border-blue-500/20 uppercase tracking-widest">
@@ -162,24 +167,26 @@ export default function PaymentHistory() {
                                 </div>
                                 <div className="flex items-center gap-4 text-xs font-medium text-gray-400">
                                     <span className="flex items-center gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                                         Trans: {formatDate(item.transaction_date)}
                                     </span>
+                                    <span className="flex items-center gap-1 opacity-50">|</span>
                                     <span className="flex items-center gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                                        Trip: {formatDateWithParentheses(item.loading_date)}
+                                        Trip: {formatDate(item.loading_date)}
                                     </span>
                                 </div>
                             </div>
-                            <div className="text-right">
-                                <div className={`text-xl font-black ${item.transaction_type === 'CREDIT' ? 'text-green-400' : 'text-rose-400'}`}>
-                                    {item.transaction_type === 'CREDIT' ? '+' : '-'}₹{formatCurrency(item.amount)}
-                                </div>
-                                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest group-hover:text-gray-300 transition-colors">
-                                    {item.transaction_type}
+                            <div className="text-right w-full sm:w-auto flex justify-between sm:block items-center border-t border-white/5 sm:border-0 pt-3 sm:pt-0 mt-2 sm:mt-0">
+                                <span className="sm:hidden text-xs font-bold uppercase text-gray-500">{item.transaction_type}</span>
+                                <div>
+                                    <div className={`text-xl font-black ${item.transaction_type === 'CREDIT' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                        {item.transaction_type === 'CREDIT' ? '+' : '-'}₹{formatCurrency(item.amount)}
+                                    </div>
+                                    <div className="hidden sm:block text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                                        {item.transaction_type}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </GlassCard>
                     ))
                 )}
             </div>

@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../services/api";
-import GlassBox from "../components/GlassBox";
+import GlassCard from "../components/GlassCard";
+import GlassButton from "../components/GlassButton";
+import Skeleton from "../components/Skeleton";
 import { formatCurrency } from "../utils/format";
 import { useAuth } from "../context/AuthContext";
+import { ArrowLeft, Edit2, FileText, Calendar, MapPin, Truck, User, CreditCard } from "lucide-react";
+
 export default function TripDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -21,7 +25,21 @@ export default function TripDetail() {
     });
   }, [id, navigate]);
 
-  if (!trip) return <div className="text-white p-8 italic">Loading trip details...</div>;
+  if (!trip) {
+    return (
+      <div className="max-w-6xl mx-auto space-y-6">
+        <div className="flex justify-between">
+          <Skeleton width="200px" height="40px" />
+          <Skeleton width="200px" height="40px" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <Skeleton key={i} height="200px" className="glass-panel" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const openPOD = () => {
     const token = localStorage.getItem("token");
@@ -30,90 +48,102 @@ export default function TripDetail() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 text-white">
+    <div className="max-w-6xl mx-auto space-y-8 text-white pb-20">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">{trip.trip_code}</h1>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <div className="flex items-center gap-2 text-white/50 text-sm mb-1">
+            <span onClick={() => navigate('/trips')} className="cursor-pointer hover:text-white">Trips</span>
+            <span>/</span>
+            <span>Details</span>
+          </div>
+          <h1 className="text-3xl font-bold text-white tracking-tight">{trip.trip_code}</h1>
+        </div>
 
         <div className="flex gap-3">
-          <button
-            onClick={() => navigate(`/trips/edit/${trip.id}`)}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all font-medium"
-          >
-            Edit Trip
-          </button>
-
-          <button
+          <GlassButton
+            variant="secondary"
             onClick={() => navigate("/trips")}
-            className="px-6 py-2 border border-white/20 rounded-lg hover:bg-white/5 transition-all text-gray-300 font-medium"
           >
-            Back
-          </button>
+            <ArrowLeft size={18} /> Back
+          </GlassButton>
+
+          <GlassButton
+            variant="primary"
+            onClick={() => navigate(`/trips/edit/${trip.id}`)}
+          >
+            <Edit2 size={18} /> Edit Trip
+          </GlassButton>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <Section title="Dates">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Section title="Dates" icon={Calendar}>
           <Item label="Loading Date" value={formatDate(trip.loading_date)} />
           <Item label="Unloading Date" value={formatDate(trip.unloading_date)} />
         </Section>
 
-        <Section title="Route">
+        <Section title="Route" icon={MapPin}>
           <Item label="From" value={trip.from_location} />
           <Item label="To" value={trip.to_location} />
         </Section>
 
-        <Section title="Vehicle & Driver">
-          <Item label="Vehicle Number" value={trip.vehicle_number} />
+        <Section title="Vehicle & Driver" icon={Truck}>
+          <Item label="Vehicle Number" value={trip.vehicle_number} highlight />
           <Item label="Driver Number" value={trip.driver_number || "-"} />
           <Item label="Motor Owner Name" value={trip.motor_owner_name || "-"} />
           <Item label="Motor Owner Number" value={trip.motor_owner_number || "-"} />
         </Section>
 
-        <Section title="Gaadi (Cost)">
+        <Section title="Gaadi (Cost)" icon={CreditCard}>
           <Money label="Gaadi Freight" value={trip.gaadi_freight} />
           <Money label="Gaadi Advance" value={trip.gaadi_advance} />
           <Money label="Gaadi Balance" value={trip.gaadi_balance} />
         </Section>
 
-        <Section title="Party (Income)">
-          <Item label="Party Name" value={trip.party_name} />
+        <Section title="Party (Income)" icon={User}>
+          <Item label="Party Name" value={trip.party_name} highlight />
           <Item label="Party Number" value={trip.party_number || "-"} />
           <Money label="Party Freight" value={trip.party_freight} />
           <Money label="Party Advance" value={trip.party_advance} />
           <Money label="Party Balance" value={trip.party_balance} red />
         </Section>
 
-        <Section title="Adjustments">
+        <Section title="Financials & Remarks" icon={FileText}>
           <Money label="TDS" value={trip.tds} />
           <Money label="Himmali" value={trip.himmali} />
-          <Money label="Profit" value={trip.profit} />
+          <Money label="Profit" value={trip.profit} green />
           <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Status</span>
+            <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1">Status</span>
             <span className={`text-[10px] w-fit px-2 py-0.5 rounded-full font-bold ${trip.party_payment_status === 'PAID' ? 'bg-green-500/20 text-green-400' : 'bg-rose-500/20 text-rose-400'}`}>
               {trip.party_payment_status}
             </span>
           </div>
-        </Section>
-
-        <Section title="Additional Info">
-          <Item label="Weight" value={trip.weight ? `${trip.weight} MT` : "-"} />
-          <div className="md:col-span-2">
-            <Item label="Remark" value={trip.remark || "-"} />
+          <div className="md:col-span-2 mt-4 pt-4 border-t border-white/5">
+            <div className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1">Remark</div>
+            <p className="text-sm text-white/80">{trip.remark || "-"}</p>
           </div>
         </Section>
 
+        <Section title="Additional Info" icon={FileText}>
+          <Item label="Weight" value={trip.weight ? `${trip.weight} MT` : "-"} />
+        </Section>
+
         <div className="md:col-span-2">
-          <Section title={
-            <div className="flex justify-between items-center w-full">
-              <span>POD Documents</span>
+          <GlassCard className="p-0 overflow-hidden">
+            <div className="p-4 border-b border-white/5 flex justify-between items-center bg-white/5">
+              <div className="flex items-center gap-2">
+                <FileText size={16} className="text-blue-400" />
+                <h2 className="text-sm font-bold text-white uppercase tracking-widest">POD Documents</h2>
+              </div>
               <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${(trip.pod_status === 'UPLOADED' || trip.pod_status === 'RECEIVED') ? 'bg-green-500/20 text-green-400' : 'bg-rose-500/20 text-rose-400'}`}>
                 {(trip.pod_status === 'UPLOADED' || trip.pod_status === 'RECEIVED') ? 'RECEIVED' : 'PENDING'}
               </span>
             </div>
-          }>
-            <PodGallery podPath={trip.pod_path} />
-          </Section>
+            <div className="p-4">
+              <PodGallery podPath={trip.pod_path} />
+            </div>
+          </GlassCard>
         </div>
 
       </div>
@@ -127,7 +157,6 @@ function PodGallery({ podPath }) {
   if (podPath) {
     if (typeof podPath === 'string') {
       try {
-        // Try parsing as JSON first (handles ["url1", "url2"] format)
         const parsed = JSON.parse(podPath);
         if (Array.isArray(parsed)) {
           pods = parsed;
@@ -135,7 +164,6 @@ function PodGallery({ podPath }) {
           pods = [parsed];
         }
       } catch (e) {
-        // If not valid JSON, it's likely a comma-separated string
         pods = podPath.split(',')
           .map(url => url.trim())
           .filter(Boolean);
@@ -154,9 +182,9 @@ function PodGallery({ podPath }) {
 
   if (pods.length === 0) {
     return (
-      <div className="flex items-center gap-2 text-rose-400 text-sm font-medium p-2">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-        No PODs uploaded
+      <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-white/10 rounded-lg text-white/40">
+        <FileText size={32} className="mb-2 opacity-50" />
+        <span className="text-sm">No POD documents uploaded</span>
       </div>
     );
   }
@@ -177,9 +205,9 @@ function PodGallery({ podPath }) {
                 alt={`POD ${index + 1}`}
                 className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ${isPdf ? "p-4 object-contain" : ""}`}
               />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-center p-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-white bg-blue-600 px-2 py-1 rounded">
-                  {isPdf ? "Open PDF" : "Open Image"}
+              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-center p-2 backdrop-blur-sm">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-white bg-blue-600 px-3 py-1.5 rounded shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform">
+                  {isPdf ? "Open PDF" : "View"}
                 </span>
               </div>
             </div>
@@ -190,33 +218,36 @@ function PodGallery({ podPath }) {
   );
 }
 
-function Section({ title, children }) {
+function Section({ title, icon: Icon, children }) {
   return (
-    <GlassBox>
-      <div className="p-1">
-        <h2 className="text-xs font-bold text-gray-300 uppercase tracking-widest mb-6 border-b border-white/5 pb-2">{title}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4 uppercase">
+    <GlassCard className="h-full flex flex-col p-0 overflow-hidden">
+      <div className="px-5 py-3 border-b border-white/5 bg-white/5 flex items-center gap-2">
+        {Icon && <Icon size={14} className="text-blue-400" />}
+        <h2 className="text-xs font-bold text-white uppercase tracking-widest">{title}</h2>
+      </div>
+      <div className="p-5 flex-grow">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-6">
           {children}
         </div>
       </div>
-    </GlassBox>
+    </GlassCard>
   );
 }
 
-function Item({ label, value }) {
+function Item({ label, value, highlight }) {
   return (
     <div>
-      <div className="text-[10px] font-bold text-gray-500 mb-1">{label}</div>
-      <div className="text-sm font-medium text-white">{value}</div>
+      <div className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1">{label}</div>
+      <div className={`text-sm font-medium ${highlight ? "text-white text-lg" : "text-white/90"}`}>{value}</div>
     </div>
   );
 }
 
-function Money({ label, value, red }) {
+function Money({ label, value, red, green }) {
   return (
     <div>
-      <div className="text-[10px] font-bold text-gray-500 mb-1">{label}</div>
-      <div className={`text-lg font-bold ${red ? "text-rose-400" : "text-white"}`}>
+      <div className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1">{label}</div>
+      <div className={`text-lg font-bold ${red ? "text-rose-400" : green ? "text-emerald-400" : "text-white"}`}>
         ₹{formatCurrency(value)}
       </div>
     </div>

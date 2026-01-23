@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../services/api";
-import GlassBox from "../components/GlassBox";
+import GlassCard from "../components/GlassCard";
+import GlassButton from "../components/GlassButton";
+import Skeleton from "../components/Skeleton";
 import { formatCurrency } from "../utils/format";
+import { ArrowLeft, User, Phone, MapPin, Truck } from "lucide-react";
 
 export default function PartyDetail() {
     const { name } = useParams();
@@ -31,82 +34,110 @@ export default function PartyDetail() {
         }
     };
 
-    if (loading) return <div className="text-white p-8 italic">Loading details...</div>;
+    if (loading) return (
+        <div className="space-y-6 max-w-6xl mx-auto">
+            <Skeleton height="100px" className="glass-panel" />
+            <Skeleton height="150px" className="glass-panel" />
+            <Skeleton height="400px" className="glass-panel" />
+        </div>
+    );
 
     return (
-        <div className="space-y-6 text-white">
-            {/* TOP SECTION: Summary */}
-            <GlassBox>
-                <div className="p-4 flex justify-between items-center text-white">
-                    <div>
-                        <h1 className="text-2xl font-bold">{name}</h1>
-                        <p className="text-gray-400 text-sm uppercase tracking-widest font-medium">Customer / Party</p>
-                    </div>
-                    <div className="text-right">
-                        <div className="text-lg font-bold">Total Shipments: {trips.length}</div>
-                    </div>
+        <div className="space-y-8 text-white max-w-6xl mx-auto pb-20">
+            {/* HEADER */}
+            <div className="flex items-center gap-4">
+                <GlassButton variant="secondary" onClick={() => navigate(-1)} className="rounded-full w-10 h-10 p-0 flex items-center justify-center">
+                    <ArrowLeft size={18} />
+                </GlassButton>
+                <div>
+                    <h1 className="text-2xl font-bold flex items-center gap-2">
+                        {name}
+                    </h1>
+                    <span className="text-white/50 text-xs uppercase tracking-wider font-bold">Customer Profile</span>
                 </div>
-            </GlassBox>
+            </div>
 
-            {/* MIDDLE SECTION: Personal Details */}
-            <GlassBox>
-                <div className="p-4">
-                    <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 border-b border-white/5 pb-2">Customer Profile</h2>
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Party Name</label>
-                            <div className="font-medium text-white">{party?.name}</div>
+            {/* TOP METRICS & INFO */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <GlassCard className="md:col-span-2 p-6 flex flex-col justify-center">
+                    <div className="flex items-center gap-2 mb-4 text-gray-400 border-b border-white/5 pb-2">
+                        <User size={16} className="text-blue-400" />
+                        <h2 className="text-xs font-bold uppercase tracking-widest">Contact Details</h2>
+                    </div>
+                    <div className="grid grid-cols-2 gap-8">
+                        <div>
+                            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Party Name</div>
+                            <div className="text-lg font-medium text-white">{party?.name}</div>
                         </div>
-                        <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Registered Mobile</label>
-                            <div className="font-medium text-white">{party?.mobile || "-"}</div>
+                        <div>
+                            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Mobile Number</div>
+                            <div className="text-lg font-medium text-white flex items-center gap-2">
+                                <Phone size={14} className="text-gray-500" />
+                                {party?.mobile || "N/A"}
+                            </div>
                         </div>
                     </div>
-                </div>
-            </GlassBox>
+                </GlassCard>
 
-            {/* BOTTOM SECTION: Trips List */}
-            <GlassBox>
-                <div className="p-1">
-                    <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 p-4 border-b border-white/5">Movement Ledger</h2>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full text-left text-sm">
-                            <thead className="border-b border-white/10">
-                                <tr className="text-gray-500 uppercase tracking-wider text-[10px] font-bold">
-                                    <th className="p-4">Date</th>
-                                    <th className="p-4">Ref No.</th>
-                                    <th className="p-4">Route</th>
-                                    <th className="p-4">Vehicle</th>
-                                    <th className="p-4 text-right">Freight</th>
-                                    <th className="p-4 text-right">Balance</th>
-                                    <th className="p-4">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5 text-gray-300">
-                                {trips.length === 0 ? (
-                                    <tr><td colSpan="7" className="p-8 text-center text-gray-500 italic">No movement recorded for this party.</td></tr>
-                                ) : (
-                                    trips.map(t => (
-                                        <tr key={t.id} className="hover:bg-white/5 cursor-pointer transition-colors" onClick={() => navigate(`/trips/${t.id}`)}>
-                                            <td className="p-4 whitespace-nowrap">{new Date(t.loading_date).toLocaleDateString("en-GB")}</td>
-                                            <td className="p-4 font-bold text-blue-400">{t.trip_code || t.id}</td>
-                                            <td className="p-4">{t.from_location} → {t.to_location}</td>
-                                            <td className="p-4 font-medium">{t.vehicle_number}</td>
-                                            <td className="p-4 text-right text-white">₹{formatCurrency(t.party_freight)}</td>
-                                            <td className="p-4 text-right font-bold text-rose-400">₹{formatCurrency(t.party_balance)}</td>
-                                            <td className="p-4">
-                                                <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${(t.party_payment_status || t.payment_status) === 'PAID' ? 'bg-green-500/20 text-green-400' : 'bg-rose-500/20 text-rose-400'}`}>
-                                                    {t.party_payment_status || t.payment_status}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                <GlassCard className="p-6 flex flex-col justify-center items-center text-center bg-blue-500/5 border-blue-500/10">
+                    <div className="text-[10px] font-bold text-blue-300 uppercase tracking-widest mb-2">Total Shipments</div>
+                    <div className="text-4xl font-black text-white">{trips.length}</div>
+                    <div className="text-xs text-white/40 mt-1">Recorded Trips</div>
+                </GlassCard>
+            </div>
+
+            {/* TRIPS LIST */}
+            <GlassCard className="p-0 overflow-hidden">
+                <div className="p-4 bg-white/5 border-b border-white/5 flex justify-between items-center">
+                    <h2 className="text-xs font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                        <Truck size={14} className="text-blue-400" /> Movement Ledger
+                    </h2>
                 </div>
-            </GlassBox>
+
+                <div className="overflow-x-auto">
+                    <table className="min-w-full text-left text-sm">
+                        <thead className="bg-white/5 border-b border-white/5">
+                            <tr className="text-gray-400 uppercase tracking-wider text-[10px] font-bold">
+                                <th className="p-4">Date</th>
+                                <th className="p-4">Ref No.</th>
+                                <th className="p-4">Route</th>
+                                <th className="p-4">Vehicle</th>
+                                <th className="p-4 text-right">Freight</th>
+                                <th className="p-4 text-right">Balance</th>
+                                <th className="p-4 text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5 text-gray-300">
+                            {trips.length === 0 ? (
+                                <tr><td colSpan="7" className="p-12 text-center text-gray-500 italic">No movement recorded for this party.</td></tr>
+                            ) : (
+                                trips.map(t => (
+                                    <tr key={t.id} className="hover:bg-white/5 cursor-pointer transition-colors group" onClick={() => navigate(`/trips/${t.id}`)}>
+                                        <td className="p-4 whitespace-nowrap text-white/60">{new Date(t.loading_date).toLocaleDateString("en-GB")}</td>
+                                        <td className="p-4 font-bold text-blue-400 group-hover:underline">{t.trip_code || t.id}</td>
+                                        <td className="p-4 flex items-center gap-1">
+                                            <span className="text-white">{t.from_location}</span>
+                                            <span className="text-white/30">→</span>
+                                            <span className="text-white">{t.to_location}</span>
+                                        </td>
+                                        <td className="p-4 font-mono text-xs bg-white/5 rounded w-fit px-2">{t.vehicle_number}</td>
+                                        <td className="p-4 text-right text-white font-medium">₹{formatCurrency(t.party_freight)}</td>
+                                        <td className="p-4 text-right font-bold text-rose-400">₹{formatCurrency(t.party_balance)}</td>
+                                        <td className="p-4 text-center">
+                                            <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${(t.party_payment_status || t.payment_status) === 'PAID'
+                                                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                                    : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                                                }`}>
+                                                {t.party_payment_status || t.payment_status}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </GlassCard>
         </div>
     );
 }

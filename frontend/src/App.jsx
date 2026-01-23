@@ -1,13 +1,16 @@
-import bgImage from "./assets/dashboard-bg.jpg";
+import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import TripDetail from "./pages/TripDetail";
+import { AuthProvider } from "./context/AuthContext";
+import Layout from "./layout/Layout";
+import PrivateRoute from "./components/PrivateRoute";
 
-import Header from "./layout/Header";
-
+// Pages
+import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Trips from "./pages/Trips";
 import CreateTrip from "./pages/CreateTrip";
 import EditTrip from "./pages/EditTrip";
+import TripDetail from "./pages/TripDetail";
 import Analytics from "./pages/Analytics";
 import Reports from "./pages/Reports";
 import PaymentHistory from "./pages/PaymentHistory";
@@ -16,30 +19,7 @@ import OwnTrips from "./pages/OwnTrips";
 import PartyDetail from "./pages/PartyDetail";
 import MotorOwnerDetail from "./pages/MotorOwnerDetail";
 import AdminPanel from "./pages/AdminPanel";
-
-import Login from "./pages/Login";
-import PrivateRoute from "./components/PrivateRoute";
-import { AuthProvider } from "./context/AuthContext";
-
-function Layout({ children }) {
-  return (
-    <div
-      className="min-h-screen flex flex-col font-sans text-gray-900"
-      style={{
-        backgroundImage: `url(${bgImage})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        backgroundAttachment: "fixed"
-      }}
-    >
-      <Header />
-      <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-        {children}
-      </main>
-    </div>
-  );
-}
+import CourierManagement from "./pages/CourierManagement";
 
 export default function App() {
   return (
@@ -151,6 +131,17 @@ export default function App() {
               </Layout>
             </PrivateRoute>
           } />
+
+          <Route path="/courier" element={
+            <PrivateRoute>
+              <Layout>
+                <CourierManagement />
+              </Layout>
+            </PrivateRoute>
+          } />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -1,19 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Calendar,
-  MapPin,
   Truck,
-  User,
   Wallet,
   FileText,
   ChevronRight,
-  Phone,
-  LayoutGrid
+  LayoutGrid,
+  CheckCircle,
+  X
 } from "lucide-react";
 import api from "../services/api";
-import GlassBox from "../components/GlassBox";
-import { useEffect } from "react";
+import GlassCard from "../components/GlassCard";
+import GlassInput from "../components/GlassInput";
+import GlassButton from "../components/GlassButton";
 
 export default function CreateTrip() {
   const navigate = useNavigate();
@@ -132,12 +132,12 @@ export default function CreateTrip() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6 text-white">
+    <div className="max-w-5xl mx-auto space-y-6 pb-20 text-white">
       {/* Breadcrumb */}
-      <div className="flex items-center text-sm text-gray-400 mb-4">
+      <div className="flex items-center text-sm text-gray-400">
         <span>Dashboard</span>
         <ChevronRight size={14} className="mx-1" />
-        <span>Trips</span>
+        <span onClick={() => navigate('/trips')} className="cursor-pointer hover:text-white">Trips</span>
         <ChevronRight size={14} className="mx-1" />
         <span className="font-medium text-white">Create Trip</span>
       </div>
@@ -149,114 +149,92 @@ export default function CreateTrip() {
         </p>
       </div>
 
-      <GlassBox>
-        <form onSubmit={handleSubmit} className="p-4 space-y-8">
+      <GlassCard className="p-6 md:p-8">
+        <form onSubmit={handleSubmit} className="space-y-8">
 
           {/* Dates & Route */}
           <section>
-            <div className="flex items-center gap-2 mb-4 text-blue-400">
-              <Calendar size={18} />
-              <h2 className="font-semibold text-white">Dates & Route</h2>
+            <div className="flex items-center gap-2 mb-6 pb-2 border-b border-white/5">
+              <Calendar size={18} className="text-blue-400" />
+              <h2 className="font-semibold text-white uppercase tracking-wider text-sm">Dates & Route</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Loading Date</label>
-                <input
-                  type="date"
-                  name="loading_date"
-                  required
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white transition-all"
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Unloading Date</label>
-                <input
-                  type="date"
-                  name="unloading_date"
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white transition-all"
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Origin (From)</label>
-                <input
-                  name="route_from"
-                  placeholder="City, Warehouse, or Port"
-                  required
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white placeholder-gray-500 transition-all"
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Destination (To)</label>
-                <input
-                  name="route_to"
-                  placeholder="City or Delivery Point"
-                  required
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white placeholder-gray-500 transition-all"
-                  onChange={handleChange}
-                />
-              </div>
+              <GlassInput
+                label="Loading Date"
+                type="date"
+                name="loading_date"
+                required
+                onChange={handleChange}
+              />
+              <GlassInput
+                label="Unloading Date"
+                type="date"
+                name="unloading_date"
+                onChange={handleChange}
+              />
+              <GlassInput
+                label="Origin (From)"
+                name="route_from"
+                placeholder="City, Warehouse, or Port"
+                required
+                onChange={handleChange}
+              />
+              <GlassInput
+                label="Destination (To)"
+                name="route_to"
+                placeholder="City or Delivery Point"
+                required
+                onChange={handleChange}
+              />
             </div>
           </section>
 
           {/* Vehicle & Driver Details */}
           <section>
-            <div className="flex items-center gap-2 mb-4 text-blue-400">
-              <Truck size={18} />
-              <h2 className="font-semibold text-white">Vehicle & Driver Details</h2>
+            <div className="flex items-center gap-2 mb-6 pb-2 border-b border-white/5">
+              <Truck size={18} className="text-blue-400" />
+              <h2 className="font-semibold text-white uppercase tracking-wider text-sm">Vehicle & Driver Details</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Vehicle Number</label>
-                <input
+              <div className="relative">
+                <GlassInput
+                  label="Vehicle Number"
                   name="vehicle_number"
                   placeholder="e.g. MH-12-AB-1234"
                   required
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white placeholder-gray-500 transition-all"
                   onChange={handleChange}
                 />
                 {isOwnVehicle && (
-                  <span className="text-xs text-green-400 font-medium px-1 block mt-1">
-                    ✓ Recognized as Own Vehicle
+                  <span className="absolute top-0 right-0 text-xs text-green-400 font-bold flex items-center gap-1 bg-green-500/10 px-2 py-0.5 rounded-full">
+                    <CheckCircle size={10} /> Own Vehicle
                   </span>
                 )}
               </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Driver Phone</label>
-                <input
-                  name="driver_phone"
-                  placeholder="+91 00000 00000"
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white placeholder-gray-500 transition-all"
-                  onChange={handleChange}
-                />
-              </div>
+
+              <GlassInput
+                label="Driver Phone"
+                name="driver_phone"
+                placeholder="+91 00000 00000"
+                onChange={handleChange}
+              />
 
               {!isOwnVehicle && (
                 <>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Motor Owner Name</label>
-                    <input
-                      name="motor_owner_name"
-                      placeholder="Owner Full Name"
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white placeholder-gray-500 transition-all"
-                      onChange={handleChange}
-                      onBlur={handleOwnerBlur}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Motor Owner Number</label>
-                    <input
-                      name="motor_owner_number"
-                      placeholder="Owner Contact Number"
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white placeholder-gray-500 transition-all"
-                      onChange={handleChange}
-                    />
-                  </div>
+                  <GlassInput
+                    label="Motor Owner Name"
+                    name="motor_owner_name"
+                    placeholder="Owner Full Name"
+                    onChange={handleChange}
+                    onBlur={handleOwnerBlur}
+                  />
+                  <GlassInput
+                    label="Motor Owner Number"
+                    name="motor_owner_number"
+                    placeholder="Owner Contact Number"
+                    onChange={handleChange}
+                  />
                 </>
               )}
             </div>
@@ -273,33 +251,20 @@ export default function CreateTrip() {
                 </div>
 
                 <div className="space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">GAADI FREIGHT</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-2 text-gray-500">₹</span>
-                      <input
-                        type="number"
-                        name="gaadi_freight"
-                        placeholder="0.00"
-                        className="w-full pl-8 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500/50 text-white placeholder-gray-600 transition-all"
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">GAADI ADVANCE</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-2 text-gray-500">₹</span>
-                      <input
-                        type="number"
-                        name="gaadi_advance"
-                        placeholder="0.00"
-                        className="w-full pl-8 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500/50 text-white placeholder-gray-600 transition-all"
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
+                  <GlassInput
+                    label="GAADI FREIGHT"
+                    type="number"
+                    name="gaadi_freight"
+                    placeholder="0.00"
+                    onChange={handleChange}
+                  />
+                  <GlassInput
+                    label="GAADI ADVANCE"
+                    type="number"
+                    name="gaadi_advance"
+                    placeholder="0.00"
+                    onChange={handleChange}
+                  />
                 </div>
               </div>
             )}
@@ -313,55 +278,37 @@ export default function CreateTrip() {
 
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">PARTY NAME</label>
-                    <input
-                      name="party_name"
-                      placeholder="Client Name"
-                      required
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white placeholder-gray-600 transition-all"
-                      onChange={handleChange}
-                      onBlur={handlePartyBlur}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">PARTY NUMBER</label>
-                    <input
-                      name="party_phone"
-                      placeholder="Contact No."
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white placeholder-gray-600 transition-all"
-                      onChange={handleChange}
-                    />
-                  </div>
+                  <GlassInput
+                    label="PARTY NAME"
+                    name="party_name"
+                    placeholder="Client Name"
+                    required
+                    onChange={handleChange}
+                    onBlur={handlePartyBlur}
+                  />
+                  <GlassInput
+                    label="PARTY NUMBER"
+                    name="party_phone"
+                    placeholder="Contact No."
+                    onChange={handleChange}
+                  />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">PARTY FREIGHT</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-2 text-gray-500">₹</span>
-                      <input
-                        type="number"
-                        name="party_freight"
-                        placeholder="0.00"
-                        className="w-full pl-8 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white placeholder-gray-600 transition-all"
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">PARTY ADVANCE</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-2 text-gray-500">₹</span>
-                      <input
-                        type="number"
-                        name="party_advance"
-                        placeholder="0.00"
-                        className="w-full pl-8 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white placeholder-gray-600 transition-all"
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
+                  <GlassInput
+                    label="PARTY FREIGHT"
+                    type="number"
+                    name="party_freight"
+                    placeholder="0.00"
+                    onChange={handleChange}
+                  />
+                  <GlassInput
+                    label="PARTY ADVANCE"
+                    type="number"
+                    name="party_advance"
+                    placeholder="0.00"
+                    onChange={handleChange}
+                  />
                 </div>
               </div>
             </div>
@@ -369,78 +316,63 @@ export default function CreateTrip() {
 
           {/* Adjustments & Additional Info */}
           <section>
-            <div className="flex items-center gap-2 mb-4 text-gray-300">
+            <div className="flex items-center gap-2 mb-6 pb-2 border-b border-white/5">
               <LayoutGrid size={18} className="text-blue-400" />
-              <h2 className="font-semibold text-white">Adjustments & Additional Info</h2>
+              <h2 className="font-semibold text-white uppercase tracking-wider text-sm">Adjustments & Additional Info</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">TDS (%)</label>
-                <input
-                  type="number"
-                  name="tds"
-                  placeholder="0.0"
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white placeholder-gray-600 transition-all"
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Himmali</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-2 text-gray-500">₹</span>
-                  <input
-                    type="number"
-                    name="himmali"
-                    placeholder="0.00"
-                    className="w-full pl-8 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white placeholder-gray-600 transition-all"
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Weight (MT)</label>
-                <input
-                  type="number"
-                  step="0.1"
-                  name="weight"
-                  placeholder="0.00"
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white placeholder-gray-600 transition-all"
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Remark</label>
-                <input
-                  name="remark"
-                  placeholder="Internal notes"
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white placeholder-gray-600 transition-all"
-                  onChange={handleChange}
-                />
-              </div>
+              <GlassInput
+                label="TDS (%)"
+                type="number"
+                name="tds"
+                placeholder="0.0"
+                onChange={handleChange}
+              />
+              <GlassInput
+                label="Himmali"
+                type="number"
+                name="himmali"
+                placeholder="0.00"
+                onChange={handleChange}
+              />
+              <GlassInput
+                label="Weight (MT)"
+                type="number"
+                step="0.1"
+                name="weight"
+                placeholder="0.00"
+                onChange={handleChange}
+              />
+              <GlassInput
+                label="Remark"
+                name="remark"
+                placeholder="Internal notes"
+                onChange={handleChange}
+              />
             </div>
           </section>
 
           {/* Actions */}
-          <div className="flex justify-end gap-4 pt-4">
-            <button
+          <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
+            <GlassButton
               type="button"
+              variant="secondary"
               onClick={() => navigate("/trips")}
-              className="px-6 py-2.5 text-sm font-medium text-gray-400 hover:text-white transition-colors"
             >
               Cancel
-            </button>
-            <button
+            </GlassButton>
+            <GlassButton
               type="submit"
-              className="px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2"
+              variant="primary"
+              className="px-8 shadow-lg shadow-blue-500/20"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-              Create Trip
-            </button>
+              <CheckCircle size={18} /> Create Trip
+            </GlassButton>
           </div>
 
         </form>
-      </GlassBox>
+      </GlassCard>
     </div>
   );
 }

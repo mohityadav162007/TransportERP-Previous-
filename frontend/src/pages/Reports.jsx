@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
-import GlassBox from "../components/GlassBox";
+import GlassCard from "../components/GlassCard";
+import GlassInput from "../components/GlassInput";
+import GlassButton from "../components/GlassButton";
+import { Download, FileText, Filter } from "lucide-react";
 
 export default function Reports() {
   const [trips, setTrips] = useState([]);
@@ -17,7 +20,8 @@ export default function Reports() {
     });
   }, []);
 
-  const applyFilter = () => {
+  const applyFilter = (e) => {
+    e?.preventDefault();
     let data = [...trips];
 
     if (fromDate) {
@@ -66,50 +70,65 @@ export default function Reports() {
   };
 
   return (
-    <div className="space-y-6 text-white">
-      <h1 className="text-2xl font-bold">Reports</h1>
-
-      {/* Filters */}
-      <div className="bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-xl grid grid-cols-1 md:grid-cols-4 gap-4">
-        <input
-          type="date"
-          className="bg-white/10 border border-white/10 rounded px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-          value={fromDate}
-          onChange={e => setFromDate(e.target.value)}
-        />
-        <input
-          type="date"
-          className="bg-white/10 border border-white/10 rounded px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-          value={toDate}
-          onChange={e => setToDate(e.target.value)}
-        />
-        <input
-          placeholder="Party Name"
-          className="bg-white/10 border border-white/10 rounded px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          value={party}
-          onChange={e => setParty(e.target.value)}
-        />
-        <button
-          onClick={applyFilter}
-          className="bg-blue-600 text-white rounded px-4 hover:bg-blue-700 transition-colors"
-        >
-          Apply Filter
-        </button>
+    <div className="space-y-8 text-white max-w-5xl mx-auto pb-20">
+      <div className="flex items-center gap-3">
+        <div className="p-3 bg-blue-500/20 rounded-xl">
+          <FileText size={24} className="text-blue-400" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold">Trip Reports</h1>
+          <p className="text-white/50 text-sm">Generate and export trip data reports</p>
+        </div>
       </div>
 
-      {/* Export */}
-      <div className="flex items-center justify-between">
-        <button
-          onClick={exportExcel}
-          className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 shadow-lg shadow-green-500/20 transition-all flex items-center gap-2 font-medium"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-          Export Excel
-        </button>
-
-        <div className="text-sm text-gray-400 italic">
-          Total {filtered.length} trips match current filters.
+      {/* Filters */}
+      <GlassCard className="p-6">
+        <div className="flex items-center gap-2 mb-6 pb-2 border-b border-white/5">
+          <Filter size={18} className="text-blue-400" />
+          <h2 className="font-semibold text-white uppercase tracking-wider text-sm">Filter Criteria</h2>
         </div>
+
+        <form onSubmit={applyFilter} className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+          <GlassInput
+            label="From Date"
+            type="date"
+            value={fromDate}
+            onChange={e => setFromDate(e.target.value)}
+          />
+          <GlassInput
+            label="To Date"
+            type="date"
+            value={toDate}
+            onChange={e => setToDate(e.target.value)}
+          />
+          <GlassInput
+            label="Party Name"
+            placeholder="Search Client..."
+            value={party}
+            onChange={e => setParty(e.target.value)}
+          />
+          <GlassButton type="submit" variant="primary" className="h-[42px] justify-center">
+            Apply Filters
+          </GlassButton>
+        </form>
+      </GlassCard>
+
+      {/* Export */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-6 glass-panel bg-gradient-to-r from-emerald-500/5 to-transparent border-emerald-500/20">
+        <div>
+          <h3 className="font-bold text-lg text-emerald-400">Ready to Export</h3>
+          <p className="text-sm text-white/60">
+            Found <span className="font-bold text-white">{filtered.length}</span> trips matching your criteria.
+          </p>
+        </div>
+
+        <GlassButton
+          onClick={exportExcel}
+          variant="secondary"
+          className="border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 px-6 py-3 shadow-lg shadow-emerald-500/10"
+        >
+          <Download size={18} /> Download Excel Report
+        </GlassButton>
       </div>
     </div>
   );

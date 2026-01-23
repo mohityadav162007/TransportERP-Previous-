@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import api from "../services/api";
-import GlassBox from "../components/GlassBox";
-import { UserPlus, Users, Shield, Mail, Calendar, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import GlassCard from "../components/GlassCard";
+import GlassInput from "../components/GlassInput";
+import GlassButton from "../components/GlassButton";
+import { UserPlus, Users, Shield, Mail, Calendar, AlertCircle, CheckCircle2, Loader2, Lock } from "lucide-react";
 
 export default function AdminPanel() {
     const [users, setUsers] = useState([]);
@@ -54,111 +56,105 @@ export default function AdminPanel() {
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
+        <div className="space-y-8 animate-in fade-in duration-500 text-white max-w-7xl mx-auto pb-20">
             {/* Header Section */}
             <div className="flex flex-col gap-2">
                 <h1 className="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
                     <Shield className="text-blue-500" /> Admin User Management
                 </h1>
-                <p className="text-gray-400">Manage system access and create new administrative or standard users.</p>
+                <p className="text-white/50">Manage system access and create new administrative or standard users.</p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Create User Form */}
                 <div className="lg:col-span-1">
-                    <GlassBox>
-                        <div className="p-6">
-                            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                                <UserPlus size={20} className="text-blue-400" /> Add New User
-                            </h2>
-
-                            {error && (
-                                <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-lg text-sm flex items-center gap-3">
-                                    <AlertCircle size={18} />
-                                    {error}
-                                </div>
-                            )}
-
-                            {success && (
-                                <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-lg text-sm flex items-center gap-3">
-                                    <CheckCircle2 size={18} />
-                                    {success}
-                                </div>
-                            )}
-
-                            <form onSubmit={handleSubmit} className="space-y-6">
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Email Address</label>
-                                    <div className="relative">
-                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-                                        <input
-                                            type="email"
-                                            required
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white transition-all text-sm"
-                                            placeholder="user@transport.com"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Password</label>
-                                    <input
-                                        type="password"
-                                        required
-                                        minLength={6}
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white transition-all text-sm"
-                                        placeholder="••••••••"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">User Role</label>
-                                    <select
-                                        value={role}
-                                        onChange={(e) => setRole(e.target.value)}
-                                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-white transition-all text-sm appearance-none cursor-pointer"
-                                    >
-                                        <option value="user" className="bg-[#1a1a1a]">Standard User</option>
-                                        <option value="admin" className="bg-[#1a1a1a]">Administrator</option>
-                                    </select>
-                                </div>
-
-                                <button
-                                    type="submit"
-                                    disabled={submitting}
-                                    className="w-full flex justify-center items-center gap-2 py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold rounded-lg shadow-lg shadow-blue-500/20 transition-all uppercase tracking-widest"
-                                >
-                                    {submitting ? (
-                                        <>
-                                            <Loader2 size={16} className="animate-spin" />
-                                            Creating...
-                                        </>
-                                    ) : (
-                                        "Create User"
-                                    )}
-                                </button>
-                            </form>
+                    <GlassCard className="p-6">
+                        <div className="flex items-center gap-2 mb-6 border-b border-white/5 pb-4">
+                            <UserPlus size={20} className="text-blue-400" />
+                            <h2 className="text-lg font-bold text-white">Add New User</h2>
                         </div>
-                    </GlassBox>
+
+                        {error && (
+                            <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-lg text-sm flex items-center gap-3">
+                                <AlertCircle size={18} />
+                                {error}
+                            </div>
+                        )}
+
+                        {success && (
+                            <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-lg text-sm flex items-center gap-3">
+                                <CheckCircle2 size={18} />
+                                {success}
+                            </div>
+                        )}
+
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <GlassInput
+                                label="Email Address"
+                                type="email"
+                                required
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="user@transport.com"
+                                icon={<Mail size={16} />}
+                            />
+
+                            <GlassInput
+                                label="Password"
+                                type="password"
+                                required
+                                minLength={6}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="••••••••"
+                                icon={<Lock size={16} />}
+                            />
+
+                            <div className="flex flex-col gap-2">
+                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1">User Role</label>
+                                <select
+                                    value={role}
+                                    onChange={(e) => setRole(e.target.value)}
+                                    className="glass-input [&>option]:text-black"
+                                >
+                                    <option value="user">Standard User</option>
+                                    <option value="admin">Administrator</option>
+                                </select>
+                            </div>
+
+                            <GlassButton
+                                type="submit"
+                                variant="primary"
+                                disabled={submitting}
+                                className="w-full justify-center"
+                            >
+                                {submitting ? (
+                                    <>
+                                        <Loader2 size={16} className="animate-spin" />
+                                        Creating...
+                                    </>
+                                ) : (
+                                    "Create User"
+                                )}
+                            </GlassButton>
+                        </form>
+                    </GlassCard>
                 </div>
 
                 {/* Users List */}
                 <div className="lg:col-span-2">
-                    <GlassBox>
-                        <div className="p-6">
-                            <h2 className="text-xl font-bold text-white mb-6 flex items-center justify-between">
-                                <span className="flex items-center gap-2">
-                                    <Users size={20} className="text-blue-400" /> Existing Users
-                                </span>
-                                <span className="text-xs font-medium text-gray-500 uppercase tracking-tighter bg-white/5 px-2 py-1 rounded">
-                                    {users.length} Total
-                                </span>
-                            </h2>
+                    <GlassCard className="p-0 overflow-hidden min-h-[500px] flex flex-col">
+                        <div className="p-6 pb-4 border-b border-white/5 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <Users size={20} className="text-blue-400" />
+                                <h2 className="text-lg font-bold text-white">Existing Users</h2>
+                            </div>
+                            <span className="text-xs font-bold text-blue-300 bg-blue-500/10 px-2 py-1 rounded-full border border-blue-500/20">
+                                {users.length} Total
+                            </span>
+                        </div>
 
+                        <div className="flex-grow">
                             {loading ? (
                                 <div className="flex flex-col items-center justify-center py-20 text-gray-500 gap-4">
                                     <Loader2 size={40} className="animate-spin text-blue-500" />
@@ -173,33 +169,33 @@ export default function AdminPanel() {
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-left border-collapse">
                                         <thead>
-                                            <tr className="border-b border-white/5">
-                                                <th className="pb-4 text-[10px] font-bold text-gray-500 uppercase tracking-wider">User Account</th>
-                                                <th className="pb-4 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Access Level</th>
-                                                <th className="pb-4 text-[10px] font-bold text-gray-500 uppercase tracking-wider text-right">Joined Date</th>
+                                            <tr className="bg-white/5 border-b border-white/5">
+                                                <th className="p-4 text-[10px] font-bold text-gray-500 uppercase tracking-wider">User Account</th>
+                                                <th className="p-4 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Access Level</th>
+                                                <th className="p-4 text-[10px] font-bold text-gray-500 uppercase tracking-wider text-right">Joined Date</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-white/5">
                                             {users.map((u) => (
                                                 <tr key={u.id} className="group hover:bg-white/[0.02] transition-colors">
-                                                    <td className="py-4">
+                                                    <td className="p-4">
                                                         <div className="flex items-center gap-3">
-                                                            <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 font-bold text-xs">
+                                                            <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 font-bold text-xs ring-2 ring-blue-500/20">
                                                                 {u.email[0].toUpperCase()}
                                                             </div>
-                                                            <span className="text-sm text-gray-200 font-medium">{u.email}</span>
+                                                            <span className="text-sm text-gray-200 font-medium group-hover:text-white transition-colors">{u.email}</span>
                                                         </div>
                                                     </td>
-                                                    <td className="py-4">
-                                                        <span className={`inline-flex items-center px-2 py-1 rounded text-[10px] font-bold uppercase tracking-tighter ${u.role === 'admin'
-                                                                ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
-                                                                : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+                                                    <td className="p-4">
+                                                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${u.role === 'admin'
+                                                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                                            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                                                             }`}>
                                                             {u.role === 'admin' && <Shield size={10} className="mr-1" />}
                                                             {u.role}
                                                         </span>
                                                     </td>
-                                                    <td className="py-4 text-right">
+                                                    <td className="p-4 text-right">
                                                         <div className="flex flex-col items-end">
                                                             <span className="text-xs text-gray-300">
                                                                 {new Date(u.created_at).toLocaleDateString('en-IN', {
@@ -223,10 +219,11 @@ export default function AdminPanel() {
                                 </div>
                             )}
                         </div>
-                    </GlassBox>
+                    </GlassCard>
 
-                    <div className="mt-6 p-4 bg-blue-500/5 border border-blue-500/10 rounded-xl">
-                        <p className="text-[11px] text-blue-400/80 leading-relaxed italic">
+                    <div className="mt-6 p-4 bg-blue-500/5 border border-blue-500/10 rounded-xl flex items-start gap-3">
+                        <Lock size={16} className="text-blue-400 mt-0.5" />
+                        <p className="text-xs text-blue-300/80 leading-relaxed">
                             <b>Security Note:</b> Passwords are never stored in plain text and are not viewable by administrators.
                             Users created here can sign in immediately using their email and password.
                         </p>
