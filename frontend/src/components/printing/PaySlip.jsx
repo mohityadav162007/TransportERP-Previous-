@@ -26,11 +26,24 @@ const PaySlip = ({ data = {}, slipNumber }) => {
     return (
         <div className="h-full w-full border border-black p-4 flex flex-col font-serif relative">
             {/* Header */}
-            <div className="text-center border-b-2 border-black pb-2 mb-4">
-                <h1 className="text-3xl font-bold text-red-600 uppercase tracking-wider scale-y-110">Shri Sanwariya Road Lines</h1>
-                <p className="text-[10px] mt-1 font-bold">19, 20, 22, 32, Feet Container, Open Body Available</p>
-                <p className="text-[10px] mt-0.5">Plot No. 24, New Loha Mandi, Gopal Gang Square, Dewas Naka, Indore (M.P.) 452010</p>
-                <p className="text-[11px] font-bold mt-0.5 absolute top-14 right-2">Mob.: 6260001228</p>
+            {/* Header */}
+            <div className="border-b-2 border-black pb-2 mb-4">
+                <div className="flex justify-between items-start">
+                    {/* Left Zone - Spacer to balance Right Zone */}
+                    <div className="w-32 flex-shrink-0"></div>
+
+                    {/* Center Zone - Main Title & Address */}
+                    <div className="flex-grow text-center">
+                        <h1 className="text-3xl font-bold text-red-600 uppercase tracking-wider scale-y-110">Shri Sanwariya Road Lines</h1>
+                        <p className="text-[10px] mt-1 font-bold">19, 20, 22, 32, Feet Container, Open Body Available</p>
+                        <p className="text-[10px] mt-0.5">Plot No. 24, New Loha Mandi, Gopal Gang Square, Dewas Naka, Indore (M.P.) 452010</p>
+                    </div>
+
+                    {/* Right Zone - Mobile Number (Fixed Container) */}
+                    <div className="w-32 flex-shrink-0 text-right">
+                        <p className="text-[11px] font-bold mt-1">Mob.: 6260001228</p>
+                    </div>
+                </div>
             </div>
 
             {/* Slip Info */}

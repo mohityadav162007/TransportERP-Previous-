@@ -1,20 +1,25 @@
-import React from 'react';
-import styled from 'styled-components';
+import { motion } from 'framer-motion';
+import { FADE_IN_VARIANTS } from '../styles/animations';
 
 const GlassCard = ({
     children,
     className,
     interactive = false,
-    onClick
+    onClick,
+    ...messageProps // Pass through other props like variants, initial, animate
 }) => {
     return (
-        <div
+        <motion.div
             className={`glass-panel ${interactive ? 'glass-panel-interactive' : ''} ${className || ''}`}
             onClick={onClick}
-            style={{ padding: '24px' }} // Default comfortable padding
+            style={{ padding: '24px' }}
+            initial="hidden"
+            animate="visible"
+            variants={FADE_IN_VARIANTS}
+            {...messageProps}
         >
             {children}
-        </div>
+        </motion.div>
     );
 };
 

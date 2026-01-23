@@ -2,41 +2,54 @@ import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MODAL_BACKDROP, MODAL_CONTENT } from '../styles/animations';
 
 const GlassModal = ({ isOpen, onClose, title, children, maxWidth = '600px' }) => {
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-        }
-        return () => {
-            document.body.style.overflow = 'unset';
-        };
-    }, [isOpen]);
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
-    if (!isOpen) return null;
-
-    return createPortal(
-        <Overlay onClick={onClose}>
-            <ModalContainer
-                className="glass-modal fade-in"
-                maxWidth={maxWidth}
-                onClick={(e) => e.stopPropagation()}
-            >
-                <Header>
-                    <Title>{title}</Title>
-                    <CloseButton onClick={onClose}>
-                        <X size={20} />
-                    </CloseButton>
-                </Header>
-                <Content>
-                    {children}
-                </Content>
-            </ModalContainer>
-        </Overlay>,
-        document.getElementById('root') || document.body
-    );
+  return createPortal(
+    <AnimatePresence>
+      {isOpen && (
+        <Overlay
+          as={motion.div}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          variants={MODAL_BACKDROP}
+          onClick={onClose}
+        >
+          <ModalContainer
+            as={motion.div}
+            className="glass-modal"
+            maxWidth={maxWidth}
+            onClick={(e) => e.stopPropagation()}
+            variants={MODAL_CONTENT}
+          >
+            <Header>
+              <Title>{title}</Title>
+              <CloseButton onClick={onClose}>
+                <X size={20} />
+              </CloseButton>
+            </Header>
+            <Content>
+              {children}
+            </Content>
+          </ModalContainer>
+        </Overlay>
+      )}
+    </AnimatePresence>,
+    document.getElementById('root') || document.body
+  );
 };
 
 const Overlay = styled.div`

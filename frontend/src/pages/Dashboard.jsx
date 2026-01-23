@@ -9,6 +9,8 @@ import {
   Truck, DollarSign, Receipt, FileText, Coins, Wallet, HandCoins, CircleDollarSign,
   TrendingUp, ArrowRight
 } from "lucide-react";
+import { motion } from "framer-motion";
+import { STAGGER_CONTAINER, FADE_IN_VARIANTS } from "../styles/animations";
 
 import GlassCard from "../components/GlassCard";
 import GlassTable from "../components/GlassTable";
@@ -86,17 +88,22 @@ export default function Dashboard() {
       {/* ===== ROW 1 & 2: KPIs (4 cols) ===== */}
       <h1 className="text-2xl font-bold text-white mb-2">Dashboard Overview</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        <KPICard title="Total Trips" value={totalTrips} icon={Truck} color="blue" />
-        <KPICard title="Total Freight" value={`₹${formatCurrency(totalPartyFreight)}`} icon={DollarSign} color="emerald" />
-        <KPICard title="Total Bhada" value={`₹${formatCurrency(totalGaadiFreight)}`} icon={Receipt} color="orange" />
-        <KPICard title="Pending POD" value={pendingPODCount} icon={FileText} color="amber" alert={pendingPODCount > 0} />
+      <motion.div
+        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6"
+        variants={STAGGER_CONTAINER}
+        initial="hidden"
+        animate="visible"
+      >
+        <KPICard title="Total Trips" value={totalTrips} icon={Truck} color="blue" variants={FADE_IN_VARIANTS} />
+        <KPICard title="Total Freight" value={`₹${formatCurrency(totalPartyFreight)}`} icon={DollarSign} color="emerald" variants={FADE_IN_VARIANTS} />
+        <KPICard title="Total Bhada" value={`₹${formatCurrency(totalGaadiFreight)}`} icon={Receipt} color="orange" variants={FADE_IN_VARIANTS} />
+        <KPICard title="Pending POD" value={pendingPODCount} icon={FileText} color="amber" alert={pendingPODCount > 0} variants={FADE_IN_VARIANTS} />
 
-        <KPICard title="Pending Payments" value={pendingPaymentsCount} icon={Coins} color="rose" alert={pendingPaymentsCount > 0} />
-        <KPICard title="Balance Due" value={`₹${formatCurrency(balanceDue)}`} icon={Wallet} color="indigo" />
-        <KPICard title="Payable" value={`₹${formatCurrency(payable)}`} icon={HandCoins} color="cyan" />
-        <KPICard title="Monthly Profit" value={`₹${formatCurrency(totalProfit)}`} icon={CircleDollarSign} color="green" />
-      </div>
+        <KPICard title="Pending Payments" value={pendingPaymentsCount} icon={Coins} color="rose" alert={pendingPaymentsCount > 0} variants={FADE_IN_VARIANTS} />
+        <KPICard title="Balance Due" value={`₹${formatCurrency(balanceDue)}`} icon={Wallet} color="indigo" variants={FADE_IN_VARIANTS} />
+        <KPICard title="Payable" value={`₹${formatCurrency(payable)}`} icon={HandCoins} color="cyan" variants={FADE_IN_VARIANTS} />
+        <KPICard title="Monthly Profit" value={`₹${formatCurrency(totalProfit)}`} icon={CircleDollarSign} color="green" variants={FADE_IN_VARIANTS} />
+      </motion.div>
 
       {/* ===== ROW 3: PROFIT GRAPH + STATUS CHARTS ===== */}
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
@@ -336,7 +343,7 @@ export default function Dashboard() {
    COMPONENTS
 ========================= */
 
-function KPICard({ title, value, icon: Icon, color, alert }) {
+function KPICard({ title, value, icon: Icon, color, alert, ...props }) {
   const colors = {
     blue: "text-blue-400 bg-blue-400/10",
     emerald: "text-emerald-400 bg-emerald-400/10",
@@ -351,7 +358,7 @@ function KPICard({ title, value, icon: Icon, color, alert }) {
   const theme = colors[color] || colors.blue;
 
   return (
-    <GlassCard className={`relative overflow-hidden group hover:bg-white/5 transition-all duration-300 ${alert ? 'border-orange-500/30' : ''}`} interactive>
+    <GlassCard className={`relative overflow-hidden group hover:bg-white/5 transition-all duration-300 ${alert ? 'border-orange-500/30' : ''}`} interactive {...props}>
       {alert && (
         <div className="absolute top-0 right-0 w-2 h-2 rounded-full bg-orange-500 animate-pulse m-3" />
       )}

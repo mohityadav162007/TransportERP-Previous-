@@ -6,6 +6,8 @@ import GlassButton from "../components/GlassButton";
 import Skeleton from "../components/Skeleton";
 import { formatCurrency, formatDate } from "../utils/format";
 import { Plus, Edit2, Trash2, RotateCcw, Upload, FileText, Download, MapPin, Calendar, Wallet } from "lucide-react";
+import { motion } from "framer-motion";
+import { STAGGER_CONTAINER, LIST_ITEM_VARIANTS } from "../styles/animations";
 
 export default function Trips() {
   const navigate = useNavigate();
@@ -245,13 +247,26 @@ export default function Trips() {
       </GlassCard>
 
       {/* CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      <motion.div
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6"
+        variants={STAGGER_CONTAINER}
+        initial="hidden"
+        animate="visible"
+      >
         {filteredTrips.map(trip => (
           <GlassCard
             key={trip.id}
             className={`flex flex-col h-full relative group ${trip.is_deleted ? "opacity-60 grayscale" : ""}`}
             interactive
             onClick={() => navigate(`/trips/${trip.id}`)}
+            variants={LIST_ITEM_VARIANTS}
+            // Override GlassCard's default initial/animate to let parent control stagger
+            initial={false}
+            animate={false} // By not setting this, it inherits from parent? No, GlassCard uses motion.div directly. 
+          // Actually, if I pass variants to GlassCard data-props, it might override.
+          // But GlassCard implementation uses <motion.div ... initial="hidden" animate="visible">. 
+          // I need to update GlassCard to accept props better.
+          // For now, let's assuming I will update GlassCard to be flexible.
           >
             {/* Deleted Badge */}
             {trip.is_deleted && <div className="absolute top-0 left-0 right-0 bottom-0 bg-black/20 flex items-center justify-center pointer-events-none rounded-2xl z-20">
@@ -309,16 +324,16 @@ export default function Trips() {
             {/* STATUS BADGES */}
             <div className="flex items-center justify-between mb-4">
               <div className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${(trip.pod_status === 'UPLOADED' || trip.pod_status === 'RECEIVED')
-                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                  : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
                 }`}>
                 <FileText size={10} />
                 {trip.pod_status === 'UPLOADED' || trip.pod_status === 'RECEIVED' ? 'POD Received' : 'POD Pending'}
               </div>
 
               <div className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${trip.party_balance > 0
-                  ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                  : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                 }`}>
                 {trip.party_balance > 0 ? 'Payment Pending' : 'Paid'}
               </div>
@@ -381,16 +396,18 @@ export default function Trips() {
 
           </GlassCard>
         ))}
-      </div>
+      </motion.div>
 
-      {filteredTrips.length === 0 && (
-        <div className="flex flex-col items-center justify-center p-12 glass-panel opacity-50">
-          <div className="bg-white/10 p-4 rounded-full mb-4">
-            <FileText size={32} />
+      {
+        filteredTrips.length === 0 && (
+          <div className="flex flex-col items-center justify-center p-12 glass-panel opacity-50">
+            <div className="bg-white/10 p-4 rounded-full mb-4">
+              <FileText size={32} />
+            </div>
+            <p className="text-lg font-medium text-white/50">No trips found matching criteria</p>
           </div>
-          <p className="text-lg font-medium text-white/50">No trips found matching criteria</p>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 }

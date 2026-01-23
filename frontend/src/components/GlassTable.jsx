@@ -1,43 +1,51 @@
-import React from 'react';
-import styled from 'styled-components';
+import { motion, AnimatePresence } from 'framer-motion';
+import { LIST_ITEM_VARIANTS, STAGGER_CONTAINER } from '../styles/animations';
 
 const GlassTable = ({ columns, data, onRowClick }) => {
-    return (
-        <TableContainer className="glass-panel">
-            <StyledTable>
-                <thead>
-                    <tr>
-                        {columns.map((col, index) => (
-                            <th key={index} style={{ width: col.width }}>{col.header}</th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.length > 0 ? (
-                        data.map((row, rowIndex) => (
-                            <tr
-                                key={rowIndex}
-                                onClick={() => onRowClick && onRowClick(row)}
-                                className={onRowClick ? 'interactive' : ''}
-                            >
-                                {columns.map((col, colIndex) => (
-                                    <td key={colIndex}>
-                                        {col.render ? col.render(row) : row[col.accessor]}
-                                    </td>
-                                ))}
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan={columns.length} className="text-center py-8 text-white/50">
-                                No data available
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </StyledTable>
-        </TableContainer>
-    );
+  return (
+    <TableContainer className="glass-panel">
+      <StyledTable>
+        <thead>
+          <tr>
+            {columns.map((col, index) => (
+              <th key={index} style={{ width: col.width }}>{col.header}</th>
+            ))}
+          </tr>
+        </thead>
+        <motion.tbody
+          initial="hidden"
+          animate="visible"
+          variants={STAGGER_CONTAINER}
+        >
+          <AnimatePresence>
+            {data.length > 0 ? (
+              data.map((row, rowIndex) => (
+                <motion.tr
+                  key={rowIndex}
+                  onClick={() => onRowClick && onRowClick(row)}
+                  className={onRowClick ? 'interactive' : ''}
+                  variants={LIST_ITEM_VARIANTS}
+                  layout
+                >
+                  {columns.map((col, colIndex) => (
+                    <td key={colIndex}>
+                      {col.render ? col.render(row) : row[col.accessor]}
+                    </td>
+                  ))}
+                </motion.tr>
+              ))
+            ) : (
+              <motion.tr variants={LIST_ITEM_VARIANTS}>
+                <td colSpan={columns.length} className="text-center py-8 text-white/50">
+                  No data available
+                </td>
+              </motion.tr>
+            )}
+          </AnimatePresence>
+        </motion.tbody>
+      </StyledTable>
+    </TableContainer>
+  );
 };
 
 const TableContainer = styled.div`
@@ -67,7 +75,7 @@ const StyledTable = styled.table`
   tbody {
     tr {
       border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-      transition: background 0.2s ease;
+      // Removed CSS transition to avoid conflict with framer-motion
       
       &:last-child {
         border-bottom: none;

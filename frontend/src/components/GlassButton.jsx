@@ -1,5 +1,5 @@
-import React from 'react';
-import styled, { css } from 'styled-components';
+import { motion } from 'framer-motion';
+import { BUTTON_TAP } from '../styles/animations';
 
 const GlassButton = ({
     children,
@@ -11,10 +11,12 @@ const GlassButton = ({
 }) => {
     return (
         <StyledButton
+            as={motion.button}
             className={`${className || ''} btn-glass-${variant}`}
             onClick={onClick}
             disabled={disabled}
             type={type}
+            whileTap={!disabled ? BUTTON_TAP : undefined}
         >
             {children}
         </StyledButton>
