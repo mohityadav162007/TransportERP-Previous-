@@ -13,6 +13,7 @@ import {
     Package
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import ConnectionStatus from '../components/ConnectionStatus';
 
 const Sidebar = () => {
     const { logout } = useAuth();
@@ -57,7 +58,8 @@ const Sidebar = () => {
                 })}
             </nav>
 
-            <div className="p-4 border-t border-white/5">
+            <div className="p-4 border-t border-white/5 space-y-2">
+                <ConnectionStatus />
                 <button
                     onClick={logout}
                     className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors"
