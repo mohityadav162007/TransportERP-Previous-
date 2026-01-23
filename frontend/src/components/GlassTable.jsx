@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import styled from 'styled-components'; // Added missing import
 import { LIST_ITEM_VARIANTS, STAGGER_CONTAINER } from '../styles/animations';
 
 const GlassTable = ({ columns, data, onRowClick }) => {

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import styled from 'styled-components'; // Added missing import
 import { BUTTON_TAP } from '../styles/animations';
 
 const GlassButton = ({
