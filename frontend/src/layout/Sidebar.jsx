@@ -21,7 +21,6 @@ const Sidebar = () => {
     const navItems = [
         { name: 'Dashboard', path: '/', icon: LayoutDashboard },
         { name: 'All Trips', path: '/trips', icon: Truck },
-        { name: 'New Trip', path: '/trips/new', icon: PlusCircle },
         { name: 'Own Trips', path: '/own-trips', icon: Truck },
         { name: 'Analytics', path: '/analytics', icon: PieChart },
         { name: 'Reports', path: '/reports', icon: FileText },

@@ -5,7 +5,7 @@ import GlassCard from "../components/GlassCard";
 import GlassButton from "../components/GlassButton";
 import Skeleton from "../components/Skeleton";
 import { formatCurrency, formatDate } from "../utils/format";
-import { Plus, Edit2, Trash2, RotateCcw, Upload, FileText, Download } from "lucide-react";
+import { Plus, Edit2, Trash2, RotateCcw, Upload, FileText, Download, MapPin, Calendar, Wallet } from "lucide-react";
 
 export default function Trips() {
   const navigate = useNavigate();
@@ -258,57 +258,74 @@ export default function Trips() {
               <span className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold uppercase shadow-lg">Deleted</span>
             </div>}
 
-            {/* TOP SECTION */}
-            <div className="flex justify-between items-start mb-4 border-b border-white/5 pb-4">
-              <div>
+            {/* HEADER ROW */}
+            <div className="flex justify-between items-start mb-4 border-b border-white/5 pb-3">
+              <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-white text-lg tracking-tight group-hover:text-blue-400 transition-colors">
+                  <span className="font-bold text-lg text-white group-hover:text-blue-400 transition-colors">
                     {trip.trip_code}
                   </span>
-                  {(trip.pod_status === 'UPLOADED' || trip.pod_status === 'RECEIVED') ? (
-                    <span className="bg-emerald-500/20 text-emerald-400 p-1 rounded-full"><FileText size={14} /></span>
-                  ) : (
-                    <span className="bg-rose-500/20 text-rose-400 p-1 rounded-full" title="POD Pending"><FileText size={14} /></span>
-                  )}
+                  <span className="text-[10px] font-mono bg-white/10 px-1.5 py-0.5 rounded text-white/70">
+                    {trip.vehicle_number}
+                  </span>
                 </div>
-                <div className="text-xs text-blue-300 font-bold uppercase tracking-wider mt-1 truncate max-w-[180px]">
+                <span className="text-xs text-blue-300 font-bold uppercase tracking-wider mt-1 truncate max-w-[200px]" title={trip.party_name}>
                   {trip.party_name}
+                </span>
+              </div>
+              <div className="text-right">
+                <div className="flex items-center gap-1 justify-end">
+                  <Wallet size={12} className={trip.party_balance > 0 ? "text-rose-400" : "text-emerald-400"} />
+                  <span className={`font-bold text-lg ${trip.party_balance > 0 ? "text-rose-400" : "text-emerald-400"}`}>
+                    ₹{formatCurrency(trip.party_balance)}
+                  </span>
+                </div>
+                <span className="text-[9px] uppercase tracking-widest text-white/30 font-bold">Balance</span>
+              </div>
+            </div>
+
+            {/* ROUTE INFO */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div>
+                <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-white/40 mb-1">
+                  <MapPin size={10} /> From
+                </div>
+                <div className="text-sm font-semibold text-white truncate" title={trip.from_location}>{trip.from_location}</div>
+                <div className="flex items-center gap-1 text-[10px] text-white/50 mt-1">
+                  <Calendar size={10} /> {formatDate(trip.loading_date)}
                 </div>
               </div>
               <div className="text-right">
-                <div className={`font-bold text-xl ${(trip.payment_status || trip.party_payment_status) === 'PAID' ? "text-emerald-400" : "text-rose-400"}`}>
-                  ₹{formatCurrency(trip.party_balance)}
+                <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-white/40 mb-1 justify-end">
+                  To <MapPin size={10} />
                 </div>
-                <div className="text-[10px] text-white/40 uppercase font-medium mt-1">Balance</div>
+                <div className="text-sm font-semibold text-white truncate" title={trip.to_location}>{trip.to_location}</div>
+                <div className="flex items-center gap-1 text-[10px] text-white/50 mt-1 justify-end">
+                  {formatDate(trip.unloading_date)} <Calendar size={10} />
+                </div>
               </div>
             </div>
 
-            {/* ROUTE */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="p-3 rounded-lg bg-white/5 border border-white/5">
-                <div className="text-[10px] text-white/40 uppercase mb-1">From</div>
-                <div className="text-sm font-semibold text-white truncate">{trip.from_location || trip.route_from}</div>
-                <div className="text-[10px] text-white/50 mt-1">{formatDate(trip.loading_date)}</div>
+            {/* STATUS BADGES */}
+            <div className="flex items-center justify-between mb-4">
+              <div className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${(trip.pod_status === 'UPLOADED' || trip.pod_status === 'RECEIVED')
+                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                  : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                }`}>
+                <FileText size={10} />
+                {trip.pod_status === 'UPLOADED' || trip.pod_status === 'RECEIVED' ? 'POD Received' : 'POD Pending'}
               </div>
-              <div className="p-3 rounded-lg bg-white/5 border border-white/5">
-                <div className="text-[10px] text-white/40 uppercase mb-1">To</div>
-                <div className="text-sm font-semibold text-white truncate">{trip.to_location || trip.route_to}</div>
-                <div className="text-[10px] text-white/50 mt-1">{formatDate(trip.unloading_date)}</div>
-              </div>
-            </div>
 
-            {/* INFO ROW */}
-            <div className="flex justify-between items-center mb-6 text-xs text-white/60">
-              <div className="flex items-center gap-2">
-                <span className="bg-white/10 px-2 py-1 rounded text-white/80 font-mono">{trip.vehicle_number}</span>
-              </div>
-              <div>
-                {/* Placeholder for other tags */}
+              <div className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${trip.party_balance > 0
+                  ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                  : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                }`}>
+                {trip.party_balance > 0 ? 'Payment Pending' : 'Paid'}
               </div>
             </div>
 
             {/* ACTIONS FOOTER */}
-            <div className="mt-auto pt-4 border-t border-white/5 flex justify-between items-center opacity-80 group-hover:opacity-100 transition-opacity">
+            <div className="mt-auto pt-3 border-t border-white/5 flex justify-between items-center opacity-70 group-hover:opacity-100 transition-opacity">
               {!trip.is_deleted ? (
                 <>
                   <div
@@ -326,12 +343,14 @@ export default function Trips() {
                     <button
                       onClick={(e) => { e.stopPropagation(); navigate(`/trips/edit/${trip.id}`); }}
                       className="p-2 hover:bg-white/10 rounded-full text-white/70 hover:text-white transition-colors"
+                      title="Edit Trip"
                     >
                       <Edit2 size={16} />
                     </button>
                     <button
                       onClick={(e) => softDelete(e, trip.id)}
                       className="p-2 hover:bg-rose-500/20 rounded-full text-rose-400 hover:text-rose-300 transition-colors"
+                      title="Delete Trip"
                     >
                       <Trash2 size={16} />
                     </button>
