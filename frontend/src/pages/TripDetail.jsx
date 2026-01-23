@@ -70,15 +70,15 @@ export default function TripDetail() {
             <ArrowLeft size={18} /> Back
           </GlassButton>
 
-          {user?.role === 'admin' && (
-            <GlassButton
-              variant="secondary"
-              onClick={() => setShowPrintModal(true)}
-              className="bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 border-blue-500/30"
-            >
-              <Printer size={18} /> Print Slips
-            </GlassButton>
-          )}
+          {/* {user?.role === 'admin' && ( */}
+          <GlassButton
+            variant="secondary"
+            onClick={() => setShowPrintModal(true)}
+            className="bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 border-blue-500/30"
+          >
+            <Printer size={18} /> Print Slips
+          </GlassButton>
+          {/* )} */}
 
           <GlassButton
             variant="primary"
