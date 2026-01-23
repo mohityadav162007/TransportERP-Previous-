@@ -13,14 +13,37 @@ export const SPRING_GENTLE = {
 };
 
 export const PAGE_VARIANTS = {
-    initial: { opacity: 0, scale: 0.98 },
-    animate: { opacity: 1, scale: 1 },
-    exit: { opacity: 0, scale: 1.02 }
+    initial: {
+        opacity: 0,
+        scale: 0.96,
+        rotateY: 15, // Subtle 3D rotation start
+        transformOrigin: "50% 50%"
+    },
+    animate: {
+        opacity: 1,
+        scale: 1,
+        rotateY: 0,
+        transition: {
+            duration: 0.5,
+            ease: [0.25, 1, 0.5, 1], // Apple-like ease
+            type: "spring",
+            stiffness: 100,
+            damping: 20
+        }
+    },
+    exit: {
+        opacity: 0,
+        scale: 0.96,
+        rotateY: -15, // Rotate out the other way
+        transition: {
+            duration: 0.4,
+            ease: [0.25, 1, 0.5, 1]
+        }
+    }
 };
 
 export const PAGE_TRANSITION = {
-    duration: 0.4,
-    ease: [0.25, 1, 0.5, 1] // Apple-like ease
+    // Transition defined inside variants for cleaner control per-state
 };
 
 export const FADE_IN_VARIANTS = {
