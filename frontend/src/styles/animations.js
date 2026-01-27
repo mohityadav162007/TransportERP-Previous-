@@ -186,3 +186,8 @@ export const FORM_STEP_VARIANTS = {
         }
     })
 };
+
+export const BUTTON_TAP = {
+    scale: 0.96,
+    transition: { duration: 0.1 }
+};
