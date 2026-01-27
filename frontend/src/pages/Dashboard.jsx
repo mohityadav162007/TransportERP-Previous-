@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { use3DNavigate } from "../hooks/use3DNavigate";
 import api from "../services/api";
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -25,7 +25,7 @@ import {
 import { formatCurrency } from "../utils/format";
 
 export default function Dashboard() {
-  const navigate = useNavigate();
+  const { navigate } = use3DNavigate();
   const [trips, setTrips] = useState(null);
 
   useEffect(() => {
@@ -299,12 +299,12 @@ export default function Dashboard() {
 
         {/* POD Pending Table (2 cols) */}
         <div className="xl:col-span-2 min-h-full">
-          <GlassTableHeader title="POD Pending" count={pendingPODCount} onClick={() => navigate('/trips')} />
+          <GlassTableHeader title="POD Pending" count={pendingPODCount} onClick={() => navigate('/trips', { transition: 'card' })} />
           <div className="glass-panel overflow-hidden">
             <GlassTable
               columns={tableColumns}
               data={pendingPODList}
-              onRowClick={(row) => navigate(`/trips/${row.id}`)}
+              onRowClick={(row) => navigate(`/trips/${row.id}`, { transition: 'stack' })}
             />
           </div>
         </div>
@@ -313,23 +313,23 @@ export default function Dashboard() {
       {/* ===== ROW 5: PENDING PAYMENTS + RECENT TRIPS ===== */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div className="min-h-[300px]">
-          <GlassTableHeader title="Pending Payments" count={pendingPaymentsCount} onClick={() => navigate('/trips')} />
+          <GlassTableHeader title="Pending Payments" count={pendingPaymentsCount} onClick={() => navigate('/trips', { transition: 'card' })} />
           <div className="glass-panel overflow-hidden">
             <GlassTable
               columns={tableColumns}
               data={pendingPaymentList}
-              onRowClick={(row) => navigate(`/trips/${row.id}`)}
+              onRowClick={(row) => navigate(`/trips/${row.id}`, { transition: 'stack' })}
             />
           </div>
         </div>
 
         <div className="min-h-[300px]">
-          <GlassTableHeader title="Recent Trips" onClick={() => navigate('/trips')} />
+          <GlassTableHeader title="Recent Trips" onClick={() => navigate('/trips', { transition: 'card' })} />
           <div className="glass-panel overflow-hidden">
             <GlassTable
               columns={tableColumns}
               data={recentTripsList}
-              onRowClick={(row) => navigate(`/trips/${row.id}`)}
+              onRowClick={(row) => navigate(`/trips/${row.id}`, { transition: 'stack' })}
             />
           </div>
         </div>

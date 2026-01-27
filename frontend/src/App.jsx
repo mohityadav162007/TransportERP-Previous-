@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { TransitionProvider } from "./context/TransitionContext";
 import Layout from "./layout/Layout";
 import PrivateRoute from "./components/PrivateRoute";
 import PageTransition from "./components/PageTransition";
@@ -23,156 +24,105 @@ import MotorOwnerDetail from "./pages/MotorOwnerDetail";
 import AdminPanel from "./pages/AdminPanel";
 import CourierManagement from "./pages/CourierManagement";
 
-function AnimatedRoutes() {
-  // Removed AnimatePresence and specific location keying to fix "Blue Screen" rendering issue.
-  // We will restore specific animations later once the app is stable.
+function AuthenticatedRoutes() {
+  const location = useLocation();
+
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
+    <PrivateRoute>
+      <Layout>
+        <AnimatePresence mode="wait" initial={false}>
+          {/* We key the Routes by pathname so Framer Motion detects the change */}
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={
+              <PageTransition>
+                <Dashboard />
+              </PageTransition>
+            } />
 
-      <Route path="/" element={
-        <PrivateRoute>
-          <Layout>
-            <PageTransition>
-              <Dashboard />
-            </PageTransition>
-          </Layout>
-        </PrivateRoute>
-      } />
+            <Route path="/trips" element={
+              <PageTransition>
+                <Trips />
+              </PageTransition>
+            } />
 
-      <Route path="/trips" element={
-        <PrivateRoute>
-          <Layout>
-            <PageTransition>
-              <Trips />
-            </PageTransition>
-          </Layout>
-        </PrivateRoute>
-      } />
+            <Route path="/trips/new" element={
+              <PageTransition>
+                <CreateTrip />
+              </PageTransition>
+            } />
 
-      <Route path="/trips/new" element={
-        <PrivateRoute>
-          <Layout>
-            <PageTransition>
-              <CreateTrip />
-            </PageTransition>
-          </Layout>
-        </PrivateRoute>
-      } />
+            <Route path="/trips/edit/:id" element={
+              <PageTransition>
+                <EditTrip />
+              </PageTransition>
+            } />
 
-      <Route path="/trips/edit/:id" element={
-        <PrivateRoute>
-          <Layout>
-            <PageTransition>
-              <EditTrip />
-            </PageTransition>
-          </Layout>
-        </PrivateRoute>
-      } />
+            <Route path="/trips/:id" element={
+              <PageTransition>
+                <TripDetail />
+              </PageTransition>
+            } />
 
-      <Route path="/trips/:id" element={
-        <PrivateRoute>
-          <Layout>
-            <PageTransition>
-              <TripDetail />
-            </PageTransition>
-          </Layout>
-        </PrivateRoute>
-      } />
+            <Route path="/analytics" element={
+              <PageTransition>
+                <Analytics />
+              </PageTransition>
+            } />
 
-      <Route path="/analytics" element={
-        <PrivateRoute>
-          <Layout>
-            <PageTransition>
-              <Analytics />
-            </PageTransition>
-          </Layout>
-        </PrivateRoute>
-      } />
+            <Route path="/reports" element={
+              <PageTransition>
+                <Reports />
+              </PageTransition>
+            } />
 
-      <Route path="/reports" element={
-        <PrivateRoute>
-          <Layout>
-            <PageTransition>
-              <Reports />
-            </PageTransition>
-          </Layout>
-        </PrivateRoute>
-      } />
+            <Route path="/payment-history" element={
+              <PageTransition>
+                <PaymentHistory />
+              </PageTransition>
+            } />
 
-      <Route path="/payment-history" element={
-        <PrivateRoute>
-          <Layout>
-            <PageTransition>
-              <PaymentHistory />
-            </PageTransition>
-          </Layout>
-        </PrivateRoute>
-      } />
+            <Route path="/expenses" element={
+              <PageTransition>
+                <DailyExpenses />
+              </PageTransition>
+            } />
 
-      <Route path="/expenses" element={
-        <PrivateRoute>
-          <Layout>
-            <PageTransition>
-              <DailyExpenses />
-            </PageTransition>
-          </Layout>
-        </PrivateRoute>
-      } />
+            <Route path="/own-trips" element={
+              <PageTransition>
+                <OwnTrips />
+              </PageTransition>
+            } />
 
-      <Route path="/own-trips" element={
-        <PrivateRoute>
-          <Layout>
-            <PageTransition>
-              <OwnTrips />
-            </PageTransition>
-          </Layout>
-        </PrivateRoute>
-      } />
+            <Route path="/analytics/party/:name" element={
+              <PageTransition>
+                <PartyDetail />
+              </PageTransition>
+            } />
 
-      <Route path="/analytics/party/:name" element={
-        <PrivateRoute>
-          <Layout>
-            <PageTransition>
-              <PartyDetail />
-            </PageTransition>
-          </Layout>
-        </PrivateRoute>
-      } />
+            <Route path="/analytics/owner/:name" element={
+              <PageTransition>
+                <MotorOwnerDetail />
+              </PageTransition>
+            } />
 
-      <Route path="/analytics/owner/:name" element={
-        <PrivateRoute>
-          <Layout>
-            <PageTransition>
-              <MotorOwnerDetail />
-            </PageTransition>
-          </Layout>
-        </PrivateRoute>
-      } />
+            <Route path="/admin-panel" element={
+              <PageTransition>
+                <AdminPanel />
+              </PageTransition>
+            } />
 
-      <Route path="/admin-panel" element={
-        <PrivateRoute>
-          <Layout>
-            <PageTransition>
-              <AdminPanel />
-            </PageTransition>
-          </Layout>
-        </PrivateRoute>
-      } />
+            <Route path="/courier" element={
+              <PageTransition>
+                <CourierManagement />
+              </PageTransition>
+            } />
 
-      <Route path="/courier" element={
-        <PrivateRoute>
-          <Layout>
-            <PageTransition>
-              <CourierManagement />
-            </PageTransition>
-          </Layout>
-        </PrivateRoute>
-      } />
-
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+            {/* Fallback within authenticated app */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AnimatePresence>
+      </Layout>
+    </PrivateRoute>
   );
 }
 
@@ -180,7 +130,13 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <AnimatedRoutes />
+        <TransitionProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            {/* All other routes are handled by AuthenticatedRoutes which includes Layout */}
+            <Route path="/*" element={<AuthenticatedRoutes />} />
+          </Routes>
+        </TransitionProvider>
       </BrowserRouter>
     </AuthProvider>
   );

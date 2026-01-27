@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { use3DNavigate } from "../hooks/use3DNavigate";
+import { AnimatePresence } from "framer-motion";
 import api from "../services/api";
 import GlassCard from "../components/GlassCard";
 import GlassButton from "../components/GlassButton";
@@ -11,7 +13,7 @@ import PrintModal from "../components/printing/PrintModal";
 
 export default function TripDetail() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const { navigate, back } = use3DNavigate();
   const { user } = useAuth();
   const [trip, setTrip] = useState(null);
   const [showPrintModal, setShowPrintModal] = useState(false);
@@ -55,7 +57,7 @@ export default function TripDetail() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <div className="flex items-center gap-2 text-white/50 text-sm mb-1">
-            <span onClick={() => navigate('/trips')} className="cursor-pointer hover:text-white">Trips</span>
+            <span onClick={() => navigate('/trips', { direction: 'backward' })} className="cursor-pointer hover:text-white">Trips</span>
             <span>/</span>
             <span>Details</span>
           </div>
@@ -65,7 +67,7 @@ export default function TripDetail() {
         <div className="flex gap-3">
           <GlassButton
             variant="secondary"
-            onClick={() => navigate("/trips")}
+            onClick={() => navigate("/trips", { direction: 'backward', transition: 'stack' })}
           >
             <ArrowLeft size={18} /> Back
           </GlassButton>
@@ -82,7 +84,7 @@ export default function TripDetail() {
 
           <GlassButton
             variant="primary"
-            onClick={() => navigate(`/trips/edit/${trip.id}`)}
+            onClick={() => navigate(`/trips/edit/${trip.id}`, { transition: 'stack' })}
           >
             <Edit2 size={18} /> Edit Trip
           </GlassButton>
@@ -160,12 +162,14 @@ export default function TripDetail() {
 
       </div>
 
-      {showPrintModal && (
-        <PrintModal
-          trip={trip}
-          onClose={() => setShowPrintModal(false)}
-        />
-      )}
+      <AnimatePresence>
+        {showPrintModal && (
+          <PrintModal
+            trip={trip}
+            onClose={() => setShowPrintModal(false)}
+          />
+        )}
+      </AnimatePresence>
 
     </div>
   );
