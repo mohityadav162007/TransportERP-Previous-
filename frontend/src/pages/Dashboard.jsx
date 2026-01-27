@@ -9,8 +9,7 @@ import {
   Truck, DollarSign, Receipt, FileText, Coins, Wallet, HandCoins, CircleDollarSign,
   TrendingUp, ArrowRight
 } from "lucide-react";
-import { motion } from "framer-motion";
-import { STAGGER_CONTAINER, FADE_IN_VARIANTS } from "../styles/animations";
+
 
 import GlassCard from "../components/GlassCard";
 import GlassTable from "../components/GlassTable";
@@ -88,22 +87,17 @@ export default function Dashboard() {
       {/* ===== ROW 1 & 2: KPIs (4 cols) ===== */}
       <h1 className="text-2xl font-bold text-white mb-2">Dashboard Overview</h1>
 
-      <motion.div
-        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6"
-        variants={STAGGER_CONTAINER}
-        initial="hidden"
-        animate="visible"
-      >
-        <KPICard title="Total Trips" value={totalTrips} icon={Truck} color="blue" />
-        <KPICard title="Total Freight" value={`₹${formatCurrency(totalPartyFreight)}`} icon={DollarSign} color="emerald" />
-        <KPICard title="Total Bhada" value={`₹${formatCurrency(totalGaadiFreight)}`} icon={Receipt} color="orange" />
-        <KPICard title="Pending POD" value={pendingPODCount} icon={FileText} color="amber" alert={pendingPODCount > 0} />
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <KPICard title="Total Trips" value={totalTrips} icon={Truck} color="blue" layoutId="module-trips" onClick={() => navigate('/trips')} />
+        <KPICard title="Total Freight" value={`₹${formatCurrency(totalPartyFreight)}`} icon={DollarSign} color="emerald" layoutId="module-freight" />
+        <KPICard title="Total Bhada" value={`₹${formatCurrency(totalGaadiFreight)}`} icon={Receipt} color="orange" layoutId="module-bhada" />
+        <KPICard title="Pending POD" value={pendingPODCount} icon={FileText} color="amber" alert={pendingPODCount > 0} layoutId="module-pod" />
 
-        <KPICard title="Pending Payments" value={pendingPaymentsCount} icon={Coins} color="rose" alert={pendingPaymentsCount > 0} />
-        <KPICard title="Balance Due" value={`₹${formatCurrency(balanceDue)}`} icon={Wallet} color="indigo" />
-        <KPICard title="Payable" value={`₹${formatCurrency(payable)}`} icon={HandCoins} color="cyan" />
-        <KPICard title="Monthly Profit" value={`₹${formatCurrency(totalProfit)}`} icon={CircleDollarSign} color="green" />
-      </motion.div>
+        <KPICard title="Pending Payments" value={pendingPaymentsCount} icon={Coins} color="rose" alert={pendingPaymentsCount > 0} layoutId="module-payments" onClick={() => navigate('/payment-history')} />
+        <KPICard title="Balance Due" value={`₹${formatCurrency(balanceDue)}`} icon={Wallet} color="indigo" layoutId="module-balance" />
+        <KPICard title="Payable" value={`₹${formatCurrency(payable)}`} icon={HandCoins} color="cyan" layoutId="module-payable" />
+        <KPICard title="Monthly Profit" value={`₹${formatCurrency(totalProfit)}`} icon={CircleDollarSign} color="green" layoutId="module-profit" />
+      </div>
 
       {/* ===== ROW 3: PROFIT GRAPH + STATUS CHARTS ===== */}
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
@@ -343,7 +337,7 @@ export default function Dashboard() {
    COMPONENTS
 ========================= */
 
-function KPICard({ title, value, icon: Icon, color, alert, ...props }) {
+function KPICard({ title, value, icon: Icon, color, alert, layoutId, ...props }) {
   const colors = {
     blue: "text-blue-400 bg-blue-400/10",
     emerald: "text-emerald-400 bg-emerald-400/10",
@@ -358,12 +352,12 @@ function KPICard({ title, value, icon: Icon, color, alert, ...props }) {
   const theme = colors[color] || colors.blue;
 
   return (
-    <GlassCard className={`relative overflow-hidden group hover:bg-white/5 transition-all duration-300 ${alert ? 'border-orange-500/30' : ''}`} interactive {...props}>
+    <GlassCard className={`relative overflow-hidden group ${alert ? 'border-orange-500/30' : ''}`} interactive layoutId={layoutId} {...props}>
       {alert && (
         <div className="absolute top-0 right-0 w-2 h-2 rounded-full bg-orange-500 animate-pulse m-3" />
       )}
       <div className="flex justify-between items-start mb-4">
-        <div className={`p-3 rounded-xl ${theme} group-hover:scale-110 transition-transform duration-300`}>
+        <div className={`p-3 rounded-xl ${theme}`}>
           <Icon size={24} strokeWidth={2} />
         </div>
         {/* Decorative background blob */}

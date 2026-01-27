@@ -6,8 +6,7 @@ import GlassButton from "../components/GlassButton";
 import Skeleton from "../components/Skeleton";
 import { formatCurrency, formatDate } from "../utils/format";
 import { Plus, Edit2, Trash2, RotateCcw, Upload, FileText, Download, MapPin, Calendar, Wallet } from "lucide-react";
-import { motion } from "framer-motion";
-import { STAGGER_CONTAINER, LIST_ITEM_VARIANTS } from "../styles/animations";
+
 
 export default function Trips() {
   const navigate = useNavigate();
@@ -247,26 +246,13 @@ export default function Trips() {
       </GlassCard>
 
       {/* CARDS */}
-      <motion.div
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6"
-        variants={STAGGER_CONTAINER}
-        initial="hidden"
-        animate="visible"
-      >
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {filteredTrips.map(trip => (
           <GlassCard
             key={trip.id}
             className={`flex flex-col h-full relative group ${trip.is_deleted ? "opacity-60 grayscale" : ""}`}
             interactive
             onClick={() => navigate(`/trips/${trip.id}`)}
-            variants={LIST_ITEM_VARIANTS}
-            // Override GlassCard's default initial/animate to let parent control stagger
-            initial={false}
-            animate={false} // By not setting this, it inherits from parent? No, GlassCard uses motion.div directly. 
-          // Actually, if I pass variants to GlassCard data-props, it might override.
-          // But GlassCard implementation uses <motion.div ... initial="hidden" animate="visible">. 
-          // I need to update GlassCard to accept props better.
-          // For now, let's assuming I will update GlassCard to be flexible.
           >
             {/* Deleted Badge */}
             {trip.is_deleted && <div className="absolute top-0 left-0 right-0 bottom-0 bg-black/20 flex items-center justify-center pointer-events-none rounded-2xl z-20">
@@ -396,7 +382,7 @@ export default function Trips() {
 
           </GlassCard>
         ))}
-      </motion.div>
+      </div>
 
       {
         filteredTrips.length === 0 && (

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { motion } from 'framer-motion';
-import { MODAL_BACKDROP, MODAL_CONTENT } from '../../styles/animations';
+import { SYSTEM_SPRING } from '../../styles/animations';
 import api from '../../services/api';
 import PaySlip from './PaySlip';
 import LoadingSlip from './LoadingSlip';
@@ -60,14 +60,17 @@ export default function PrintModal({ trip, onClose }) {
 
     return (
         <motion.div
-            variants={MODAL_BACKDROP}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={SYSTEM_SPRING}
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
         >
             <motion.div
-                variants={MODAL_CONTENT}
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                transition={SYSTEM_SPRING}
                 className="bg-[#1a1f2e] text-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col overflow-hidden border border-white/10"
             >
 

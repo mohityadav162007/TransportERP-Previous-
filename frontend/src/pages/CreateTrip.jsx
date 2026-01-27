@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { use3DNavigate } from "../hooks/use3DNavigate";
 import { motion, AnimatePresence } from "framer-motion";
-import { FORM_STEP_VARIANTS } from "../styles/animations";
+import { SYSTEM_SPRING } from "../styles/animations";
 import {
   Calendar, Truck, Wallet, FileText, ChevronRight, LayoutGrid, CheckCircle, ArrowLeft, ArrowRight
 } from "lucide-react";
@@ -10,14 +10,13 @@ import GlassCard from "../components/GlassCard";
 import GlassInput from "../components/GlassInput";
 import GlassButton from "../components/GlassButton";
 
-function FormStep({ children, direction }) {
+function FormStep({ children }) {
   return (
     <motion.div
-      custom={direction}
-      variants={FORM_STEP_VARIANTS}
-      initial="initial"
-      animate="animate"
-      exit="exit"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={SYSTEM_SPRING}
       style={{
         position: 'absolute',
         width: '100%',
@@ -88,7 +87,7 @@ export default function CreateTrip() {
   };
 
   const prevStep = () => {
-    setDirection('backward'); // Corrected direction string
+    setDirection('backward');
     setCurrentStep(prev => Math.max(prev - 1, 0));
   };
 

@@ -5,6 +5,7 @@ import { TransitionProvider } from "./context/TransitionContext";
 import Layout from "./layout/Layout";
 import PrivateRoute from "./components/PrivateRoute";
 import PageTransition from "./components/PageTransition";
+import { AnimatePresence } from "framer-motion";
 
 
 // Pages
@@ -31,94 +32,96 @@ function AuthenticatedRoutes() {
     <PrivateRoute>
       <Layout>
 
-        <Routes>
-          <Route path="/" element={
-            <PageTransition>
-              <Dashboard />
-            </PageTransition>
-          } />
+        <AnimatePresence mode="popLayout" initial={false}>
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={
+              <PageTransition layoutId="dashboard-page">
+                <Dashboard />
+              </PageTransition>
+            } />
 
-          <Route path="/trips" element={
-            <PageTransition>
-              <Trips />
-            </PageTransition>
-          } />
+            <Route path="/trips" element={
+              <PageTransition layoutId="module-trips">
+                <Trips />
+              </PageTransition>
+            } />
 
-          <Route path="/trips/new" element={
-            <PageTransition>
-              <CreateTrip />
-            </PageTransition>
-          } />
+            <Route path="/trips/new" element={
+              <PageTransition layoutId="module-create-trip">
+                <CreateTrip />
+              </PageTransition>
+            } />
 
-          <Route path="/trips/edit/:id" element={
-            <PageTransition>
-              <EditTrip />
-            </PageTransition>
-          } />
+            <Route path="/trips/edit/:id" element={
+              <PageTransition>
+                <EditTrip />
+              </PageTransition>
+            } />
 
-          <Route path="/trips/:id" element={
-            <PageTransition>
-              <TripDetail />
-            </PageTransition>
-          } />
+            <Route path="/trips/:id" element={
+              <PageTransition>
+                <TripDetail />
+              </PageTransition>
+            } />
 
-          <Route path="/analytics" element={
-            <PageTransition>
-              <Analytics />
-            </PageTransition>
-          } />
+            <Route path="/analytics" element={
+              <PageTransition layoutId="module-analytics">
+                <Analytics />
+              </PageTransition>
+            } />
 
-          <Route path="/reports" element={
-            <PageTransition>
-              <Reports />
-            </PageTransition>
-          } />
+            <Route path="/reports" element={
+              <PageTransition layoutId="module-reports">
+                <Reports />
+              </PageTransition>
+            } />
 
-          <Route path="/payment-history" element={
-            <PageTransition>
-              <PaymentHistory />
-            </PageTransition>
-          } />
+            <Route path="/payment-history" element={
+              <PageTransition layoutId="module-payments">
+                <PaymentHistory />
+              </PageTransition>
+            } />
 
-          <Route path="/expenses" element={
-            <PageTransition>
-              <DailyExpenses />
-            </PageTransition>
-          } />
+            <Route path="/expenses" element={
+              <PageTransition layoutId="module-expenses">
+                <DailyExpenses />
+              </PageTransition>
+            } />
 
-          <Route path="/own-trips" element={
-            <PageTransition>
-              <OwnTrips />
-            </PageTransition>
-          } />
+            <Route path="/own-trips" element={
+              <PageTransition layoutId="module-own">
+                <OwnTrips />
+              </PageTransition>
+            } />
 
-          <Route path="/analytics/party/:name" element={
-            <PageTransition>
-              <PartyDetail />
-            </PageTransition>
-          } />
+            <Route path="/analytics/party/:name" element={
+              <PageTransition>
+                <PartyDetail />
+              </PageTransition>
+            } />
 
-          <Route path="/analytics/owner/:name" element={
-            <PageTransition>
-              <MotorOwnerDetail />
-            </PageTransition>
-          } />
+            <Route path="/analytics/owner/:name" element={
+              <PageTransition>
+                <MotorOwnerDetail />
+              </PageTransition>
+            } />
 
-          <Route path="/admin-panel" element={
-            <PageTransition>
-              <AdminPanel />
-            </PageTransition>
-          } />
+            <Route path="/admin-panel" element={
+              <PageTransition layoutId="module-admin">
+                <AdminPanel />
+              </PageTransition>
+            } />
 
-          <Route path="/courier" element={
-            <PageTransition>
-              <CourierManagement />
-            </PageTransition>
-          } />
+            <Route path="/courier" element={
+              <PageTransition layoutId="module-courier">
+                <CourierManagement />
+              </PageTransition>
+            } />
 
-          {/* Fallback within authenticated app */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            {/* Fallback within authenticated app */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AnimatePresence>
 
       </Layout>
     </PrivateRoute >

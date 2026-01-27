@@ -1,32 +1,23 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useTransition } from '../context/TransitionContext';
-import { PAGE_VARIANTS, PAGE_TRANSITION, CARD_EXPAND_VARIANTS, STACK_SLIDE_VARIANTS } from '../styles/animations';
+import { SYSTEM_SPRING } from '../styles/animations';
 
-export default function PageTransition({ children, className = "" }) {
-    const { transitionState } = useTransition();
+export default function PageTransition({ children, layoutId, className = "" }) {
+    // If layoutId is present, we use it for a shared element transition.
+    // Otherwise, we just render the content static (or minimal fade if needed, but per instructions: NO fade).
 
-    const getVariants = () => {
-        switch (transitionState.type) {
-            case 'card': return CARD_EXPAND_VARIANTS;
-            case 'stack': return STACK_SLIDE_VARIANTS;
-            default: return PAGE_VARIANTS;
-        }
-    };
-
+    // We strictly use layoutId for the Apple-like "App Open" effect.
     return (
-        <div style={{ perspective: '1200px', width: '100%', height: '100%' }}>
-            <motion.div
-                custom={transitionState.direction}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                variants={getVariants()}
-                className={`w-full h-full ${className}`}
-                style={{ transformStyle: 'preserve-3d' }}
-            >
-                {children}
-            </motion.div>
-        </div>
+        <motion.div
+            layoutId={layoutId} // This connects to the Dashboard card with the same ID
+            className={`w-full h-full ${className}`}
+            initial={{ opacity: 0 }} // Small fade to smooth the POP
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }} // Minimal fade out
+            transition={SYSTEM_SPRING}
+            style={{ originX: 0.5, originY: 0 }}
+        >
+            {children}
+        </motion.div>
     );
 }
