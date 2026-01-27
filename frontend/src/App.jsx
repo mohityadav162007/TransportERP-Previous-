@@ -38,22 +38,22 @@ function AuthenticatedRoutes() {
     <PrivateRoute>
       <Layout>
         <Suspense fallback={<LoadingFallback />}>
-          <AnimatePresence mode="popLayout" initial={false}>
+          <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
               <Route path="/" element={
-                <PageTransition layoutId="dashboard-page">
+                <PageTransition>
                   <Dashboard />
                 </PageTransition>
               } />
 
               <Route path="/trips" element={
-                <PageTransition layoutId="module-trips">
+                <PageTransition>
                   <Trips />
                 </PageTransition>
               } />
 
               <Route path="/trips/new" element={
-                <PageTransition layoutId="module-create-trip">
+                <PageTransition>
                   <CreateTrip />
                 </PageTransition>
               } />
@@ -71,31 +71,31 @@ function AuthenticatedRoutes() {
               } />
 
               <Route path="/analytics" element={
-                <PageTransition layoutId="module-analytics">
+                <PageTransition>
                   <Analytics />
                 </PageTransition>
               } />
 
               <Route path="/reports" element={
-                <PageTransition layoutId="module-reports">
+                <PageTransition>
                   <Reports />
                 </PageTransition>
               } />
 
               <Route path="/payment-history" element={
-                <PageTransition layoutId="module-payments">
+                <PageTransition>
                   <PaymentHistory />
                 </PageTransition>
               } />
 
               <Route path="/expenses" element={
-                <PageTransition layoutId="module-expenses">
+                <PageTransition>
                   <DailyExpenses />
                 </PageTransition>
               } />
 
               <Route path="/own-trips" element={
-                <PageTransition layoutId="module-own">
+                <PageTransition>
                   <OwnTrips />
                 </PageTransition>
               } />
@@ -113,13 +113,13 @@ function AuthenticatedRoutes() {
               } />
 
               <Route path="/admin-panel" element={
-                <PageTransition layoutId="module-admin">
+                <PageTransition>
                   <AdminPanel />
                 </PageTransition>
               } />
 
               <Route path="/courier" element={
-                <PageTransition layoutId="module-courier">
+                <PageTransition>
                   <CourierManagement />
                 </PageTransition>
               } />

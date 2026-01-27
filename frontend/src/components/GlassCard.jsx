@@ -1,12 +1,14 @@
 import { motion } from 'framer-motion';
-
+import { FADE_IN_VARIANTS } from '../styles/animations';
 
 const GlassCard = ({
     children,
     className,
     interactive = false,
     onClick,
-    layoutId,
+    initial = "hidden",
+    animate = "visible",
+    variants = FADE_IN_VARIANTS,
     ...messageProps
 }) => {
     return (
@@ -14,7 +16,9 @@ const GlassCard = ({
             className={`glass-panel ${interactive ? 'glass-panel-interactive' : ''} ${className || ''}`}
             onClick={onClick}
             style={{ padding: '24px' }}
-            layoutId={layoutId} // Key for continuity transition
+            initial={initial}
+            animate={animate}
+            variants={variants}
             {...messageProps}
         >
             {children}

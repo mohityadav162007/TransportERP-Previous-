@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SYSTEM_SPRING } from '../styles/animations';
+import { MODAL_BACKDROP, MODAL_CONTENT } from '../styles/animations';
 
 const GlassModal = ({ isOpen, onClose, title, children, maxWidth = '600px' }) => {
   useEffect(() => {
@@ -22,10 +22,10 @@ const GlassModal = ({ isOpen, onClose, title, children, maxWidth = '600px' }) =>
       {isOpen && (
         <Overlay
           as={motion.div}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={SYSTEM_SPRING}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          variants={MODAL_BACKDROP}
           onClick={onClose}
         >
           <ModalContainer
@@ -33,10 +33,7 @@ const GlassModal = ({ isOpen, onClose, title, children, maxWidth = '600px' }) =>
             className="glass-modal"
             maxWidth={maxWidth}
             onClick={(e) => e.stopPropagation()}
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.95, opacity: 0 }}
-            transition={SYSTEM_SPRING}
+            variants={MODAL_CONTENT}
           >
             <Header>
               <Title>{title}</Title>
@@ -68,6 +65,7 @@ const Overlay = styled.div`
   align-items: center;
   justify-content: center;
   padding: 20px;
+  animation: fadeIn 0.3s ease;
 `;
 
 const ModalContainer = styled.div`
