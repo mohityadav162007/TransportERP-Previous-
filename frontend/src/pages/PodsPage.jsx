@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import GlassCard from "../components/GlassCard";
 import GlassInput from "../components/GlassInput";
@@ -9,6 +9,23 @@ import PodDetailsModal from "../components/PodDetailsModal";
 import { formatCurrency, formatDate } from "../utils/format";
 import { Package, Search, Save, Truck, CheckCircle2, FileText, Send, Eye, Filter, Plus, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+
+// Optimized Item Component for the list
+const TripItem = React.memo(({ trip, isSelected, onToggle }) => (
+    <div
+        onClick={() => onToggle(trip.id)}
+        className={`p-3 rounded-lg flex items-center gap-3 cursor-pointer transition-colors border ${isSelected ? 'bg-blue-600/20 border-blue-500/50' : 'bg-transparent border-transparent hover:bg-white/5'}`}
+    >
+        <div className={`w-4 h-4 rounded border flex items-center justify-center ${isSelected ? 'bg-blue-500 border-blue-500' : 'border-white/30'}`}>
+            {isSelected && <CheckCircle2 size={12} className="text-white" />}
+        </div>
+        <div className="flex-grow">
+            <div className="text-sm font-bold text-white">{trip.trip_code}</div>
+            <div className="text-xs text-white/50">{trip.party_name}</div>
+        </div>
+        <div className="text-xs font-mono text-white/40">{trip.from_location}</div>
+    </div>
+));
 
 export default function PodsPage() {
     const [trips, setTrips] = useState([]);
@@ -22,7 +39,8 @@ export default function PodsPage() {
     const [courierForm, setCourierForm] = useState({
         docketNumber: "",
         courierName: "",
-        dispatchDate: new Date().toISOString().split('T')[0]
+        dispatchDate: new Date().toISOString().split('T')[0],
+        lrNumber: ""
     });
     const [submittingCourier, setSubmittingCourier] = useState(false);
 
@@ -42,23 +60,26 @@ export default function PodsPage() {
         }
     };
 
-    // --- FILTERS ---
-    const filteredTrips = trips.filter(t =>
+    // --- FILTERS (Memoized) ---
+    const filteredTrips = React.useMemo(() => trips.filter(t =>
         t.trip_code?.toLowerCase().includes(searchTerm) ||
         t.party_name?.toLowerCase().includes(searchTerm) ||
         t.vehicle_number?.toLowerCase().includes(searchTerm) ||
         t.docket_no?.toLowerCase().includes(searchTerm)
-    );
+    ), [trips, searchTerm]);
 
-    // --- ADD COURIER LOGIC ---
-    const tripsWithoutDocket = trips.filter(t => !t.docket_no);
+    // --- ADD COURIER LOGIC (Memoized) ---
+    const tripsWithoutDocket = React.useMemo(() => trips.filter(t => !t.docket_no), [trips]);
 
-    const toggleCourierSelection = (id) => {
-        const newSet = new Set(courierSelection);
-        if (newSet.has(id)) newSet.delete(id);
-        else newSet.add(id);
-        setCourierSelection(newSet);
-    };
+    // Stable Callback for Selection
+    const toggleCourierSelection = React.useCallback((id) => {
+        setCourierSelection(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(id)) newSet.delete(id);
+            else newSet.add(id);
+            return newSet;
+        });
+    }, []);
 
     const handleCourierSubmit = async (e) => {
         e.preventDefault();
@@ -73,7 +94,7 @@ export default function PodsPage() {
             alert("Courier Assigned Successfully!");
             setShowAddCourier(false);
             setCourierSelection(new Set());
-            setCourierForm({ docketNumber: "", courierName: "", dispatchDate: new Date().toISOString().split('T')[0] });
+            setCourierForm({ docketNumber: "", courierName: "", dispatchDate: new Date().toISOString().split('T')[0], lrNumber: "" });
             fetchTrips(); // Refresh list
         } catch (err) {
             console.error(err);
@@ -270,20 +291,12 @@ export default function PodsPage() {
                                     </div>
                                     <div className="overflow-y-auto p-2 space-y-1 bg-black/20 flex-grow">
                                         {tripsWithoutDocket.map(t => (
-                                            <div
+                                            <TripItem
                                                 key={t.id}
-                                                onClick={() => toggleCourierSelection(t.id)}
-                                                className={`p-3 rounded-lg flex items-center gap-3 cursor-pointer transition-colors border ${courierSelection.has(t.id) ? 'bg-blue-600/20 border-blue-500/50' : 'bg-transparent border-transparent hover:bg-white/5'}`}
-                                            >
-                                                <div className={`w-4 h-4 rounded border flex items-center justify-center ${courierSelection.has(t.id) ? 'bg-blue-500 border-blue-500' : 'border-white/30'}`}>
-                                                    {courierSelection.has(t.id) && <CheckCircle2 size={12} className="text-white" />}
-                                                </div>
-                                                <div className="flex-grow">
-                                                    <div className="text-sm font-bold text-white">{t.trip_code}</div>
-                                                    <div className="text-xs text-white/50">{t.party_name}</div>
-                                                </div>
-                                                <div className="text-xs font-mono text-white/40">{t.from_location}</div>
-                                            </div>
+                                                trip={t}
+                                                isSelected={courierSelection.has(t.id)}
+                                                onToggle={toggleCourierSelection}
+                                            />
                                         ))}
                                         {tripsWithoutDocket.length === 0 && <div className="p-8 text-center text-white/30 text-xs">No trips pending courier assignment.</div>}
                                     </div>
@@ -336,4 +349,3 @@ export default function PodsPage() {
         </div>
     );
 }
-
