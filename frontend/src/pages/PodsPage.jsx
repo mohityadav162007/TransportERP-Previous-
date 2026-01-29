@@ -7,7 +7,7 @@ import GlassTable from "../components/GlassTable";
 import Skeleton from "../components/Skeleton";
 import PodDetailsModal from "../components/PodDetailsModal";
 import { formatCurrency, formatDate } from "../utils/format";
-import { Package, Search, Save, Truck, CheckCircle2, FileText, Send, Eye, Filter, Plus } from "lucide-react";
+import { Package, Search, Save, Truck, CheckCircle2, FileText, Send, Eye, Filter, Plus, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function PodsPage() {
