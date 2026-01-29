@@ -34,7 +34,7 @@ export default function PodsPage() {
         try {
             setLoading(true);
             const res = await api.get("/trips?deleted=false");
-            setTrips(res.data);
+            setTrips(res.data || []);
         } catch (err) {
             console.error("Failed to load trips", err);
         } finally {
@@ -153,13 +153,13 @@ export default function PodsPage() {
 
         // Unloading Details
         {
-            header: "Unloading",
-            accessor: "unloading",
+            header: "Unloading (Hemmali)",
+            accessor: "himmali",
             render: (row) => (
                 <div className="flex flex-col text-xs text-right">
-                    {row.unloading_amount ? (
+                    {row.himmali ? (
                         <>
-                            <span className="text-emerald-400 font-bold">{formatCurrency(row.unloading_amount)}</span>
+                            <span className="text-emerald-400 font-bold">{formatCurrency(row.himmali)}</span>
                             {row.unloading_date && <span className="text-white/40 text-[10px]">{formatDate(row.unloading_date)}</span>}
                         </>
                     ) : (
