@@ -299,6 +299,8 @@ export default function PodsPage() {
                                     <form onSubmit={handleCourierSubmit} className="space-y-4">
                                         <GlassInput label="Docket Number" required value={courierForm.docketNumber} onChange={e => setCourierForm({ ...courierForm, docketNumber: e.target.value })} />
 
+                                        <GlassInput label="LR Number (Optional)" value={courierForm.lrNumber || ''} onChange={e => setCourierForm({ ...courierForm, lrNumber: e.target.value })} placeholder="Update LR No for selected trips" />
+
                                         <div>
                                             <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider ml-1 mb-1 block">Courier Service</label>
                                             <select
