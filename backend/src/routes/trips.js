@@ -752,7 +752,7 @@ router.post("/:id/print-metadata", async (req, res) => {
    BULK COURIER UPDATE
 ================================ */
 router.post("/bulk-courier", async (req, res) => {
-  const { tripIds, docketNumber, courierName, dispatchDate } = req.body;
+  const { tripIds, docketNumber, courierName, dispatchDate, lrNumber } = req.body;
 
   if (!tripIds || !Array.isArray(tripIds) || tripIds.length === 0) {
     return res.status(400).json({ message: "No trips selected" });
@@ -764,11 +764,12 @@ router.post("/bulk-courier", async (req, res) => {
        SET 
          docket_no = $1,
          courier_status = 'Sent',
+         lr_number = CASE WHEN $5::text IS NOT NULL AND $5::text <> '' THEN $5 ELSE lr_number END,
          remark = COALESCE(remark, '') || ' [Courier: ' || $2 || ', Date: ' || $3 || ']',
          updated_at = NOW()
        WHERE id = ANY($4::int[])
        RETURNING id, trip_code`,
-      [docketNumber, courierName, dispatchDate, tripIds]
+      [docketNumber, courierName, dispatchDate, tripIds, lrNumber]
     );
 
     res.json({ message: "Courier details updated", count: result.rowCount, trips: result.rows });
