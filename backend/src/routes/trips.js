@@ -77,6 +77,7 @@ router.post("/:id/pod", async (req, res) => {
       UPDATE trips SET
         pod_status='RECEIVED',
         pod_path=$1,
+        pod_received_date = COALESCE(pod_received_date, NOW()),
         updated_at=now()
       WHERE id=$2
       RETURNING *
@@ -348,8 +349,12 @@ router.put("/:id", async (req, res) => {
         weight=$22,
         remark=$23,
         pod_status=$24,
+        docket_no=$25,
+        courier_status=$26,
+        unloading_amount=$27,
+        unloading_date=$28,
         updated_at=now()
-      WHERE id=$25 AND is_deleted=false
+      WHERE id=$29 AND is_deleted=false
       RETURNING *
       `,
       [
@@ -376,7 +381,12 @@ router.put("/:id", async (req, res) => {
         profit,
         t.weight || null,
         t.remark || null,
+        t.remark || null,
         oldTrip.pod_status, // Preserve existing pod_status
+        t.docket_no || oldTrip.docket_no,
+        t.courier_status || oldTrip.courier_status,
+        t.unloading_amount || oldTrip.unloading_amount,
+        t.unloading_date || oldTrip.unloading_date,
         req.params.id
       ]
     );
@@ -735,6 +745,36 @@ router.post("/:id/print-metadata", async (req, res) => {
     res.status(500).json({ message: "Failed to generate slip numbers" });
   } finally {
     client.release();
+  }
+});
+
+/* ================================
+   BULK COURIER UPDATE
+================================ */
+router.post("/bulk-courier", async (req, res) => {
+  const { tripIds, docketNumber, courierName, dispatchDate } = req.body;
+
+  if (!tripIds || !Array.isArray(tripIds) || tripIds.length === 0) {
+    return res.status(400).json({ message: "No trips selected" });
+  }
+
+  try {
+    const result = await pool.query(
+      `UPDATE trips 
+       SET 
+         docket_no = $1,
+         courier_status = 'Sent',
+         remark = COALESCE(remark, '') || ' [Courier: ' || $2 || ', Date: ' || $3 || ']',
+         updated_at = NOW()
+       WHERE id = ANY($4::int[])
+       RETURNING id, trip_code`,
+      [docketNumber, courierName, dispatchDate, tripIds]
+    );
+
+    res.json({ message: "Courier details updated", count: result.rowCount, trips: result.rows });
+  } catch (err) {
+    console.error("BULK COURIER ERROR:", err);
+    res.status(500).json({ message: "Failed to update courier details" });
   }
 });
 

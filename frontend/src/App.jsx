@@ -22,12 +22,12 @@ const OwnTrips = lazy(() => import("./pages/OwnTrips"));
 const PartyDetail = lazy(() => import("./pages/PartyDetail"));
 const MotorOwnerDetail = lazy(() => import("./pages/MotorOwnerDetail"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
-const CourierManagement = lazy(() => import("./pages/CourierManagement"));
+const PodsPage = lazy(() => import("./pages/PodsPage"));
 
 // Simple Loading Component
 const LoadingFallback = () => (
   <div className="flex h-full w-full items-center justify-center p-20">
-    <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
+    <div className="h-8 w-8 animate-spin rounded-full border-blue-500 border-t-transparent" />
   </div>
 );
 
@@ -118,9 +118,10 @@ function AuthenticatedRoutes() {
                 </PageTransition>
               } />
 
+              {/* Point /courier to PodsPage */}
               <Route path="/courier" element={
                 <PageTransition>
-                  <CourierManagement />
+                  <PodsPage />
                 </PageTransition>
               } />
 
