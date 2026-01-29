@@ -3,22 +3,24 @@ import { formatCurrency, formatDate } from '../../utils/format';
 import loadingSlipBg from '../../assets/loading_slip_template.png';
 
 const LoadingSlip = ({ data = {}, slipNumber }) => {
-    // Coordinate System: mm
-    // Container: 148.5mm x 210mm (Half A4)
+    // Canvas: 148.5mm x 210mm
+    // Font: pt only
+    // Line-height: 1
+    // Vertical Offset: +1.5mm (Compensate ascent)
 
-    // Style Utility for strict mill positioning
-    const pos = (top, left, width = 'auto', align = 'left', fontSize = '12px', fontWeight = 'bold') => ({
+    const pos = (top, left, width = 'auto', align = 'left', fontSize = '10pt', fontWeight = 'bold') => ({
         position: 'absolute',
-        top: `${top}mm`,
+        top: `${top + 1.5}mm`, // Added offset
         left: `${left}mm`,
         width: width,
         textAlign: align,
         fontSize: fontSize,
         fontWeight: fontWeight,
-        color: '#000', // Black text for print
+        color: '#000',
         fontFamily: 'Arial, sans-serif',
         zIndex: 10,
-        whiteSpace: 'nowrap'
+        whiteSpace: 'nowrap',
+        lineHeight: 1
     });
 
     const displayDate = data.loading_date ? formatDate(data.loading_date) : '';
@@ -31,31 +33,24 @@ const LoadingSlip = ({ data = {}, slipNumber }) => {
                 height: '210mm',
                 position: 'relative',
                 overflow: 'hidden',
-                backgroundColor: 'white'
+                backgroundColor: 'white',
+                margin: 0,
+                padding: 0,
+                backgroundImage: `url(${loadingSlipBg})`,
+                backgroundSize: '148.5mm 210mm',
+                backgroundPosition: '0mm 0mm', // top left
+                backgroundRepeat: 'no-repeat',
+                boxSizing: 'border-box'
             }}
         >
-            {/* Background Template */}
-            <img
-                src={loadingSlipBg}
-                alt="Loading Slip Template"
-                style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'fill' // Force 100% fill
-                }}
-            />
+            {/* OVERLAY DATA FIELDS */}
 
-            {/* OVERLAY DATA FIELDS - Adjust coordinates based on template visual */}
-
-            {/* No. (Sequence) - Assuming Top Left area */}
+            {/* No. (Sequence) */}
             <div style={pos(44, 28)}>
                 {slipNumber}
             </div>
 
-            {/* Date - Assuming Top Right area */}
+            {/* Date */}
             <div style={pos(44, 110)}>
                 {displayDate}
             </div>
@@ -80,9 +75,9 @@ const LoadingSlip = ({ data = {}, slipNumber }) => {
                 {data.to_location}
             </div>
 
-            {/* Rate (Party Freight) - "Rate" label usually implies rate per ton or total freight if fixed */}
+            {/* Rate (Party Freight) */}
             <div style={pos(103, 25, '35mm', 'center')}>
-                {/* Leaving blank or using freight if rate not distinct */}
+                {/* Blank */}
             </div>
 
             {/* Weight */}

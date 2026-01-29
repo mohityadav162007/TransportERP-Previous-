@@ -1,7 +1,6 @@
-/* PRINT STYLES */
 @media print {
     @page {
-        size: A4 landscape;
+        size: 148.5mm 210mm;
         margin: 0;
     }
 

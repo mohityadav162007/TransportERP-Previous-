@@ -3,12 +3,14 @@ import { formatCurrency, formatDate } from '../../utils/format';
 import paySlipBg from '../../assets/pay_slip_template.png';
 
 const PaySlip = ({ data = {}, slipNumber }) => {
-    // Coordinate System: mm
-    // Container: 148.5mm x 210mm (Half A4)
+    // Canvas: 148.5mm x 210mm
+    // Font: pt only
+    // Line-height: 1
+    // Vertical Offset: +1.5mm (Compensate ascent)
 
-    const pos = (top, left, width = 'auto', align = 'left', fontSize = '12px', fontWeight = 'bold') => ({
+    const pos = (top, left, width = 'auto', align = 'left', fontSize = '10pt', fontWeight = 'bold') => ({
         position: 'absolute',
-        top: `${top}mm`,
+        top: `${top + 1.5}mm`,
         left: `${left}mm`,
         width: width,
         textAlign: align,
@@ -17,7 +19,8 @@ const PaySlip = ({ data = {}, slipNumber }) => {
         color: '#000',
         fontFamily: 'Arial, sans-serif',
         zIndex: 10,
-        whiteSpace: 'nowrap'
+        whiteSpace: 'nowrap',
+        lineHeight: 1
     });
 
     const displayDate = data.loading_date ? formatDate(data.loading_date) : '';
@@ -30,23 +33,16 @@ const PaySlip = ({ data = {}, slipNumber }) => {
                 height: '210mm',
                 position: 'relative',
                 overflow: 'hidden',
-                backgroundColor: 'white'
+                backgroundColor: 'white',
+                margin: 0,
+                padding: 0,
+                backgroundImage: `url(${paySlipBg})`,
+                backgroundSize: '148.5mm 210mm',
+                backgroundPosition: '0mm 0mm',
+                backgroundRepeat: 'no-repeat',
+                boxSizing: 'border-box'
             }}
         >
-            {/* Background Template */}
-            <img
-                src={paySlipBg}
-                alt="Pay Slip Template"
-                style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'fill'
-                }}
-            />
-
             {/* OVERLAY DATA FIELDS */}
 
             {/* No. */}
@@ -64,8 +60,7 @@ const PaySlip = ({ data = {}, slipNumber }) => {
                 {data.motor_owner_name}
             </div>
 
-            {/* From - Route From? Check previous PaySlip structure logic */}
-            {/* Previous PaySlip had From/To on Row 3 */}
+            {/* From */}
             <div style={pos(68, 25, '35mm', 'center')}>
                 {data.from_location}
             </div>
@@ -80,7 +75,7 @@ const PaySlip = ({ data = {}, slipNumber }) => {
                 {data.vehicle_number}
             </div>
 
-            {/* Driver No - Assuming next to Vehicle or on next line */}
+            {/* Driver No */}
             <div style={pos(95, 110, '35mm')}>
                 {data.driver_number}
             </div>
@@ -95,13 +90,10 @@ const PaySlip = ({ data = {}, slipNumber }) => {
                 {data.weight ? `${data.weight} MT` : ''}
             </div>
 
-            {/* Freight - Assuming same as rate in total column? */}
+            {/* Freight */}
             <div style={pos(116, 35, '35mm', 'center')}>
                 {data.gaadi_freight ? formatCurrency(data.gaadi_freight) : ''}
             </div>
-
-            {/* Advance? Not explicitly mapped in strict rules but usually present */}
-            {/* The user rules said: Rate -> gaadi_freight, Freight -> gaadi_freight. Explicit binding. */}
 
         </div>
     );
