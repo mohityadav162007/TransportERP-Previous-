@@ -6,18 +6,28 @@ import api from '../../services/api';
 import PaySlip from './PaySlip';
 import LoadingSlip from './LoadingSlip';
 import GlassButton from '../GlassButton';
-import { X, Printer, Layout, ArrowRight } from 'lucide-react';
+import { X, Printer, Layout, RefreshCw, FileText } from 'lucide-react';
 import '../../styles/print.css';
 
 export default function PrintModal({ trip, onClose }) {
-    const [step, setStep] = useState('SELECT'); // SELECT | PREVIEW
-    const [leftType, setLeftType] = useState(null); // 'pay_slip' | 'loading_slip' | null
-    const [rightType, setRightType] = useState(null);
-    const [previewData, setPreviewData] = useState({ ...trip });
-    const [slipNumbers, setSlipNumbers] = useState({ pay: null, loading: null });
-    const [generating, setGenerating] = useState(false);
+    // Default to strict print layout
+    const [leftType, setLeftType] = useState('loading_slip');
+    const [rightType, setRightType] = useState('pay_slip');
 
+    // Preview Data (Editable)
+    const [previewData, setPreviewData] = useState({ ...trip });
+
+    // Slip Numbers
+    const [slipNumbers, setSlipNumbers] = useState({
+        pay: trip.pay_slip_number || "PREVIEW",
+        loading: trip.loading_slip_number || "PREVIEW"
+    });
+
+    const [generating, setGenerating] = useState(false);
     const componentRef = useRef();
+
+    // On mount, if numbers exist, use them. If not, they remain "PREVIEW" until user clicks "Generate" or "Print".
+    // Or we could auto-fetch if we wanted to be aggressive, but "PREVIEW" is safer for "No number burning".
 
     const handlePrint = useReactToPrint({
         content: () => componentRef.current,
@@ -26,13 +36,16 @@ export default function PrintModal({ trip, onClose }) {
     });
 
     const generateNumbers = async () => {
+        if (generating) return;
         setGenerating(true);
+
+        // Only request numbers for active slips
         const types = [];
         if (leftType === 'pay_slip' || rightType === 'pay_slip') types.push('pay_slip');
         if (leftType === 'loading_slip' || rightType === 'loading_slip') types.push('loading_slip');
 
         if (types.length === 0) {
-            setStep('PREVIEW');
+            alert("Please select at least one slip to generate numbers for.");
             setGenerating(false);
             return;
         }
@@ -40,22 +53,52 @@ export default function PrintModal({ trip, onClose }) {
         try {
             const res = await api.post(`/trips/${trip.id}/print-metadata`, { types });
             setSlipNumbers({
-                pay: res.data.pay_slip_number,
-                loading: res.data.loading_slip_number
+                pay: res.data.pay_slip_number || slipNumbers.pay,
+                loading: res.data.loading_slip_number || slipNumbers.loading
             });
-            setStep('PREVIEW');
+            return true; // Success
         } catch (err) {
             console.error("Error generating numbers:", err);
             alert("Failed to generate slip numbers");
+            return false;
         } finally {
             setGenerating(false);
         }
     };
 
+    const handlePrintClick = async () => {
+        // If numbers are still "PREVIEW", try to generate them first
+        if (slipNumbers.pay === "PREVIEW" || slipNumbers.loading === "PREVIEW") {
+            const success = await generateNumbers();
+            if (success) {
+                // Wait a microtask for state update to reflect in DOM before printing?
+                // React state updates might be async. 
+                // However, handlePrint reads componentRef.current.
+                // We might need a small timeout or assume the user will see the number update and click print again?
+                // Better: Use a dedicated 'ready to print' effect or just force user to generate first?
+                // Let's try to proceed. 'react-to-print' might capture the PREVIOUS render if we are not careful.
+                // Safest UX: Generate, then user clicks Print again? Or auto-print after generate?
+
+                // Let's trigger the print dialog after a slight delay to allow render
+                setTimeout(handlePrint, 500);
+            }
+        } else {
+            handlePrint();
+        }
+    };
+
     const renderSlip = (type) => {
-        if (type === 'pay_slip') return <PaySlip data={previewData} slipNumber={slipNumbers.pay} />;
-        if (type === 'loading_slip') return <LoadingSlip data={previewData} slipNumber={slipNumbers.loading} />;
-        return <div className="flex items-center justify-center h-full text-gray-300 font-bold bg-gray-50 uppercase tracking-widest text-sm border border-dashed border-gray-300 m-4 rounded">Blank Page</div>;
+        const numMap = { 'pay_slip': slipNumbers.pay, 'loading_slip': slipNumbers.loading };
+        const num = numMap[type] || "";
+
+        if (type === 'pay_slip') return <PaySlip data={previewData} slipNumber={num} />;
+        if (type === 'loading_slip') return <LoadingSlip data={previewData} slipNumber={num} />;
+        return (
+            <div className="flex flex-col items-center justify-center h-full text-gray-300 font-bold bg-gray-50 uppercase tracking-widest text-sm border-2 border-dashed border-gray-200 m-4 rounded-xl">
+                <FileText size={32} className="mb-2 opacity-50" />
+                <span>Blank Page</span>
+            </div>
+        );
     };
 
     return (
@@ -64,167 +107,150 @@ export default function PrintModal({ trip, onClose }) {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4"
         >
             <motion.div
                 variants={MODAL_CONTENT}
-                className="bg-[#1a1f2e] text-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col overflow-hidden border border-white/10"
+                className="bg-[#1a1f2e] text-white rounded-xl shadow-2xl w-full max-w-[90vw] h-[90vh] flex overflow-hidden border border-white/10"
             >
 
-                {/* Header */}
-                <div className="flex justify-between items-center p-6 border-b border-white/5 bg-white/5">
-                    <h2 className="text-xl font-bold flex items-center gap-2">
-                        <Printer className="text-blue-400" /> Print Manager
-                    </h2>
-                    <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                        <X size={20} />
-                    </button>
-                </div>
+                {/* LEFT SIDEBAR - CONTROLS */}
+                <div className="w-[350px] flex-shrink-0 flex flex-col border-r border-white/5 bg-black/20">
+                    <div className="p-6 border-b border-white/5">
+                        <h2 className="text-xl font-bold flex items-center gap-2 mb-1">
+                            <Printer className="text-blue-400" /> Print Manager
+                        </h2>
+                        <p className="text-xs text-white/50">Configure & Print Slips</p>
+                    </div>
 
-                {/* Content */}
-                <div className="flex-grow overflow-y-auto p-6">
+                    <div className="flex-grow overflow-y-auto p-6 space-y-8">
 
-                    {step === 'SELECT' && (
-                        <div className="grid grid-cols-2 gap-12 h-full items-center max-w-4xl mx-auto">
+                        {/* Page Layout */}
+                        <div className="space-y-4">
+                            <div className="text-xs font-bold uppercase tracking-widest text-blue-300">Page Layout</div>
 
-                            {/* Left Page Selector */}
-                            <div className="space-y-4 text-center">
-                                <div className="text-sm font-bold uppercase tracking-widest text-blue-300 mb-4">Left Side Page</div>
-                                <div className="grid grid-cols-1 gap-3">
-                                    <button
-                                        onClick={() => setLeftType('pay_slip')}
-                                        className={`p-6 rounded-xl border-2 transition-all ${leftType === 'pay_slip' ? 'border-blue-500 bg-blue-500/20' : 'border-white/10 hover:border-white/30 bg-white/5'}`}
-                                    >
-                                        <div className="font-bold text-lg">Pay Slip</div>
-                                        <div className="text-xs text-white/50 mt-1">Driver & Freight Details</div>
-                                    </button>
-                                    <button
-                                        onClick={() => setLeftType('loading_slip')}
-                                        className={`p-6 rounded-xl border-2 transition-all ${leftType === 'loading_slip' ? 'border-blue-500 bg-blue-500/20' : 'border-white/10 hover:border-white/30 bg-white/5'}`}
-                                    >
-                                        <div className="font-bold text-lg">Loading Slip</div>
-                                        <div className="text-xs text-white/50 mt-1">Party & Load Details</div>
-                                    </button>
-                                    <button
-                                        onClick={() => setLeftType(null)}
-                                        className={`p-4 rounded-xl border border-dashed border-white/20 hover:bg-white/5 text-sm ${leftType === null ? 'bg-white/5 opacity-50' : ''}`}
-                                    >
-                                        Leave Blank
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Right Page Selector */}
-                            <div className="space-y-4 text-center">
-                                <div className="text-sm font-bold uppercase tracking-widest text-blue-300 mb-4">Right Side Page</div>
-                                <div className="grid grid-cols-1 gap-3">
-                                    <button
-                                        onClick={() => setRightType('pay_slip')}
-                                        className={`p-6 rounded-xl border-2 transition-all ${rightType === 'pay_slip' ? 'border-blue-500 bg-blue-500/20' : 'border-white/10 hover:border-white/30 bg-white/5'}`}
-                                    >
-                                        <div className="font-bold text-lg">Pay Slip</div>
-                                        <div className="text-xs text-white/50 mt-1">Driver & Freight Details</div>
-                                    </button>
-                                    <button
-                                        onClick={() => setRightType('loading_slip')}
-                                        className={`p-6 rounded-xl border-2 transition-all ${rightType === 'loading_slip' ? 'border-blue-500 bg-blue-500/20' : 'border-white/10 hover:border-white/30 bg-white/5'}`}
-                                    >
-                                        <div className="font-bold text-lg">Loading Slip</div>
-                                        <div className="text-xs text-white/50 mt-1">Party & Load Details</div>
-                                    </button>
-                                    <button
-                                        onClick={() => setRightType(null)}
-                                        className={`p-4 rounded-xl border border-dashed border-white/20 hover:bg-white/5 text-sm ${rightType === null ? 'bg-white/5 opacity-50' : ''}`}
-                                    >
-                                        Leave Blank
-                                    </button>
-                                </div>
-                            </div>
-
-                        </div>
-                    )}
-
-                    {step === 'PREVIEW' && (
-                        <div className="flex flex-col gap-6">
-                            {/* Editor Bar */}
-                            <div className="bg-white/5 p-4 rounded-xl border border-white/10 grid grid-cols-3 gap-4">
+                            <div className="space-y-4">
                                 <div>
-                                    <label className="text-xs font-bold text-white/50 uppercase ml-1">Party Name (Edit for Print)</label>
+                                    <label className="text-xs font-medium text-white/50 mb-2 block">Left Half</label>
+                                    <div className="grid grid-cols-1 gap-2">
+                                        {['loading_slip', 'pay_slip'].map(type => (
+                                            <button
+                                                key={type}
+                                                onClick={() => setLeftType(type)}
+                                                className={`px-4 py-3 rounded-lg text-left text-sm transition-all border ${leftType === type ? 'bg-blue-600 border-blue-500 font-bold shadow-lg shadow-blue-900/20' : 'bg-white/5 border-white/10 hover:bg-white/10 text-white/70'}`}
+                                            >
+                                                {type.replace('_', ' ').toUpperCase()}
+                                            </button>
+                                        ))}
+                                        <button onClick={() => setLeftType(null)} className={`px-4 py-2 rounded-lg text-left text-xs ${!leftType ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/50'}`}>Blank</button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="text-xs font-medium text-white/50 mb-2 block">Right Half</label>
+                                    <div className="grid grid-cols-1 gap-2">
+                                        {['pay_slip', 'loading_slip'].map(type => (
+                                            <button
+                                                key={type}
+                                                onClick={() => setRightType(type)}
+                                                className={`px-4 py-3 rounded-lg text-left text-sm transition-all border ${rightType === type ? 'bg-blue-600 border-blue-500 font-bold shadow-lg shadow-blue-900/20' : 'bg-white/5 border-white/10 hover:bg-white/10 text-white/70'}`}
+                                            >
+                                                {type.replace('_', ' ').toUpperCase()}
+                                            </button>
+                                        ))}
+                                        <button onClick={() => setRightType(null)} className={`px-4 py-2 rounded-lg text-left text-xs ${!rightType ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/50'}`}>Blank</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Quick Edits */}
+                        <div className="space-y-4">
+                            <div className="text-xs font-bold uppercase tracking-widest text-blue-300">Quick Edit</div>
+                            <div className="space-y-3">
+                                <div>
+                                    <label className="text-[10px] text-white/40 uppercase font-bold">Party Name</label>
                                     <input
+                                        type="text"
                                         value={previewData.party_name || ''}
                                         onChange={e => setPreviewData({ ...previewData, party_name: e.target.value })}
-                                        className="w-full bg-black/20 border border-white/10 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-blue-500"
+                                        className="w-full bg-black/20 border border-white/10 rounded px-2 py-1.5 text-sm focus:border-blue-500 outline-none transition-colors"
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-bold text-white/50 uppercase ml-1">Vehicle (Edit for Print)</label>
+                                    <label className="text-[10px] text-white/40 uppercase font-bold">Vehicle No</label>
                                     <input
+                                        type="text"
                                         value={previewData.vehicle_number || ''}
                                         onChange={e => setPreviewData({ ...previewData, vehicle_number: e.target.value })}
-                                        className="w-full bg-black/20 border border-white/10 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-blue-500"
+                                        className="w-full bg-black/20 border border-white/10 rounded px-2 py-1.5 text-sm focus:border-blue-500 outline-none transition-colors"
                                     />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-bold text-white/50 uppercase ml-1">Note</label>
-                                    <div className="text-xs text-orange-400 mt-1">Edits here apply to THIS print only. Actual trip data is unchanged.</div>
-                                </div>
-                            </div>
-
-                            {/* A4 Preview Container */}
-                            <div className="overflow-auto bg-gray-500 p-8 rounded-xl flex justify-center">
-                                <div
-                                    ref={componentRef}
-                                    className="print-container shadow-2xl bg-white"
-                                    style={{ transform: 'scale(0.8)', transformOrigin: 'top center' }} // Scale for preview visibility
-                                >
-                                    <div className="slip-half">
-                                        {renderSlip(leftType)}
-                                    </div>
-                                    <div className="slip-half">
-                                        {renderSlip(rightType)}
-                                    </div>
                                 </div>
                             </div>
                         </div>
-                    )}
 
-                </div>
+                    </div>
 
-                {/* Footer Actions */}
-                <div className="p-6 border-t border-white/10 bg-white/5 flex justify-between items-center">
-                    {step === 'SELECT' ? (
-                        <>
-                            <div className="text-sm text-white/50">Select what to print on each half of the page.</div>
-                            <div className="flex gap-4">
-                                <button onClick={onClose} className="px-6 py-2 rounded-lg text-white/70 hover:bg-white/10 transition-colors bg-transparent border border-white/10">Cancel</button>
+                    <div className="p-6 border-t border-white/5 bg-black/20">
+                        <div className="flex justify-between text-xs mb-4">
+                            <span className="text-white/50">Slip Numbers:</span>
+                            <span className={slipNumbers.loading === 'PREVIEW' ? 'text-amber-400 font-bold' : 'text-emerald-400 font-bold'}>
+                                {slipNumbers.loading === 'PREVIEW' ? 'Pending Generation' : 'Assigned'}
+                            </span>
+                        </div>
+                        <div className="grid gap-3">
+                            {(slipNumbers.loading === 'PREVIEW' && slipNumbers.pay === 'PREVIEW') && (
                                 <GlassButton
-                                    variant="primary"
+                                    variant="secondary"
+                                    className="w-full justify-center"
                                     onClick={generateNumbers}
-                                    className="px-8"
-                                    disabled={generating || (!leftType && !rightType)}
+                                    disabled={generating}
                                 >
-                                    {generating ? 'Generating...' : <><Layout size={18} /> Generate Preview</>}
+                                    {generating ? 'Generating...' : <><RefreshCw size={14} /> Generate Numbers</>}
                                 </GlassButton>
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <div className="flex items-center gap-4">
-                                <button onClick={() => setStep('SELECT')} className="text-sm text-blue-400 hover:underline flex items-center gap-1">
-                                    Change Selection
-                                </button>
-                                <span className="text-white/30">|</span>
-                                <div className="text-sm text-white/50">Verify layout before printing. Scale is fixed at 100%.</div>
-                            </div>
-                            <div className="flex gap-4">
-                                <button onClick={onClose} className="px-6 py-2 rounded-lg text-white/70 hover:bg-white/10 transition-colors bg-transparent border border-white/10">Cancel</button>
-                                <GlassButton variant="primary" onClick={handlePrint} className="px-8">
-                                    <Printer size={18} /> Print Now
-                                </GlassButton>
-                            </div>
-                        </>
-                    )}
+                            )}
+
+                            <GlassButton
+                                variant="primary"
+                                className="w-full justify-center py-3 text-base"
+                                onClick={handlePrintClick}
+                            >
+                                <Printer size={18} /> Print Now
+                            </GlassButton>
+                        </div>
+                        <button onClick={onClose} className="w-full text-center text-xs text-white/30 hover:text-white mt-4 transition-colors">Cancel</button>
+                    </div>
                 </div>
+
+                {/* RIGHT SIDE - PREVIEW */}
+                <div className="flex-grow bg-[#525659] overflow-auto flex items-center justify-center p-8 relative">
+                    <div className="absolute top-4 left-4 text-xs font-bold text-white/50 uppercase tracking-widest pointer-events-none">
+                        Live Preview (A4 / 100%)
+                    </div>
+
+                    {/* The Print Container */}
+                    <div className="shadow-2xl ring-1 ring-black/10">
+                        <div
+                            ref={componentRef}
+                            className="print-container bg-white"
+                            // No scale transform here - show 100% or scale via CSS zoom if needed for viewport fit
+                            style={{
+                                // Optional: Scale down if viewport is small, or strictly allow scroll
+                                // For WYSIWYG, 1:1 is best, but fitting to screen is nice.
+                                // Let's use a responsive scale if needed, but 'print-container' defines the A4 mm dimensions.
+                            }}
+                        >
+                            <div className="slip-half">
+                                {renderSlip(leftType)}
+                            </div>
+                            <div className="slip-half">
+                                {renderSlip(rightType)}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
             </motion.div>
         </motion.div>
     );

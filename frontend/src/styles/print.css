@@ -30,17 +30,13 @@
 }
 
 .slip-half {
-    width: 50%;
-    height: 100%;
+    width: 148.5mm;
+    height: 210mm;
     position: relative;
-    padding: 10mm;
+    padding: 0;
+    margin: 0;
     box-sizing: border-box;
-    border-right: 1px dashed #ccc;
-    /* Optional visual separator, remove if strict */
-}
-
-.slip-half:last-child {
-    border-right: none;
+    /* Border removed to allow seamless background */
 }
 
 /* SLIP LAYOUT */
