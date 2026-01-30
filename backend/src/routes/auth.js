@@ -28,7 +28,14 @@ router.post("/login", async (req, res) => {
             { expiresIn: "24h" }
         );
 
-        res.json({ token, user: { id: user.id, email: user.email, role: user.role } });
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        });
+
+        res.json({ message: "Login successful", user: { id: user.id, email: user.email, role: user.role } });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Server error" });

@@ -1,18 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useReactToPrint } from 'react-to-print';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MODAL_BACKDROP, MODAL_CONTENT } from '../../styles/animations';
 import api from '../../services/api';
-import PaySlip from './PaySlip';
-import LoadingSlip from './LoadingSlip';
 import GlassButton from '../GlassButton';
-import { X, Printer, Layout, RefreshCw, FileText } from 'lucide-react';
+import { X, Printer, FileText, Download, Loader2 } from 'lucide-react';
 import '../../styles/print.css';
 
 export default function PrintModal({ trip, onClose }) {
-    // Default to strict print layout
     const [leftType, setLeftType] = useState('loading_slip');
     const [rightType, setRightType] = useState('pay_slip');
+    const [generating, setGenerating] = useState(false);
+    const [pdfUrl, setPdfUrl] = useState(null);
 
     // Preview Data (Editable)
     const [previewData, setPreviewData] = useState({ ...trip });
@@ -23,23 +21,10 @@ export default function PrintModal({ trip, onClose }) {
         loading: trip.loading_slip_number || "PREVIEW"
     });
 
-    const [generating, setGenerating] = useState(false);
-    const componentRef = useRef();
-
-    // On mount, if numbers exist, use them. If not, they remain "PREVIEW" until user clicks "Generate" or "Print".
-    // Or we could auto-fetch if we wanted to be aggressive, but "PREVIEW" is safer for "No number burning".
-
-    const handlePrint = useReactToPrint({
-        content: () => componentRef.current,
-        documentTitle: `Slip_${trip.trip_code}`,
-        onAfterPrint: onClose
-    });
-
     const generateNumbers = async () => {
         if (generating) return;
         setGenerating(true);
 
-        // Only request numbers for active slips
         const types = [];
         if (leftType === 'pay_slip' || rightType === 'pay_slip') types.push('pay_slip');
         if (leftType === 'loading_slip' || rightType === 'loading_slip') types.push('loading_slip');
@@ -52,53 +37,59 @@ export default function PrintModal({ trip, onClose }) {
 
         try {
             const res = await api.post(`/trips/${trip.id}/print-metadata`, { types });
-            setSlipNumbers({
+            const newNumbers = {
                 pay: res.data.pay_slip_number || slipNumbers.pay,
                 loading: res.data.loading_slip_number || slipNumbers.loading
-            });
-            return true; // Success
+            };
+            setSlipNumbers(newNumbers);
+            setGenerating(false);
+            return newNumbers;
         } catch (err) {
             console.error("Error generating numbers:", err);
             alert("Failed to generate slip numbers");
-            return false;
+            setGenerating(false);
+            return null;
+        }
+    };
+
+    const handleGeneratePdf = async () => {
+        setGenerating(true);
+        try {
+            // Ensure numbers are generated if not already
+            let currentNumbers = slipNumbers;
+            if (currentNumbers.pay === "PREVIEW" || currentNumbers.loading === "PREVIEW") {
+                const result = await generateNumbers();
+                if (result) currentNumbers = result;
+                else {
+                    setGenerating(false);
+                    return;
+                }
+            }
+
+            const response = await api.post('/print/generate', {
+                tripData: previewData,
+                options: { left: leftType, right: rightType },
+                slipNumbers: currentNumbers
+            }, {
+                responseType: 'blob'
+            });
+
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            setPdfUrl(url);
+
+        } catch (error) {
+            console.error("Error generating PDF:", error);
+            alert("Failed to generate PDF");
         } finally {
             setGenerating(false);
         }
     };
 
-    const handlePrintClick = async () => {
-        // If numbers are still "PREVIEW", try to generate them first
-        if (slipNumbers.pay === "PREVIEW" || slipNumbers.loading === "PREVIEW") {
-            const success = await generateNumbers();
-            if (success) {
-                // Wait a microtask for state update to reflect in DOM before printing?
-                // React state updates might be async. 
-                // However, handlePrint reads componentRef.current.
-                // We might need a small timeout or assume the user will see the number update and click print again?
-                // Better: Use a dedicated 'ready to print' effect or just force user to generate first?
-                // Let's try to proceed. 'react-to-print' might capture the PREVIOUS render if we are not careful.
-                // Safest UX: Generate, then user clicks Print again? Or auto-print after generate?
-
-                // Let's trigger the print dialog after a slight delay to allow render
-                setTimeout(handlePrint, 500);
-            }
-        } else {
-            handlePrint();
+    const openPdf = () => {
+        if (pdfUrl) {
+            window.open(pdfUrl, '_blank');
         }
-    };
-
-    const renderSlip = (type) => {
-        const numMap = { 'pay_slip': slipNumbers.pay, 'loading_slip': slipNumbers.loading };
-        const num = numMap[type] || "";
-
-        if (type === 'pay_slip') return <PaySlip data={previewData} slipNumber={num} />;
-        if (type === 'loading_slip') return <LoadingSlip data={previewData} slipNumber={num} />;
-        return (
-            <div className="flex flex-col items-center justify-center h-full text-gray-300 font-bold bg-gray-50 uppercase tracking-widest text-sm border-2 border-dashed border-gray-200 m-4 rounded-xl">
-                <FileText size={32} className="mb-2 opacity-50" />
-                <span>Blank Page</span>
-            </div>
-        );
     };
 
     return (
@@ -111,62 +102,53 @@ export default function PrintModal({ trip, onClose }) {
         >
             <motion.div
                 variants={MODAL_CONTENT}
-                className="bg-[#1a1f2e] text-white rounded-xl shadow-2xl w-full max-w-[90vw] h-[90vh] flex overflow-hidden border border-white/10"
+                className="bg-[#1a1f2e] text-white rounded-xl shadow-2xl w-full max-w-4xl flex overflow-hidden border border-white/10"
+                style={{ maxHeight: '90vh' }}
             >
-
-                {/* LEFT SIDEBAR - CONTROLS */}
-                <div className="w-[350px] flex-shrink-0 flex flex-col border-r border-white/5 bg-black/20">
-                    <div className="p-6 border-b border-white/5">
-                        <h2 className="text-xl font-bold flex items-center gap-2 mb-1">
-                            <Printer className="text-blue-400" /> Print Manager
+                {/* SETTINGS PANEL */}
+                <div className="w-1/2 p-8 border-r border-white/5 flex flex-col">
+                    <div className="mb-6">
+                        <h2 className="text-2xl font-bold flex items-center gap-3 mb-2">
+                            <Printer className="text-blue-400" size={28} /> Print Setup
                         </h2>
-                        <p className="text-xs text-white/50">Configure & Print Slips</p>
+                        <p className="text-white/50 text-sm">Configure your slip layout before generating PDF.</p>
                     </div>
 
-                    <div className="flex-grow overflow-y-auto p-6 space-y-8">
-
+                    <div className="flex-grow space-y-8">
                         {/* Page Layout */}
                         <div className="space-y-4">
-                            <div className="text-xs font-bold uppercase tracking-widest text-blue-300">Page Layout</div>
-
-                            <div className="space-y-4">
+                            <div className="text-xs font-bold uppercase tracking-widest text-blue-300">Layout Configuration</div>
+                            <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="text-xs font-medium text-white/50 mb-2 block">Left Half</label>
-                                    <div className="grid grid-cols-1 gap-2">
-                                        {['loading_slip', 'pay_slip'].map(type => (
-                                            <button
-                                                key={type}
-                                                onClick={() => setLeftType(type)}
-                                                className={`px-4 py-3 rounded-lg text-left text-sm transition-all border ${leftType === type ? 'bg-blue-600 border-blue-500 font-bold shadow-lg shadow-blue-900/20' : 'bg-white/5 border-white/10 hover:bg-white/10 text-white/70'}`}
-                                            >
-                                                {type.replace('_', ' ').toUpperCase()}
-                                            </button>
-                                        ))}
-                                        <button onClick={() => setLeftType(null)} className={`px-4 py-2 rounded-lg text-left text-xs ${!leftType ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/50'}`}>Blank</button>
-                                    </div>
+                                    <label className="text-xs font-medium text-white/50 mb-2 block">Left Side</label>
+                                    <select
+                                        value={leftType || ''}
+                                        onChange={(e) => setLeftType(e.target.value || null)}
+                                        className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none"
+                                    >
+                                        <option value="">Blank</option>
+                                        <option value="loading_slip">Loading Slip</option>
+                                        <option value="pay_slip">Pay Slip</option>
+                                    </select>
                                 </div>
-
                                 <div>
-                                    <label className="text-xs font-medium text-white/50 mb-2 block">Right Half</label>
-                                    <div className="grid grid-cols-1 gap-2">
-                                        {['pay_slip', 'loading_slip'].map(type => (
-                                            <button
-                                                key={type}
-                                                onClick={() => setRightType(type)}
-                                                className={`px-4 py-3 rounded-lg text-left text-sm transition-all border ${rightType === type ? 'bg-blue-600 border-blue-500 font-bold shadow-lg shadow-blue-900/20' : 'bg-white/5 border-white/10 hover:bg-white/10 text-white/70'}`}
-                                            >
-                                                {type.replace('_', ' ').toUpperCase()}
-                                            </button>
-                                        ))}
-                                        <button onClick={() => setRightType(null)} className={`px-4 py-2 rounded-lg text-left text-xs ${!rightType ? 'bg-white/10 text-white' : 'text-white/30 hover:text-white/50'}`}>Blank</button>
-                                    </div>
+                                    <label className="text-xs font-medium text-white/50 mb-2 block">Right Side</label>
+                                    <select
+                                        value={rightType || ''}
+                                        onChange={(e) => setRightType(e.target.value || null)}
+                                        className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-blue-500 outline-none"
+                                    >
+                                        <option value="">Blank</option>
+                                        <option value="loading_slip">Loading Slip</option>
+                                        <option value="pay_slip">Pay Slip</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
 
                         {/* Quick Edits */}
                         <div className="space-y-4">
-                            <div className="text-xs font-bold uppercase tracking-widest text-blue-300">Quick Edit</div>
+                            <div className="text-xs font-bold uppercase tracking-widest text-blue-300">Data Correction</div>
                             <div className="space-y-3">
                                 <div>
                                     <label className="text-[10px] text-white/40 uppercase font-bold">Party Name</label>
@@ -174,7 +156,7 @@ export default function PrintModal({ trip, onClose }) {
                                         type="text"
                                         value={previewData.party_name || ''}
                                         onChange={e => setPreviewData({ ...previewData, party_name: e.target.value })}
-                                        className="w-full bg-black/20 border border-white/10 rounded px-2 py-1.5 text-sm focus:border-blue-500 outline-none transition-colors"
+                                        className="w-full bg-black/20 border border-white/10 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none transition-colors"
                                     />
                                 </div>
                                 <div>
@@ -183,72 +165,68 @@ export default function PrintModal({ trip, onClose }) {
                                         type="text"
                                         value={previewData.vehicle_number || ''}
                                         onChange={e => setPreviewData({ ...previewData, vehicle_number: e.target.value })}
-                                        className="w-full bg-black/20 border border-white/10 rounded px-2 py-1.5 text-sm focus:border-blue-500 outline-none transition-colors"
+                                        className="w-full bg-black/20 border border-white/10 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none transition-colors"
                                     />
                                 </div>
                             </div>
                         </div>
 
+                        <div className="p-4 bg-white/5 rounded-lg border border-white/5">
+                            <div className="flex justify-between text-sm mb-2">
+                                <span className="text-white/50">Loading Slip No:</span>
+                                <span className="font-mono">{slipNumbers.loading}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                                <span className="text-white/50">Pay Slip No:</span>
+                                <span className="font-mono">{slipNumbers.pay}</span>
+                            </div>
+                        </div>
+
                     </div>
 
-                    <div className="p-6 border-t border-white/5 bg-black/20">
-                        <div className="flex justify-between text-xs mb-4">
-                            <span className="text-white/50">Slip Numbers:</span>
-                            <span className={slipNumbers.loading === 'PREVIEW' ? 'text-amber-400 font-bold' : 'text-emerald-400 font-bold'}>
-                                {slipNumbers.loading === 'PREVIEW' ? 'Pending Generation' : 'Assigned'}
-                            </span>
-                        </div>
-                        <div className="grid gap-3">
-                            {(slipNumbers.loading === 'PREVIEW' && slipNumbers.pay === 'PREVIEW') && (
-                                <GlassButton
-                                    variant="secondary"
-                                    className="w-full justify-center"
-                                    onClick={generateNumbers}
-                                    disabled={generating}
-                                >
-                                    {generating ? 'Generating...' : <><RefreshCw size={14} /> Generate Numbers</>}
-                                </GlassButton>
-                            )}
-
-                            <GlassButton
-                                variant="primary"
-                                className="w-full justify-center py-3 text-base"
-                                onClick={handlePrintClick}
-                            >
-                                <Printer size={18} /> Print Now
-                            </GlassButton>
-                        </div>
-                        <button onClick={onClose} className="w-full text-center text-xs text-white/30 hover:text-white mt-4 transition-colors">Cancel</button>
+                    <div className="mt-8 pt-6 border-t border-white/5 flex gap-3">
+                        <button onClick={onClose} className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-colors">
+                            Cancel
+                        </button>
+                        <GlassButton
+                            variant="primary"
+                            className="flex-grow justify-center"
+                            onClick={handleGeneratePdf}
+                            disabled={generating}
+                        >
+                            {generating ? <Loader2 className="animate-spin" /> : <Printer size={18} />}
+                            {generating ? 'Generating...' : (pdfUrl ? 'Regenerate PDF' : 'Generate PDF')}
+                        </GlassButton>
                     </div>
                 </div>
 
-                {/* RIGHT SIDE - PREVIEW */}
-                <div className="flex-grow bg-[#525659] overflow-auto flex items-center justify-center p-8 relative">
-                    <div className="absolute top-4 left-4 text-xs font-bold text-white/50 uppercase tracking-widest pointer-events-none">
-                        Live Preview (A4 / 100%)
-                    </div>
+                {/* PREVIEW PANEL */}
+                <div className="w-1/2 bg-[#525659] p-8 flex flex-col items-center justify-center relative overflow-hidden">
+                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')] opacity-20"></div>
 
-                    {/* The Print Container */}
-                    <div className="shadow-2xl ring-1 ring-black/10">
-                        <div
-                            ref={componentRef}
-                            className="print-container bg-white"
-                            // No scale transform here - show 100% or scale via CSS zoom if needed for viewport fit
-                            style={{
-                                // Optional: Scale down if viewport is small, or strictly allow scroll
-                                // For WYSIWYG, 1:1 is best, but fitting to screen is nice.
-                                // Let's use a responsive scale if needed, but 'print-container' defines the A4 mm dimensions.
-                            }}
-                        >
-                            <div className="slip-half">
-                                {renderSlip(leftType)}
+                    {pdfUrl ? (
+                        <div className="z-10 text-center animate-in fade-in zoom-in duration-300">
+                            <div className="bg-white p-2 rounded shadow-2xl mb-6 mx-auto w-[200px] h-[280px] flex items-center justify-center text-gray-400 border-[8px] border-white ring-1 ring-black/20">
+                                <FileText size={48} />
                             </div>
-                            <div className="slip-half">
-                                {renderSlip(rightType)}
-                            </div>
+                            <h3 className="text-xl font-bold text-white mb-2">Ready to Print</h3>
+                            <p className="text-white/50 text-sm mb-6">Your PDF has been generated successfully.</p>
+
+                            <GlassButton
+                                variant="secondary"
+                                className="mx-auto"
+                                onClick={openPdf}
+                            >
+                                <Download size={18} /> View Generated PDF
+                            </GlassButton>
                         </div>
-                    </div>
-
+                    ) : (
+                        <div className="z-10 text-center opacity-50">
+                            <Layout size={64} className="mx-auto mb-4 text-white/30" />
+                            <h3 className="text-lg font-medium text-white mb-1">No PDF Generated</h3>
+                            <p className="text-xs text-white/50">Configure settings and click Generate</p>
+                        </div>
+                    )}
                 </div>
 
             </motion.div>

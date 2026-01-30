@@ -3,6 +3,7 @@ dotenv.config();
 
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import { pool } from "./db.js";
 
 import tripsRouter from "./routes/trips.js";
@@ -15,11 +16,16 @@ import mastersRouter from "./routes/masters.js";
 import expensesRouter from "./routes/expenses.js";
 import authenticateToken from "./middleware/authMiddleware.js";
 import adminRouter from "./routes/admin.js";
+import printRouter from "./routes/print.js";
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173', // Frontend URL
+  credentials: true
+}));
 app.use(express.json());
+app.use(cookieParser());
 
 // Public routes
 app.use("/api/auth", authRouter);
@@ -33,6 +39,7 @@ app.use("/api/payment-history", authenticateToken, paymentHistoryRouter);
 app.use("/api/masters", authenticateToken, mastersRouter);
 app.use("/api/expenses", authenticateToken, expensesRouter);
 app.use("/api/admin", authenticateToken, adminRouter);
+app.use("/api/print", authenticateToken, printRouter);
 
 app.get("/api/health", async (req, res) => {
   try {
