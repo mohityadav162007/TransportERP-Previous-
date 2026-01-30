@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: transport-erp-pdf
+    runtime: python
+    repo: https://github.com/mohityadav162007/TransportERP-Previous-
+    branch: main
+    rootDir: pdf_service
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port 10000
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.0
+      - key: PORT
+        value: 10000
