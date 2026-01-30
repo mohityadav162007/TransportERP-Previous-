@@ -21,7 +21,7 @@ import printRouter from "./routes/print.js";
 const app = express();
 
 app.use(cors({
-  origin: 'http://localhost:5173', // Frontend URL
+  origin: ['http://localhost:5173', 'https://transport-erp-previous.vercel.app'], // Frontend URLs
   credentials: true
 }));
 app.use(express.json());
