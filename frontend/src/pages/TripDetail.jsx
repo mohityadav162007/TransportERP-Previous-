@@ -9,7 +9,6 @@ import Skeleton from "../components/Skeleton";
 import { formatCurrency } from "../utils/format";
 import { useAuth } from "../context/AuthContext";
 import { ArrowLeft, Edit2, FileText, Calendar, MapPin, Truck, User, CreditCard, Printer } from "lucide-react";
-import PrintModal from "../components/printing/PrintModal";
 
 
 export default function TripDetail() {
@@ -17,7 +16,6 @@ export default function TripDetail() {
   const { navigate, back } = use3DNavigate();
   const { user } = useAuth();
   const [trip, setTrip] = useState(null);
-  const [showPrintModal, setShowPrintModal] = useState(false);
 
 
   useEffect(() => {
@@ -67,13 +65,6 @@ export default function TripDetail() {
         </div>
 
         <div className="flex gap-3">
-          <GlassButton
-            variant="secondary"
-            onClick={() => setShowPrintModal(true)}
-          >
-            <Printer size={18} /> Print
-          </GlassButton>
-
           <GlassButton
             variant="secondary"
             onClick={() => navigate("/trips", { direction: 'backward', transition: 'stack' })}
@@ -163,15 +154,6 @@ export default function TripDetail() {
         </div>
 
       </div>
-
-      <AnimatePresence>
-        {showPrintModal && (
-          <PrintModal
-            trip={trip}
-            onClose={() => setShowPrintModal(false)}
-          />
-        )}
-      </AnimatePresence>
 
     </div>
   );
