@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+reportlab
+pillow
+psycopg2-binary
+python-dotenv
+pydantic

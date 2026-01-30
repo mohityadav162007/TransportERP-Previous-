@@ -66,7 +66,16 @@ export default function PrintModal({ trip, onClose }) {
                 }
             }
 
-            const response = await api.post('/print/generate', {
+            // PYTHON SERVICE CALL
+            // Use env var or default to localhost:8000 for local dev
+            const PYTHON_SERVICE_URL = import.meta.env.VITE_PYTHON_SERVICE_URL || 'http://localhost:8000';
+
+            // We use standard fetch or axios directly here because the Python service 
+            // might be on a diff domain/port than the Node API and might not share same auth cookies immediately
+            // or if it does, CORS must be set up.
+            // For now, simple POST.
+
+            const response = await axios.post(`${PYTHON_SERVICE_URL}/print/generate`, {
                 tripData: previewData,
                 options: { left: leftType, right: rightType },
                 slipNumbers: currentNumbers
