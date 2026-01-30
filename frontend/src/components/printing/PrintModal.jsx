@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MODAL_BACKDROP, MODAL_CONTENT } from '../../styles/animations';
 import api from '../../services/api';
+import axios from 'axios';
 import GlassButton from '../GlassButton';
 import { X, Printer, FileText, Download, Loader2, Layout } from 'lucide-react';
 import '../../styles/print.css';
