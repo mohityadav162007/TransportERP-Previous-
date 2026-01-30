@@ -9,14 +9,14 @@ import Skeleton from "../components/Skeleton";
 import { formatCurrency } from "../utils/format";
 import { useAuth } from "../context/AuthContext";
 import { ArrowLeft, Edit2, FileText, Calendar, MapPin, Truck, User, CreditCard, Printer } from "lucide-react";
-import PrintModal from "../components/printing/PrintModal";
+
 
 export default function TripDetail() {
   const { id } = useParams();
   const { navigate, back } = use3DNavigate();
   const { user } = useAuth();
   const [trip, setTrip] = useState(null);
-  const [showPrintModal, setShowPrintModal] = useState(false);
+
 
   useEffect(() => {
     api.get("/trips").then(res => {
@@ -73,14 +73,7 @@ export default function TripDetail() {
           </GlassButton>
 
           {/* {user?.role === 'admin' && ( */}
-          <GlassButton
-            variant="secondary"
-            onClick={() => setShowPrintModal(true)}
-            className="bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 border-blue-500/30"
-          >
-            <Printer size={18} /> Print Slips
-          </GlassButton>
-          {/* )} */}
+
 
           <GlassButton
             variant="primary"
