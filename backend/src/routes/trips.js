@@ -701,9 +701,9 @@ router.post("/:id/print-metadata", async (req, res) => {
         if (trip.pay_slip_number) {
           responseData.pay_slip_number = trip.pay_slip_number;
         } else {
-          // Generate new
+          // Generate new: Ensure next number is at least 300
           const seqRes = await client.query(
-            "UPDATE slip_counters SET current_value = current_value + 1 WHERE type='pay_slip' RETURNING current_value"
+            "UPDATE slip_counters SET current_value = GREATEST(current_value, 299) + 1 WHERE type='pay_slip' RETURNING current_value"
           );
           const newNum = seqRes.rows[0].current_value;
           responseData.pay_slip_number = newNum;
@@ -715,9 +715,9 @@ router.post("/:id/print-metadata", async (req, res) => {
         if (trip.loading_slip_number) {
           responseData.loading_slip_number = trip.loading_slip_number;
         } else {
-          // Generate new
+          // Generate new: Ensure next number is at least 300
           const seqRes = await client.query(
-            "UPDATE slip_counters SET current_value = current_value + 1 WHERE type='loading_slip' RETURNING current_value"
+            "UPDATE slip_counters SET current_value = GREATEST(current_value, 299) + 1 WHERE type='loading_slip' RETURNING current_value"
           );
           const newNum = seqRes.rows[0].current_value;
           responseData.loading_slip_number = newNum;
