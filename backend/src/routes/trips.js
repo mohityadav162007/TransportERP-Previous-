@@ -109,12 +109,12 @@ router.post("/", async (req, res) => {
 
     const isOwn = await isOwnVehicle(t.vehicle_number);
 
-    let gaadi_freight = Number(t.gaadi_freight || 0);
-    let gaadi_advance = Number(t.gaadi_advance || 0);
-    const party_freight = Number(t.party_freight || 0);
-    const party_advance = Number(t.party_advance || 0);
-    const tds = Number(t.tds || 0);
-    let himmali = Number(t.himmali || 0);
+    let gaadi_freight = Number(t.gaadi_freight) || 0;
+    let gaadi_advance = Number(t.gaadi_advance) || 0;
+    const party_freight = Number(t.party_freight) || 0;
+    const party_advance = Number(t.party_advance) || 0;
+    const tds = Number(t.tds) || 0;
+    let himmali = Number(t.himmali) || 0;
 
     // ADMIN OWN VEHICLE LOGIC
     if (isOwn) {
@@ -304,12 +304,12 @@ router.put("/:id", async (req, res) => {
 
     const isOwn = await isOwnVehicle(t.vehicle_number);
 
-    let gaadi_freight = Number(t.gaadi_freight || 0);
-    let gaadi_advance = Number(t.gaadi_advance || 0);
-    const party_freight = Number(t.party_freight || 0);
-    const party_advance = Number(t.party_advance || 0);
-    const tds = Number(t.tds || 0);
-    let himmali = Number(t.himmali || 0);
+    let gaadi_freight = Number(t.gaadi_freight) || 0;
+    let gaadi_advance = Number(t.gaadi_advance) || 0;
+    const party_freight = Number(t.party_freight) || 0;
+    const party_advance = Number(t.party_advance) || 0;
+    const tds = Number(t.tds) || 0;
+    let himmali = Number(t.himmali) || 0;
 
     // ADMIN OWN VEHICLE LOGIC
     if (isOwn) {
@@ -683,7 +683,7 @@ router.post("/bulk-courier", async (req, res) => {
          docket_no = $1,
          courier_status = 'Sent',
          lr_number = CASE WHEN $5::text IS NOT NULL AND $5::text <> '' THEN $5 ELSE lr_number END,
-         remark = COALESCE(remark, '') || ' [Courier: ' || $2 || ', Date: ' || $3 || ']',
+         remark = COALESCE(remark, '') || ' [Courier: ' || COALESCE($2, '?') || ', Date: ' || COALESCE($3, '?') || ']',
          updated_at = NOW()
        WHERE id = ANY($4::int[])
        RETURNING id, trip_code`,
