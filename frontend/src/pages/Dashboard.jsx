@@ -7,17 +7,14 @@ import {
 } from "recharts";
 import {
   Truck, DollarSign, Receipt, FileText, Coins, Wallet, HandCoins, CircleDollarSign,
-  TrendingUp, ArrowRight
+  ArrowRight, MoreHorizontal
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { STAGGER_CONTAINER, FADE_IN_VARIANTS } from "../styles/animations";
-
-import GlassCard from "../components/GlassCard";
-import GlassTable from "../components/GlassTable";
-import Skeleton from "../components/Skeleton";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/Card";
+import { Button } from "../components/ui/Button";
+import { cn } from "../utils/cn";
 
 import {
-  groupByDate,
   statusSplit,
   monthlyProfit,
   getWeeklyTrips
@@ -39,10 +36,10 @@ export default function Dashboard() {
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           {[...Array(8)].map((_, i) => (
-            <Skeleton key={i} height="120px" className="glass-panel" />
+            <div key={i} className="h-32 rounded-xl bg-muted/50 animate-pulse" />
           ))}
         </div>
-        <Skeleton height="300px" className="glass-panel" />
+        <div className="h-96 rounded-xl bg-muted/50 animate-pulse" />
       </div>
     );
   }
@@ -74,265 +71,153 @@ export default function Dashboard() {
   const pendingPODList = trips.filter(t => t.pod_status !== "UPLOADED" && t.pod_status !== "RECEIVED").slice(0, 5);
   const pendingPaymentList = trips.filter(t => t.payment_status === "UNPAID").slice(0, 5);
 
-  const tableColumns = [
-    { header: "Trip ID", accessor: "trip_code", render: (row) => <span className="font-medium text-blue-400">{row.trip_code}</span> },
-    { header: "Date", accessor: "loading_date", render: (row) => formatDate(row.loading_date) },
-    { header: "Route", accessor: "route_from", render: (row) => <span className="truncate block max-w-[120px]">{row.route_from}</span> },
-    { header: "Vehicle", accessor: "vehicle_number" },
-    { header: "Balance", accessor: "party_balance", render: (row) => <span className="text-right block">₹{row.party_balance}</span> },
-  ];
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
 
       {/* ===== ROW 1 & 2: KPIs (4 cols) ===== */}
-      <h1 className="text-2xl font-bold text-white mb-2">Dashboard Overview</h1>
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard Overview</h1>
+        <p className="text-muted-foreground">Welcome back! Here's what's happening today.</p>
+      </div>
 
-      <motion.div
-        className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6"
-        variants={STAGGER_CONTAINER}
-        initial="hidden"
-        animate="visible"
-      >
-        <KPICard title="Total Trips" value={totalTrips} icon={Truck} color="blue" />
-        <KPICard title="Total Freight" value={`₹${formatCurrency(totalPartyFreight)}`} icon={DollarSign} color="emerald" />
-        <KPICard title="Total Bhada" value={`₹${formatCurrency(totalGaadiFreight)}`} icon={Receipt} color="orange" />
-        <KPICard title="Pending POD" value={pendingPODCount} icon={FileText} color="amber" alert={pendingPODCount > 0} />
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <KPICard title="Total Trips" value={totalTrips} icon={Truck} className="border-l-4 border-l-blue-500" />
+        <KPICard title="Total Freight" value={`₹${formatCurrency(totalPartyFreight)}`} icon={DollarSign} className="border-l-4 border-l-emerald-500" />
+        <KPICard title="Total Bhada" value={`₹${formatCurrency(totalGaadiFreight)}`} icon={Receipt} className="border-l-4 border-l-orange-500" />
+        <KPICard title="Pending POD" value={pendingPODCount} icon={FileText} className="border-l-4 border-l-amber-500" alert={pendingPODCount > 0} />
 
-        <KPICard title="Pending Payments" value={pendingPaymentsCount} icon={Coins} color="rose" alert={pendingPaymentsCount > 0} />
-        <KPICard title="Balance Due" value={`₹${formatCurrency(balanceDue)}`} icon={Wallet} color="indigo" />
-        <KPICard title="Payable" value={`₹${formatCurrency(payable)}`} icon={HandCoins} color="cyan" />
-        <KPICard title="Monthly Profit" value={`₹${formatCurrency(totalProfit)}`} icon={CircleDollarSign} color="green" />
-      </motion.div>
+        <KPICard title="Pending Payments" value={pendingPaymentsCount} icon={Coins} className="border-l-4 border-l-rose-500" alert={pendingPaymentsCount > 0} />
+        <KPICard title="Balance Due" value={`₹${formatCurrency(balanceDue)}`} icon={Wallet} className="border-l-4 border-l-indigo-500" />
+        <KPICard title="Payable" value={`₹${formatCurrency(payable)}`} icon={HandCoins} className="border-l-4 border-l-cyan-500" />
+        <KPICard title="Monthly Profit" value={`₹${formatCurrency(totalProfit)}`} icon={CircleDollarSign} className="border-l-4 border-l-green-500" />
+      </div>
 
       {/* ===== ROW 3: PROFIT GRAPH + STATUS CHARTS ===== */}
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-        {/* Profit Trend (Spans 2 cols) */}
-        <div className="xl:col-span-2 h-full">
-          <GlassCard className="h-full flex flex-col">
-            <div className="mb-6 flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-white">Profit Analytics</h3>
-              <select className="bg-white/5 border border-white/10 rounded-lg px-3 py-1 text-sm text-white/70 outline-none">
-                <option>Last 6 Months</option>
-                <option>This Year</option>
-              </select>
-            </div>
-            <div className="h-64 w-full flex-grow">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={profitTrend}>
-                  <defs>
-                    <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid horizontal={true} vertical={false} stroke="rgba(255,255,255,0.05)" />
-                  <XAxis
-                    dataKey="month"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 12 }}
-                    dy={10}
-                  />
-                  <YAxis
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 12 }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'rgba(5, 8, 15, 0.9)',
-                      borderColor: 'rgba(255,255,255,0.1)',
-                      borderRadius: '8px',
-                      color: '#fff',
-                      backdropFilter: 'blur(10px)'
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="profit"
-                    stroke="#10b981"
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#colorProfit)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </GlassCard>
-        </div>
+      <div className="grid grid-cols-1 xl:grid-cols-7 gap-6">
+        {/* Profit Trend (Spans 4 cols) */}
+        <Card className="xl:col-span-4 h-full flex flex-col">
+          <CardHeader>
+            <CardTitle>Profit Analytics</CardTitle>
+            <CardDescription>Monthly profit trends for the current year</CardDescription>
+          </CardHeader>
+          <CardContent className="flex-1 min-h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={profitTrend}>
+                <defs>
+                  <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis
+                  dataKey="month"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                  dy={10}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--popover))',
+                    borderColor: 'hsl(var(--border))',
+                    color: 'hsl(var(--popover-foreground))',
+                    borderRadius: 'var(--radius)',
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="profit"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
+                  fillOpacity={1}
+                  fill="url(#colorProfit)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
 
         {/* POD Status */}
-        <div className="h-full">
-          <GlassCard className="h-full flex flex-col">
-            <h3 className="text-sm font-semibold text-white/80 mb-4">POD Status</h3>
-            <div className="h-48 w-full relative flex-grow ">
+        <Card className="xl:col-span-3 h-full flex flex-col">
+          <CardHeader>
+            <CardTitle>Status Breakdown</CardTitle>
+            <CardDescription>POD and Payment status overview</CardDescription>
+          </CardHeader>
+          <CardContent className="flex-1 grid grid-cols-2 gap-4">
+            <div className="relative h-[200px]">
+              <h4 className="text-sm font-medium text-center mb-2">POD Status</h4>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={podData}
-                    innerRadius={60}
-                    outerRadius={80}
+                    innerRadius={50}
+                    outerRadius={70}
                     paddingAngle={5}
                     dataKey="value"
-                    startAngle={90}
-                    endAngle={-270}
                     cornerRadius={4}
                     stroke="none"
                   >
-                    <Cell fill="#10b981" /> {/* Received - Green */}
-                    <Cell fill="#f43f5e" /> {/* Pending - Red */}
+                    <Cell fill="hsl(var(--primary))" /> {/* Received */}
+                    <Cell fill="hsl(var(--destructive))" /> {/* Pending */}
                   </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'rgba(5, 8, 15, 0.9)',
-                      borderColor: 'rgba(255,255,255,0.1)',
-                      borderRadius: '8px',
-                      color: '#fff'
-                    }}
-                  />
+                  <Tooltip />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-2xl font-bold text-white">{Math.round((podData[0].value / (podData[0].value + podData[1].value || 1)) * 100)}%</span>
-                <span className="text-xs text-white/50">Completed</span>
+              <div className="absolute inset-0 top-6 flex flex-col items-center justify-center pointer-events-none">
+                <span className="text-xl font-bold">{Math.round((podData[0].value / (podData[0].value + podData[1].value || 1)) * 100)}%</span>
+                <span className="text-[10px] text-muted-foreground">Received</span>
               </div>
             </div>
-            <div className="flex justify-between px-4 mt-2">
-              <div className="text-center">
-                <p className="text-xs text-white/50">Received</p>
-                <p className="text-lg font-bold text-emerald-400">{podData[0].value}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-white/50">Pending</p>
-                <p className="text-lg font-bold text-rose-400">{podData[1].value}</p>
-              </div>
-            </div>
-          </GlassCard>
-        </div>
 
-        {/* Payment Status */}
-        <div className="h-full">
-          <GlassCard className="h-full flex flex-col">
-            <h3 className="text-sm font-semibold text-white/80 mb-4">Payment Status</h3>
-            <div className="h-48 w-full relative flex-grow">
+            <div className="relative h-[200px]">
+              <h4 className="text-sm font-medium text-center mb-2">Payment Status</h4>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={paymentData}
-                    innerRadius={60}
-                    outerRadius={80}
+                    innerRadius={50}
+                    outerRadius={70}
                     paddingAngle={5}
                     dataKey="value"
-                    startAngle={90}
-                    endAngle={-270}
                     cornerRadius={4}
                     stroke="none"
                   >
-                    <Cell fill="#3b82f6" /> {/* Paid - Blue */}
-                    <Cell fill="#f59e0b" /> {/* Pending - Amber */}
+                    <Cell fill="hsl(var(--primary))" /> {/* Paid */}
+                    <Cell fill="hsl(var(--destructive))" /> {/* Pending */}
                   </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'rgba(5, 8, 15, 0.9)',
-                      borderColor: 'rgba(255,255,255,0.1)',
-                      borderRadius: '8px',
-                      color: '#fff'
-                    }}
-                  />
+                  <Tooltip />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-2xl font-bold text-white">{Math.round((paymentData[0].value / (paymentData[0].value + paymentData[1].value || 1)) * 100)}%</span>
-                <span className="text-xs text-white/50">Paid</span>
+              <div className="absolute inset-0 top-6 flex flex-col items-center justify-center pointer-events-none">
+                <span className="text-xl font-bold">{Math.round((paymentData[0].value / (paymentData[0].value + paymentData[1].value || 1)) * 100)}%</span>
+                <span className="text-[10px] text-muted-foreground">Paid</span>
               </div>
             </div>
-            <div className="flex justify-between px-4 mt-2">
-              <div className="text-center">
-                <p className="text-xs text-white/50">Received</p>
-                <p className="text-lg font-bold text-blue-400">{paymentData[0].value}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-white/50">Pending</p>
-                <p className="text-lg font-bold text-amber-500">{paymentData[1].value}</p>
-              </div>
-            </div>
-          </GlassCard>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* ===== ROW 4: WEEKLY TRIPS + PENDING POD TABLE ===== */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Weekly Trips (1 col) */}
-        <div className="h-full">
-          <GlassCard className="h-full flex flex-col">
-            <h3 className="text-sm font-semibold text-white mb-6">Weekly Activity</h3>
-            <div className="h-64 w-full flex-grow">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={weeklyTrips}>
-                  <XAxis
-                    dataKey="day"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 12 }}
-                    dy={10}
-                  />
-                  <Tooltip
-                    cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                    contentStyle={{
-                      backgroundColor: 'rgba(5, 8, 15, 0.9)',
-                      borderColor: 'rgba(255,255,255,0.1)',
-                      borderRadius: '8px',
-                      color: '#fff'
-                    }}
-                  />
-                  <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 4, 4]} barSize={24}>
-                    {weeklyTrips.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.count > 0 ? '#3b82f6' : 'rgba(255,255,255,0.1)'} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </GlassCard>
-        </div>
-
-        {/* POD Pending Table (2 cols) */}
-        <div className="xl:col-span-2 min-h-full">
-          <GlassTableHeader title="POD Pending" count={pendingPODCount} onClick={() => navigate('/trips', { transition: 'card' })} />
-          <div className="glass-panel overflow-hidden">
-            <GlassTable
-              columns={tableColumns}
-              data={pendingPODList}
-              onRowClick={(row) => navigate(`/trips/${row.id}`, { transition: 'stack' })}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* ===== ROW 5: PENDING PAYMENTS + RECENT TRIPS ===== */}
+      {/* ===== ROW 4: DATA TABLES ===== */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <div className="min-h-[300px]">
-          <GlassTableHeader title="Pending Payments" count={pendingPaymentsCount} onClick={() => navigate('/trips', { transition: 'card' })} />
-          <div className="glass-panel overflow-hidden">
-            <GlassTable
-              columns={tableColumns}
-              data={pendingPaymentList}
-              onRowClick={(row) => navigate(`/trips/${row.id}`, { transition: 'stack' })}
-            />
-          </div>
-        </div>
-
-        <div className="min-h-[300px]">
-          <GlassTableHeader title="Recent Trips" onClick={() => navigate('/trips', { transition: 'card' })} />
-          <div className="glass-panel overflow-hidden">
-            <GlassTable
-              columns={tableColumns}
-              data={recentTripsList}
-              onRowClick={(row) => navigate(`/trips/${row.id}`, { transition: 'stack' })}
-            />
-          </div>
-        </div>
+        <DataTableCard
+          title="POD Pending"
+          count={pendingPODCount}
+          data={pendingPODList}
+          navigate={navigate}
+          type="pod"
+        />
+        <DataTableCard
+          title="Recent Trips"
+          data={recentTripsList}
+          navigate={navigate}
+          type="trip"
+        />
       </div>
 
     </div>
@@ -343,58 +228,63 @@ export default function Dashboard() {
    COMPONENTS
 ========================= */
 
-function KPICard({ title, value, icon: Icon, color, alert, ...props }) {
-  const colors = {
-    blue: "text-blue-400 bg-blue-400/10",
-    emerald: "text-emerald-400 bg-emerald-400/10",
-    orange: "text-orange-400 bg-orange-400/10",
-    amber: "text-amber-400 bg-amber-400/10",
-    rose: "text-rose-400 bg-rose-400/10",
-    indigo: "text-indigo-400 bg-indigo-400/10",
-    cyan: "text-cyan-400 bg-cyan-400/10",
-    green: "text-green-400 bg-green-400/10",
-  };
-
-  const theme = colors[color] || colors.blue;
-
+function KPICard({ title, value, icon: Icon, alert, className, ...props }) {
   return (
-    <GlassCard className={`relative overflow-hidden group hover:bg-white/5 transition-all duration-300 ${alert ? 'border-orange-500/30' : ''}`} interactive {...props}>
-      {alert && (
-        <div className="absolute top-0 right-0 w-2 h-2 rounded-full bg-orange-500 animate-pulse m-3" />
-      )}
-      <div className="flex justify-between items-start mb-4">
-        <div className={`p-3 rounded-xl ${theme} group-hover:scale-110 transition-transform duration-300`}>
+    <Card className={cn("transition-all hover:shadow-md", className)} {...props}>
+      <CardContent className="p-6 flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-muted-foreground mb-1">{title}</p>
+          <h3 className="text-2xl font-bold tracking-tight">{value}</h3>
+        </div>
+        <div className={cn("p-3 rounded-full bg-primary/10 text-primary", alert && "bg-destructive/10 text-destructive")}>
           <Icon size={24} strokeWidth={2} />
         </div>
-        {/* Decorative background blob */}
-        <div className={`absolute -right-4 -top-4 w-24 h-24 rounded-full ${theme.split(' ')[1]} blur-2xl opacity-20 pointer-events-none`} />
-      </div>
-
-      <div>
-        <p className="text-sm font-medium text-white/50 mb-1">{title}</p>
-        <h3 className="text-2xl font-bold text-white tracking-tight">{value}</h3>
-      </div>
-    </GlassCard>
+      </CardContent>
+    </Card>
   );
 }
 
-function GlassTableHeader({ title, count, onClick }) {
+function DataTableCard({ title, count, data, navigate, type }) {
   return (
-    <div className="flex justify-between items-center mb-3 px-1">
-      <div className="flex items-center gap-2">
-        <h3 className="text-sm font-semibold text-white">{title}</h3>
-        {count !== undefined && (
-          <span className="bg-white/10 text-white/70 text-xs px-2 py-0.5 rounded-full">{count}</span>
-        )}
-      </div>
-      <button
-        onClick={onClick}
-        className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
-      >
-        View All <ArrowRight size={12} />
-      </button>
-    </div>
-  );
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between py-5">
+        <div className="flex items-center gap-2">
+          <CardTitle className="text-lg">{title}</CardTitle>
+          {count !== undefined && count > 0 && (
+            <span className="bg-destructive/10 text-destructive text-xs px-2 py-0.5 rounded-full font-medium">{count}</span>
+          )}
+        </div>
+        <Button variant="ghost" size="sm" onClick={() => navigate('/trips')} className="gap-1">
+          View All <ArrowRight className="h-4 w-4" />
+        </Button>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {data.map((row, i) => (
+            <div
+              key={i}
+              onClick={() => navigate(`/trips/${row.trip_code}`)}
+              className="flex items-center justify-between p-3 rounded-lg border bg-muted/30 hover:bg-muted transition-colors cursor-pointer"
+            >
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 rounded-full bg-background flex items-center justify-center border">
+                  <Truck className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="font-medium">{row.trip_code}</p>
+                  <p className="text-xs text-muted-foreground">{formatDate(row.loading_date)}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-medium">₹{row.party_balance}</p>
+                <p className="text-xs text-muted-foreground">{row.route_from}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  )
 }
 
 function sum(arr, key) {

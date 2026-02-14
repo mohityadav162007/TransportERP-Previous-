@@ -3,19 +3,21 @@ import { NavLink, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard,
     Truck,
-    PlusCircle,
     PieChart,
     FileText,
     History,
     Receipt,
     ShieldCheck,
     LogOut,
-    Package
+    Package,
+    Menu,
+    X
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import ConnectionStatus from '../components/ConnectionStatus';
+import { cn } from '../utils/cn';
+import { Button } from '../components/ui/Button';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
     const { logout } = useAuth();
     const location = useLocation();
 
@@ -31,44 +33,75 @@ const Sidebar = () => {
         { name: 'Admin', path: '/admin-panel', icon: ShieldCheck },
     ];
 
-    return (
-        <aside className="w-64 h-screen fixed left-0 top-0 hidden md:flex flex-col glass-panel border-r border-white/10 z-50">
-            <div className="p-6 border-b border-white/5">
-                <h1 className="text-xl font-bold text-gradient">Transport ERP</h1>
+    const SidebarContent = () => (
+        <div className="flex flex-col h-full bg-card text-card-foreground border-r">
+            <div className="p-6 border-b flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
+                        <Truck className="h-5 w-5 text-primary-foreground" />
+                    </div>
+                    <h1 className="text-xl font-bold tracking-tight">Transport ERP</h1>
+                </div>
+                <Button variant="ghost" size="icon" className="md:hidden" onClick={onClose}>
+                    <X className="h-5 w-5" />
+                </Button>
             </div>
 
-            <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+            <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-1">
                 {navItems.map((item) => {
                     const isActive = location.pathname === item.path;
                     return (
                         <NavLink
                             key={item.path}
                             to={item.path}
-                            className={`
-                flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300
-                ${isActive
-                                    ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-[0_0_20px_rgba(59,130,246,0.15)]'
-                                    : 'text-white/60 hover:text-white hover:bg-white/5 hover:translate-x-1'}
-              `}
+                            onClick={() => onClose && onClose()}
+                            className={({ isActive }) => cn(
+                                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group",
+                                isActive
+                                    ? "bg-primary text-primary-foreground shadow-sm"
+                                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                            )}
                         >
-                            <item.icon size={20} className={isActive ? 'text-blue-400' : 'text-white/50'} />
+                            <item.icon size={20} className={cn("transition-colors", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground")} />
                             <span className="font-medium text-sm">{item.name}</span>
                         </NavLink>
                     );
                 })}
             </nav>
 
-            <div className="p-4 border-t border-white/5 space-y-2">
-                <ConnectionStatus />
-                <button
+            <div className="p-4 border-t space-y-2">
+                <Button
+                    variant="outline"
+                    className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 border-red-200 dark:border-red-900"
                     onClick={logout}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors"
                 >
-                    <LogOut size={20} />
-                    <span className="font-medium text-sm">Logout</span>
-                </button>
+                    <LogOut size={18} className="mr-2" />
+                    Logout
+                </Button>
             </div>
-        </aside>
+        </div>
+    );
+
+    return (
+        <>
+            {/* Desktop Sidebar */}
+            <aside className="hidden md:flex w-64 h-screen fixed left-0 top-0 flex-col z-30">
+                <SidebarContent />
+            </aside>
+
+            {/* Mobile Sidebar Overlay */}
+            {isOpen && (
+                <div className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm md:hidden" onClick={onClose} />
+            )}
+
+            {/* Mobile Sidebar */}
+            <div className={cn(
+                "fixed inset-y-0 left-0 z-50 w-64 bg-background shadow-lg transition-transform duration-300 md:hidden",
+                isOpen ? "translate-x-0" : "-translate-x-full"
+            )}>
+                <SidebarContent />
+            </div>
+        </>
     );
 };
 

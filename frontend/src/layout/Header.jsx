@@ -1,118 +1,74 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useLocation, NavLink } from "react-router-dom";
-import api from "../services/api";
-import { useAuth } from "../context/AuthContext";
-import { Menu, X, LogOut, User } from "lucide-react";
+import React from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { Menu, Bell, Search, ChevronRight } from 'lucide-react';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { cn } from '../utils/cn';
 
-export default function Header() {
-  const [status, setStatus] = useState("CHECKING");
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+export default function Header({ onMenuClick }) {
+  const { user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const checkHealth = () => {
-      api.get("/health")
-        .then(() => setStatus("ONLINE"))
-        .catch(() => setStatus("OFFLINE"));
+  // Generate breadcrumbs from path
+  const pathSegments = location.pathname.split('/').filter(Boolean);
+  const breadcrumbs = pathSegments.map((segment, index) => {
+    const path = `/${pathSegments.slice(0, index + 1).join('/')}`;
+    return {
+      name: segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' '),
+      path
     };
-
-    checkHealth();
-    const interval = setInterval(checkHealth, 10000); // every 10s
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const navLinks = [
-    { name: "Dashboard", path: "/" },
-    { name: "Trips", path: "/trips" },
-    { name: "Own Trips", path: "/own-trips" },
-    { name: "Analytics", path: "/analytics" },
-    { name: "Reports", path: "/reports" },
-    { name: "Payment History", path: "/payment-history" },
-    { name: "Daily Expenses", path: "/expenses" },
-  ];
-
-  if (user?.role === 'admin') {
-    navLinks.push({ name: "Admin Panel", path: "/admin-panel" });
-  }
+  });
 
   return (
-    <header className="bg-white/5 backdrop-blur-md sticky top-0 z-50 border-b border-white/10">
-      <div className="px-6 py-3 flex items-center justify-between">
+    <header className="sticky top-0 z-20 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-16 items-center px-4 md:px-6 gap-4">
+        <Button variant="ghost" size="icon" className="md:hidden" onClick={onMenuClick}>
+          <Menu className="h-5 w-5" />
+        </Button>
 
-        {/* Left: Logo & Navigation */}
-        <div className="flex items-center gap-8">
-          <div className="flex items-center gap-4">
-            {location.pathname !== "/" && (
-              <button
-                onClick={() => navigate(-1)}
-                className="p-1 rounded-full hover:bg-white/10 text-gray-300 transition-colors"
-                title="Go Back"
+        <div className="hidden md:flex items-center text-sm text-muted-foreground">
+          <span className="cursor-pointer hover:text-foreground transition-colors" onClick={() => navigate('/')}>Dashboard</span>
+          {breadcrumbs.map((crumb, index) => (
+            <React.Fragment key={crumb.path}>
+              <ChevronRight className="h-4 w-4 mx-1" />
+              <span
+                className={cn("cursor-pointer hover:text-foreground transition-colors", index === breadcrumbs.length - 1 && "font-medium text-foreground")}
+                onClick={() => navigate(crumb.path)}
               >
-                <span className="text-xl">←</span>
-              </button>
-            )}
-            <img src="/logo.png" alt="Logo" className="h-8 w-8 object-contain" />
-            <div className="font-bold text-xl text-white tracking-tight">
-              Transport ERP
-            </div>
-          </div>
-
-          <nav className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.path}
-                to={link.path}
-                className={({ isActive }) =>
-                  `px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${isActive
-                    ? "bg-white/10 text-white shadow-sm"
-                    : "text-gray-300 hover:text-white hover:bg-white/5"
-                  }`
-                }
-              >
-                {link.name}
-              </NavLink>
-            ))}
-          </nav>
+                {crumb.name}
+              </span>
+            </React.Fragment>
+          ))}
         </div>
 
-        {/* Right: System Status & User Profile */}
-        <div className="flex items-center gap-6">
-          {/* System Status */}
-          <div className="hidden sm:flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${status === "ONLINE" ? "bg-green-400" : status === "OFFLINE" ? "bg-red-400" : "bg-gray-400"
-                }`}></span>
-              <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${status === "ONLINE" ? "bg-green-500" : status === "OFFLINE" ? "bg-red-500" : "bg-gray-500"
-                }`}></span>
-            </span>
-            <span
-              className={`text-xs font-semibold ${status === "OFFLINE" ? "text-red-400" : "text-gray-300"
-                }`}
-            >
-              {status === "ONLINE"
-                ? "System Online"
-                : status === "OFFLINE"
-                  ? "Database Down"
-                  : "Checking..."}
-            </span>
+        <div className="flex-1" />
+
+        <div className="flex items-center gap-4">
+          <div className="relative hidden sm:block w-64">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search..."
+              className="pl-9 h-9 bg-muted/50 border-none focus-visible:ring-1"
+            />
           </div>
 
-          {/* User Profile */}
+          <Button variant="ghost" size="icon" className="relative">
+            <Bell className="h-5 w-5" />
+            <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full" />
+          </Button>
+
           {user && (
-            <div className="flex items-center gap-3 pl-4 border-l border-white/10">
-              <div className="flex flex-col items-end">
-                <span className="text-sm font-medium text-white leading-tight">Admin</span>
-                <span className="text-xs text-gray-400">{user.email}</span>
+            <div className="flex items-center gap-2 pl-4 border-l">
+              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+                {user.name ? user.name.charAt(0).toUpperCase() : 'A'}
               </div>
-              <button
-                onClick={logout}
-                className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-full transition-colors"
-                title="Logout"
-              >
-                <LogOut size={18} />
-              </button>
+              <div className="hidden md:block">
+                <p className="text-sm font-medium leading-none">{user.name || 'Admin'}</p>
+                <p className="text-xs text-muted-foreground mt-1">{user.email}</p>
+              </div>
             </div>
           )}
         </div>
