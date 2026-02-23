@@ -683,11 +683,11 @@ router.post("/bulk-courier", async (req, res) => {
          docket_no = $1,
          courier_status = 'Sent',
          lr_number = CASE WHEN $5::text IS NOT NULL AND $5::text <> '' THEN $5 ELSE lr_number END,
-         remark = COALESCE(remark, '') || ' [Courier: ' || COALESCE($2, '?') || ', Date: ' || COALESCE($3, '?') || ']',
+         remark = COALESCE(remark, '') || ' [Courier: ' || COALESCE($2::text, '?') || ', Date: ' || COALESCE($3::text, '?') || ']',
          updated_at = NOW()
        WHERE id = ANY($4::int[])
        RETURNING id, trip_code`,
-      [docketNumber, courierName, dispatchDate, tripIds, lrNumber]
+      [docketNumber || null, courierName || null, dispatchDate || null, tripIds, lrNumber || null]
     );
 
     res.json({ message: "Courier details updated", count: result.rowCount, trips: result.rows });
