@@ -25,6 +25,7 @@ CREATE TABLE trips (
   profit NUMERIC(12, 2) DEFAULT 0,
   weight VARCHAR(50),
   remark TEXT,
+  lr_number VARCHAR(100),
   pod_status VARCHAR(50) DEFAULT 'PENDING',
   pod_path TEXT,
   is_deleted BOOLEAN DEFAULT FALSE,
