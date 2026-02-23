@@ -6,7 +6,7 @@ import GlassCard from './GlassCard';
 import { MODAL_BACKDROP, MODAL_CONTENT } from '../styles/animations';
 
 export default function PodDetailsModal({ trip, onClose }) {
-    const [activeTab, setActiveTab] = useState('DETAILS'); // DETAILS | PODS | SLIPS
+    const [activeTab, setActiveTab] = useState('DETAILS'); // DETAILS | PODS
 
     if (!trip) return null;
 
@@ -43,13 +43,13 @@ export default function PodDetailsModal({ trip, onClose }) {
 
                     {/* TABS */}
                     <div className="flex border-b border-white/5 bg-black/20 px-6 pt-4 gap-4">
-                        {['DETAILS', 'PODS', 'SLIPS'].map((tab) => (
+                        {['DETAILS', 'PODS'].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
                                 className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTab === tab
-                                        ? 'border-blue-500 text-blue-400'
-                                        : 'border-transparent text-white/40 hover:text-white hover:border-white/20'
+                                    ? 'border-blue-500 text-blue-400'
+                                    : 'border-transparent text-white/40 hover:text-white hover:border-white/20'
                                     }`}
                             >
                                 {tab}
@@ -174,23 +174,6 @@ export default function PodDetailsModal({ trip, onClose }) {
                             </div>
                         )}
 
-                        {/* TAB: SLIPS */}
-                        {activeTab === 'SLIPS' && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="bg-white text-black p-4 rounded-lg min-h-[300px] flex items-center justify-center text-center">
-                                    <div>
-                                        <div className="font-bold text-lg mb-2">Loading Slip</div>
-                                        <div className="text-sm text-gray-500">{trip.loading_slip_number || "Not generated"}</div>
-                                    </div>
-                                </div>
-                                <div className="bg-white text-black p-4 rounded-lg min-h-[300px] flex items-center justify-center text-center">
-                                    <div>
-                                        <div className="font-bold text-lg mb-2">Pay Slip</div>
-                                        <div className="text-sm text-gray-500">{trip.pay_slip_number || "Not generated"}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
 
                     </div>
 
