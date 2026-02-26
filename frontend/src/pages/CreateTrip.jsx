@@ -76,6 +76,10 @@ export default function CreateTrip() {
     try {
       await api.post("/trips", {
         ...form,
+        from_location: form.route_from,
+        to_location: form.route_to,
+        party_number: form.party_phone || null,
+        payment_status: form.party_payment_status || "UNPAID",
         gaadi_freight: Number(form.gaadi_freight),
         gaadi_advance: Number(form.gaadi_advance) || 0,
         party_freight: Number(form.party_freight),
