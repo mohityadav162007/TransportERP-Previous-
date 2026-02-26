@@ -551,22 +551,14 @@ router.post("/:id/restore", async (req, res) => {
     }
 
     const trip = targetRes.rows[0];
-    const parts = trip.trip_code.split("_");
+    const delIndex = trip.trip_code.lastIndexOf('_DEL_');
 
-    // Support both new buffer style (parts=5) and old style (parts=4)
-    if (parts.length < 4 || parts[3] !== "DEL") {
+    if (delIndex === -1) {
       await client.query("ROLLBACK");
       return res.status(400).json({ message: "Invalid deleted trip format, cannot restore" });
     }
 
-    const prefix = `${parts[0]}_${parts[1]}`;
-    const originalNum = parseInt(parts[2]);
-
-    if (isNaN(originalNum)) {
-      throw new Error("Invalid original trip number");
-    }
-
-    const originalCode = `${prefix}_${String(originalNum).padStart(3, "0")}`;
+    const originalCode = trip.trip_code.substring(0, delIndex);
 
     // 2. CHECK IF SLOT IS OCCUPIED
     const collisionRes = await client.query(
