@@ -222,7 +222,7 @@ export default function OwnTrips() {
                 {filteredTrips.map(trip => (
                     <GlassCard
                         key={trip.id}
-                        className={`flex flex-col h-full group relative ${trip.is_deleted ? "opacity-60 grayscale" : ""}`}
+                        className={`flex flex-col h-full group relative ${trip.is_deleted ? "opacity-75" : ""}`}
                         interactive
                         onClick={() => navigate(`/trips/${trip.id}`)}
                     >
@@ -311,6 +311,17 @@ export default function OwnTrips() {
                                         className="text-emerald-400 hover:text-emerald-300 text-xs font-bold uppercase flex items-center gap-1"
                                     >
                                         <RotateCcw size={14} /> Restore
+                                    </button>
+                                    <button
+                                        onClick={async (e) => {
+                                            e.stopPropagation();
+                                            if (!confirm("PERMANENTLY DELETE?")) return;
+                                            await api.delete(`/trips/${trip.id}/permanent`);
+                                            fetchTrips();
+                                        }}
+                                        className="text-rose-500 hover:text-rose-400 text-xs font-bold uppercase"
+                                    >
+                                        Delete Forever
                                     </button>
                                 </div>
                             )}

@@ -256,7 +256,7 @@ export default function Trips() {
         {filteredTrips.map(trip => (
           <GlassCard
             key={trip.id}
-            className={`flex flex-col h-full relative group ${trip.is_deleted ? "opacity-60 grayscale" : ""}`}
+            className={`flex flex-col h-full relative group ${trip.is_deleted ? "opacity-75" : ""}`}
             interactive
             onClick={() => navigate(`/trips/${trip.id}`)}
             variants={LIST_ITEM_VARIANTS}
